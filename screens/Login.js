@@ -64,5 +64,3 @@ export default function Login({ navigation, route }) {
     </SafeAreaView>
   );
 }
-
-//TEST
