@@ -23,9 +23,11 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 
+
 export default function Register({ route, navigation }) {
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
+
     Urbanist_500Medium,
   });
 

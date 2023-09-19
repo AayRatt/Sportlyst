@@ -2,12 +2,14 @@ import React from "react";
 import { Text, View, TouchableOpacity, Pressable } from "react-native";
 import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
 import Register from "./Register";
+
 import {
   SafeAreaView,
   SafeAreaProvider,
   SafeAreaInsetsContext,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+
 
 export default function Launch({ navigation }) {
   let [fontsLoaded] = useFonts({
@@ -38,5 +40,6 @@ export default function Launch({ navigation }) {
         </Pressable>
       </View>
     </SafeAreaView>
+
   );
 }
