@@ -41,5 +41,3 @@ export default function Launch({ navigation }) {
     </SafeAreaView>
   );
 }
-
-//HOOK TEST
