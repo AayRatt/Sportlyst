@@ -10,7 +10,6 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-
 export default function Launch({ navigation }) {
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -40,6 +39,7 @@ export default function Launch({ navigation }) {
         </Pressable>
       </View>
     </SafeAreaView>
-
   );
 }
+
+//HOOK TEST
