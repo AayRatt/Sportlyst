@@ -7,7 +7,11 @@ import {
   StatusBar,
   TextInput,
 } from "react-native";
-import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
+import {
+  useFonts,
+  Urbanist_600SemiBold,
+  Urbanist_500Medium,
+} from "@expo-google-fonts/urbanist";
 import {
   SafeAreaView,
   SafeAreaProvider,
@@ -19,6 +23,8 @@ import { Ionicons } from "@expo/vector-icons";
 export default function Login({ navigation, route }) {
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
+
+    Urbanist_500Medium,
   });
 
   if (!fontsLoaded) {
