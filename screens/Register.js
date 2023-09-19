@@ -23,7 +23,6 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 
-
 export default function Register({ route, navigation }) {
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -70,8 +69,14 @@ export default function Register({ route, navigation }) {
             placeholderTextColor={"#666"}
           ></TextInput>
           <TextInput
-            className="bg-gray h-12 rounded-lg w=11/12 p-4 font-urbanist"
+            className="bg-gray h-12 rounded-lg w=11/12 p-4 font-urbanist mb-5"
             placeholder="Enter Password"
+            placeholderTextColor={"#666"}
+            secureTextEntry
+          ></TextInput>
+          <TextInput
+            className="bg-gray h-12 rounded-lg w=11/12 p-4 font-urbanist"
+            placeholder="Confirm Password"
             placeholderTextColor={"#666"}
             secureTextEntry
           ></TextInput>
@@ -84,7 +89,7 @@ export default function Register({ route, navigation }) {
             <View className="flex-row">
               <MaterialCommunityIcons name="apple" size={24} color="black" />
               <Text className="text-lg font-urbanistBold text-secondary">
-                Continue with Apple
+                Sign Up with Apple
               </Text>
             </View>
           </Pressable>
@@ -92,7 +97,7 @@ export default function Register({ route, navigation }) {
             <View className="flex-row justify-center items-center">
               <AntDesign name="google" size={20} color="black" />
               <Text className="text-lg font-urbanistBold text-secondary ml-0.5">
-                Continue with Google
+                Sign Up with Google
               </Text>
             </View>
           </Pressable>

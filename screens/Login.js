@@ -19,6 +19,8 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function Login({ navigation, route }) {
   let [fontsLoaded] = useFonts({
@@ -63,6 +65,22 @@ export default function Login({ navigation, route }) {
             <Text className="text-lg font-urbanistBold text-primary">
               Continue
             </Text>
+          </Pressable>
+          <Pressable className="bg-gray rounded-lg h-14 mt-5 items-center justify-center">
+            <View className="flex-row">
+              <MaterialCommunityIcons name="apple" size={24} color="black" />
+              <Text className="text-lg font-urbanistBold text-secondary">
+                Continue with Apple
+              </Text>
+            </View>
+          </Pressable>
+          <Pressable className="bg-gray rounded-lg h-14 mt-5 items-center justify-center">
+            <View className="flex-row justify-center items-center">
+              <AntDesign name="google" size={20} color="black" />
+              <Text className="text-lg font-urbanistBold text-secondary ml-0.5">
+                Continue with Google
+              </Text>
+            </View>
           </Pressable>
         </View>
         <StatusBar barStyle="dark-content"></StatusBar>
