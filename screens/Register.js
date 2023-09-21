@@ -25,9 +25,10 @@ import { AntDesign } from "@expo/vector-icons";
 
 import { useState, useEffect } from 'react';
 
-// Import the auth variable
-import { auth } from '../firebaseConfig';
-import { createUserWithEmailAndPassword } from "firebase/auth"; 
+// Import firebase auth/db
+import { auth, db } from '../firebaseConfig';
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { setDoc, doc } from "firebase/firestore"; 
 
 export default function Register({ route, navigation }) {
 
@@ -53,7 +54,7 @@ export default function Register({ route, navigation }) {
     console.log(outData);
 
     try {
-      
+      // Field Conditions
       if (!formField.email) {
         alert("Please enter your email");
       } else if (!formField.password || formField.password.length < 6) {
@@ -65,10 +66,21 @@ export default function Register({ route, navigation }) {
       } else if (!formField.lastName) {
         alert("Please enter your last name");
       } else {
+        //Create User
         const userCredential = await(createUserWithEmailAndPassword(auth, 
           formField.email, formField.password))
         console.log(`Id of created user is: ${userCredential.user.uid}`)
-        alert(userCredential.user.uid)  
+        alert(userCredential.user.uid)
+        
+        //Create a Firestore Collection
+        //1. Add data Object
+        const profileData = {
+          firstName: formField.firstName,
+          lastName: formField.lastName
+        }
+        //2. Add data to firestore
+        await setDoc(doc(db, "userProfiles", userCredential.user.uid), profileData)
+        console.log("Profile created");
         //Clean Field
         setFormField({
           email: "",
