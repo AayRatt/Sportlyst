@@ -22,65 +22,61 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 // Import the auth variable
-import { auth } from '../firebaseConfig';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
-
+import { auth } from "../firebaseConfig";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 export default function Login({ navigation, route }) {
+  //Variables
+  const [usernameFromUI, setUsernameFromUI] = useState("");
+  const [passwordFromUI, setPasswordFromUI] = useState("");
 
-//Variables
-const [usernameFromUI, setUsernameFromUI] = useState("");
-const [passwordFromUI, setPasswordFromUI] = useState("");
-
-
-// Login
-const loginClick = async () => {
+  // Login
+  const loginClick = async () => {
     try {
-      if(usernameFromUI === ""){
-        alert("Write your username")
-      }else if (passwordFromUI === ""){
-        alert("write your password")
-      }else{
-      //Verify Credential
-      await signInWithEmailAndPassword(
-        auth, usernameFromUI,passwordFromUI)
-      //User Information
-        console.log("Who is the currently logged in user")
-        console.log(auth.currentUser)
-        alert(`Login success! ${auth.currentUser.uid}`)
-      //Clean Inputs
-      setUsernameFromUI("")
-      setPasswordFromUI("")
+      if (usernameFromUI === "") {
+        alert("Write your username");
+      } else if (passwordFromUI === "") {
+        alert("write your password");
+      } else {
+        //Verify Credential
+        await signInWithEmailAndPassword(auth, usernameFromUI, passwordFromUI);
+        //User Information
+        console.log("Who is the currently logged in user");
+        console.log(auth.currentUser);
+        // alert(`Login success! ${auth.currentUser.uid}`);
+        //Clean Inputs
+        setUsernameFromUI("");
+        setPasswordFromUI("");
       }
     } catch (error) {
       if (error.code === "auth/invalid-login-credentials") {
-        alert('Invalid login credentials');
+        alert("Invalid login credentials");
       } else if (error.code === "auth/invalid-email") {
-        alert('Invalid email');
+        alert("Invalid email");
       } else if (error.code === "auth/wrong-password") {
-        alert('Wrong password');
+        alert("Wrong password");
       } else {
-        alert('Check your credentials');
+        alert("Check your credentials");
       }
     }
-}
+  };
 
-// LogOut
-const logOutClick = async () => {
-  try {
-    if (auth.currentUser === null){
-      alert("logoutPressed: There is no user to logout!")
-    }else{
-      await signOut(auth)
-      alert('User LogOut')
+  // LogOut
+  const logOutClick = async () => {
+    try {
+      if (auth.currentUser === null) {
+        alert("logoutPressed: There is no user to logout!");
+      } else {
+        await signOut(auth);
+        alert("User LogOut");
+      }
+    } catch (error) {
+      console.log(error);
     }
-  } catch (error) {
-    console.log(error);
-  }
-}
+  };
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -126,18 +122,14 @@ const logOutClick = async () => {
             value={passwordFromUI}
             onChangeText={setPasswordFromUI}
           ></TextInput>
-          <Pressable className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center">
-            <Text className="text-lg font-urbanistBold text-primary" onPress={loginClick}>
-              Continue
+          <Pressable
+            className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
+            onPress={loginClick}
+          >
+            <Text className="text-lg font-urbanistBold text-primary">
+              Login
             </Text>
           </Pressable>
-
-          <Pressable className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center">
-            <Text className="text-lg font-urbanistBold text-primary" onPress={logOutClick}>
-              Log Out
-            </Text>
-          </Pressable> 
-
           <Pressable className="bg-gray rounded-lg h-14 mt-5 items-center justify-center">
             <View className="flex-row">
               <MaterialCommunityIcons name="apple" size={24} color="black" />
