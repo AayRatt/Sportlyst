@@ -33,7 +33,7 @@ export default function Profile({ navigation }) {
 
   // Function to update form fields
   const updateUser = (key, updatedValue) => {
-    const temp = { ...formField };
+    const temp = { ...user };
     temp[key] = updatedValue;
     setUser(temp);
   };
@@ -57,38 +57,6 @@ export default function Profile({ navigation }) {
 
 
   return (
-    // <View className="flex-1 justify-center items-center">
-    //   <Text>Profile</Text>
-    //   <Button title="Log Out" onPress={logOutClick}></Button>
-    // </View>
-
-    // <SafeAreaView style={styles.container}>
-
-    //   <View style={styles.innerContainer}>
-    //     {/* view 2 */}
-    //     <View style={styles.view2}>
-    //       {/* view 3 */}
-    //       <View style={styles.view3}>
-    //         <Image
-    //           source={user.image ? { uri: user.image } : profileIcon} style={styles.image}
-    //         />
-    //         <Text style={{ fontSize: 22, alignContent: 'center' }}>{user.email}</Text>
-    //         <Text style={{ fontSize: 28, fontWeight: "bold", alignContent: 'center', alignItems: 'center' }}>{user.firstName} {user.lastName}</Text>
-    //       </View>
-    //     </View>
-
-    //     <View style={{
-    //       alignItems: 'center'
-    //     }}>
-    // <Pressable style={styles.btn}>
-    //   <Text style={styles.btnLabel} onPress={onLogoutClicked}>Logout</Text>
-    // </Pressable>
-    //     </View>
-    //   </View>
-    // </SafeAreaView>
-
-
-
     <SafeAreaView className="bg-primary flex-1">
       <View className="bg-white pl-3 pr-3">
 
