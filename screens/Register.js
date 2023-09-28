@@ -79,6 +79,7 @@ export default function Register({ route, navigation }) {
         const profileData = {
           firstName: formField.firstName,
           lastName: formField.lastName,
+          email: formField.email
         };
         //2. Add data to firestore
         await setDoc(
