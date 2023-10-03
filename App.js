@@ -44,6 +44,11 @@ export default function App() {
           component={Profile}
           options={{ headerShown: false }}
         />
+        <Tab.Screen
+          name="Events"
+          component={Events}
+          options={{ headerShown: false }}
+        />
       </Tab.Navigator>
     );
   }
@@ -69,12 +74,6 @@ export default function App() {
             component={Register}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="Events"
-            component={Events}
-            options={{ headerShown: false }}
-          />
-
         </Stack.Navigator>
       )}
     </NavigationContainer>
