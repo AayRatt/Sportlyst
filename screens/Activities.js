@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Button } from "react-native";
+import { View, Text, Pressable, Button } from "react-native";
 import { useState, useEffect } from 'react';
+
 
 // Import Location's Library
 import * as Location from 'expo-location'
@@ -42,6 +43,11 @@ export default function Activities({ navigation }) {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text>Activities</Text>
+      <Button
+      title="Events"
+      onPress={()=> navigation.navigate("Events")}
+      />
     </View>
+
   );
 }
