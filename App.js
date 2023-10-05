@@ -11,6 +11,8 @@ import Activities from "./screens/Activities";
 import Profile from "./screens/Profile";
 import Search from "./screens/Search"
 import Friends from "./screens/Friends"
+import Events from "./screens/Events";
+
 
 const Tab = createBottomTabNavigator();
 
@@ -53,6 +55,8 @@ export default function App() {
         <Tab.Screen
           name="Friends"
           component={Friends}
+          name="Events"
+          component={Events}
           options={{ headerShown: false }}
         />
       </Tab.Navigator>
