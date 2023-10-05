@@ -25,7 +25,7 @@ export default function Friends({ navigation }) {
 
     //                     const docSnap = await getDoc(docRef);
     //                     if (docSnap.exists()) {
-    
+
     //                             const userDocData = docSnap.data();
     //                             const fullName = `${userDocData.firstName} ${userDocData.lastName}`;
     //                             const email = userDocData.email;
@@ -43,7 +43,7 @@ export default function Friends({ navigation }) {
     //             }
     //         });
 
-            
+
 
 
     //     } catch (error) {
@@ -55,14 +55,14 @@ export default function Friends({ navigation }) {
         const userID = auth.currentUser.uid;
         const friendRequestRef = collection(db, "userProfiles", userID, "friendRequests");
         const q = query(friendRequestRef, where('status', '==', 'Pending'));
-    
+
         // This will be the unsubscribe function.
         const unsubscribe = onSnapshot(q, async (snapshot) => {
             const userData = [];
-    
+
             for (const docSnapshot of snapshot.docs) {
                 try {
-                    const docRef = doc(db, "userProfiles", docSnapshot.data().fromUserID);
+                    const docRef = doc(db, "userProfiles", docSnapshot.data().receivedFrom);
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         const userDocData = docSnap.data();
@@ -76,10 +76,10 @@ export default function Friends({ navigation }) {
                     console.error("Error processing request:", error);
                 }
             }
-    
+
             setpendingRequests(userData);
         });
-    
+
         // Return the unsubscribe function for cleanup
         return unsubscribe;
     }
@@ -88,11 +88,11 @@ export default function Friends({ navigation }) {
         const userID = auth.currentUser.uid;
         const friendRef = collection(db, "userProfiles", userID, "friends");
         //const q = query(friendRequestRef, where('status', '==', 'Pending'));
-    
+
         // This will be the unsubscribe function.
         const unsubscribe2 = onSnapshot(friendRef, async (snapshot) => {
             const friendData = [];
-    
+
             for (const docSnapshot of snapshot.docs) {
                 try {
                     const docRef = doc(db, "userProfiles", docSnapshot.data().userID);
@@ -102,21 +102,21 @@ export default function Friends({ navigation }) {
                         const fullName = `${userDocData.firstName} ${userDocData.lastName}`;
                         const email = userDocData.email;
                         const friendID = userDocData.userID;
-                        friendData.push({friendID, fullName, email });
+                        friendData.push({ friendID, fullName, email });
                     }
                 } catch (error) {
                     console.error("Error processing request:", error);
                 }
             }
-    
+
             setFriends(friendData);
         });
-    
+
         // Return the unsubscribe function for cleanup
         return unsubscribe2;
     }
-    
-    
+
+
 
     async function accept(requestID, friendID) {
 
@@ -128,7 +128,7 @@ export default function Friends({ navigation }) {
             const requestRef = doc(db, "userProfiles", auth.currentUser.uid, "friendRequests", requestID);
             const acceptRef = collection(db, "userProfiles", auth.currentUser.uid, "friends");
             const friendRequestUserRef = collection(db, "userProfiles", friendID, "friends");
-
+            const loggedUserID = auth.currentUser.uid
 
             await updateDoc(requestRef, {
                 status: "Accepted"
@@ -137,6 +137,13 @@ export default function Friends({ navigation }) {
             await addDoc(acceptRef, {
 
                 userID: friendID,
+                timeStamp: new Date()
+
+            })
+
+            await addDoc(friendRequestUserRef, {
+
+                userID: loggedUserID,
                 timeStamp: new Date()
 
             })
@@ -150,35 +157,80 @@ export default function Friends({ navigation }) {
 
     }
 
-    async function decline(requestID) {
+    // async function decline(requestID, friendID) {
 
+    //     const friendRequestRef = doc(db, "userProfiles", auth.currentUser.uid, "friendRequests", requestID);
+    //     const friendRequestFromRef = collection(db, "userProfiles", friendID, "sentFriendRequests");
+    //     const q = query(friendRequestRef, where('sentTo', '==', auth.currentUser.uid));
+
+
+    //     try {
+
+
+
+    //         await updateDoc(friendRequestRef, {
+    //             status: "Declined"
+    //         })
+
+    //         const snapShot = await getDocs(q)
+
+    //         if(!snapShot.empty){
+    //             const requestDoc = snapShot.docs[0]
+
+    //             await updateDoc(requestDoc.ref,{
+    //                 status: "Declined"
+    //             })
+    //         }
+
+    //         console.log('User declined')
+
+    //     } catch (error) {
+
+    //     }
+
+    // }
+    async function decline(requestID, friendID) {
         try {
-            const docRef = doc(db, "userProfiles", auth.currentUser.uid, "friendRequests", requestID);
-
-            await updateDoc(docRef, {
+            const friendRequestRef = doc(db, "userProfiles", auth.currentUser.uid, "friendRequests", requestID);
+            await updateDoc(friendRequestRef, {
                 status: "Declined"
-            })
+            });
+            console.log('Friend request reference updated successfully.');
 
-            console.log('User declined')
+            const sentFriendRequestsCollection = collection(db, "userProfiles", friendID, "sentFriendRequests");
+            const q = query(sentFriendRequestsCollection, where('sentTo', '==', auth.currentUser.uid));
+            const snapShot = await getDocs(q);
+
+            console.log('Query executed successfully.');
+
+            if (!snapShot.empty) {
+                const requestDoc = snapShot.docs[0];
+                await updateDoc(requestDoc.ref, {
+                    status: "Declined"
+                });
+                console.log('Friend request in sender\'s collection updated successfully.');
+            } else {
+                console.log('No document found in sender\'s collection.');
+            }
 
         } catch (error) {
-
+            console.error("Error in decline function:", error);
         }
-
     }
+
 
     useEffect(() => {
         const unsubscribe = loadFriendRequests();
         const unsubscribe2 = loadFriends();
-        
+
         // Cleanup listener on component unmount
         return () => {
             if (unsubscribe) unsubscribe();
             if (unsubscribe2) unsubscribe2();
         };
     }, []);
-    
-    
+
+
 
 
     return (
@@ -186,38 +238,40 @@ export default function Friends({ navigation }) {
             <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
                 Friend Requests
             </Text>
-            <FlatList
-                data={pendingRequests}
-                keyExtractor={(item) => item.userID}
-                renderItem={({ item }) => (
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10 }}>
-                        <Text>{`${item.fullName}`}</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Pressable
-                                style={{ padding: 10, backgroundColor: 'green', marginRight: 10 }}
-                                onPress={() => {
-                                    // Handle the accept action
-                                    accept(item.requestID, item.friendID)
-                                    //console.log(`Accepted request from ${item.fullName}`);
-                                }}
-                            >
-                                <Text style={{ color: 'white' }}>Accept</Text>
-                            </Pressable>
-                            <Pressable
-                                style={{ padding: 10, backgroundColor: 'red' }}
-                                onPress={() => {
-
-                                    // Handle the decline action
-                                    decline(item.requestID)
-                                    //console.log(`Declined request from ${item.fullName}`);
-                                }}
-                            >
-                                <Text style={{ color: 'white' }}>Decline</Text>
-                            </Pressable>
+            {pendingRequests && pendingRequests.length > 0 ? (
+                <FlatList
+                    data={pendingRequests}
+                    keyExtractor={(item) => item.userID}
+                    renderItem={({ item }) => (
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10 }}>
+                            <Text>{`${item.fullName}`}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Pressable
+                                    style={{ padding: 10, backgroundColor: 'green', marginRight: 10 }}
+                                    onPress={() => {
+                                        // Handle the accept action
+                                        accept(item.requestID, item.friendID);
+                                    }}
+                                >
+                                    <Text style={{ color: 'white' }}>Accept</Text>
+                                </Pressable>
+                                <Pressable
+                                    style={{ padding: 10, backgroundColor: 'red' }}
+                                    onPress={() => {
+                                        // Handle the decline action
+                                        decline(item.requestID, item.friendID);
+                                    }}
+                                >
+                                    <Text style={{ color: 'white' }}>Decline</Text>
+                                </Pressable>
+                            </View>
                         </View>
-                    </View>
-                )}
-            />
+                    )}
+                />
+            ) : (
+                <Text>No pending requests</Text>
+            )}
+
 
 
             <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">

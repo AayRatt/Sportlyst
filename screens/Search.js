@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, FlatList } from "react-native";
 import { useState, useEffect } from 'react';
 import { db, auth } from "../firebaseConfig";
-import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot } from "firebase/firestore";
 
 
 export default function Search({ navigation }) {
@@ -10,55 +10,130 @@ export default function Search({ navigation }) {
     const [searchName, setSearchName] = useState("")
     const [users, setUsers] = useState([])
     const [filterUser, setFilterUsers] = useState([])
+    const [friendReqSent, setfriendReqSent] = useState([])
+    const loggedUser = auth.currentUser.uid
 
+    // async function loadUsers() {
+
+    //     try {
+
+    //         //Loading logged user's friend requests sent    
+    //         const sentFriendRequestSnapshot = await getDocs(collection(db, "userProfiles", loggedUser, "sentFriendRequests"))
+
+    //         const sentFriendRequests = sentFriendRequestSnapshot.docs.map(doc => doc.data().sentTo);
+
+    //         //Load logged user's friends list 
+    //         const friendsFromDB = await getDocs(collection(db, "userProfiles", loggedUser, "friends"))
+    //         const listOfFriends = friendsFromDB.docs.map(doc => doc.data().userID);
+
+    //         //Load all users in DB
+    //         const usersSnapshot = await getDocs(
+    //             collection(db, "userProfiles")
+    //         );
+
+    //         //Filtering users in DB 
+    //         const filterUsers = usersSnapshot.docs
+    //             .filter(doc => doc.id !== loggedUser) //Excluding Current User from list
+    //             .map(doc => {
+
+    //                 const friend = listOfFriends.includes(doc.id)
+    //                 const requestSent = sentFriendRequests.includes(doc.id)
+
+    //                 return {
+    //                     id: doc.id,
+    //                     friend,
+    //                     requestSent,
+    //                     ...doc.data()
+    //                 }
+
+    //             })
+
+    //         setUsers(filterUsers)
+    //         // console.log(filterUsers)
+
+    //     } catch (error) {
+
+    //     }
+
+    // }
 
     async function loadUsers() {
 
-        try {
+        //Listener for any changes in the friend's subcollection
+        const friendsListener = onSnapshot(collection(db, "userProfiles", loggedUser, "friends"), snapshot => {
 
-        const loggedUser = auth.currentUser.uid
+            const listOfFriends = snapshot.docs.map(doc => doc.data().userID)
 
-        const friendsFromDB = await getDocs(collection(db, "userProfiles",loggedUser, "friends" ))
-        const listOfFriends = friendsFromDB.docs.map(doc => doc.data().userID);
+            //Listener for any changes in the friends request subcollection
+            const friendRequestListener = onSnapshot(collection(db, "userProfiles", loggedUser, "sentFriendRequests"), async sentSnapshot => {
+
+                try {
+                    // const sentFriendRequests = sentSnapshot.docs.map(doc => doc.data().sentTo);
+
+                    const sentFriendRequests = sentSnapshot.docs
+                        .filter(doc => doc.data().status !== "Declined") // Filter out declined requests
+                        .map(doc => doc.data().sentTo);
 
 
-        
-        const usersSnapshot = await getDocs(
-            collection(db, "userProfiles")
-        );
+                    //Load all users in DB
+                    const usersSnapshot = await getDocs(
+                        collection(db, "userProfiles")
+                    );
 
-        const filterUsers = usersSnapshot.docs
-        .filter(doc => doc.id !== loggedUser)
-        .map(doc => {
-            
-            const friend = listOfFriends.includes(doc.id)
+                    //Filtering users in DB 
+                    const filterUsers = usersSnapshot.docs
+                        .filter(doc => doc.id !== loggedUser) //Excluding Current User from list
+                        .map(doc => {
 
-            return {id:doc.id, friend, ...doc.data()}
-            
+                            const friend = listOfFriends.includes(doc.id)
+                            const requestSent = sentFriendRequests.includes(doc.id)
+
+                            return {
+                                id: doc.id,
+                                friend,
+                                requestSent,
+                                ...doc.data()
+                            }
+
+                        })
+
+                    setUsers(filterUsers)
+                } catch (error) {
+                    console.error("Error in loadUsers function:", error);
+                }
+            })
+
+            return friendRequestListener
+
         })
 
-        // setUsers(usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+        return friendsListener
 
-        setUsers(filterUsers)
-        console.log(filterUsers)
-
-        }catch(error){
-
-        }
 
     }
 
-    async function addFriend(fromUserID, toUserID) {
+    async function addFriend(toUserID) {
 
         try {
-            const requestRef = collection(db, `userProfiles/${toUserID}/friendRequests`);
-            await addDoc(requestRef, {
+            //Add friend request sent to logged user
+            const requestSentRef = collection(db, `userProfiles/${loggedUser}/sentFriendRequests`);
+            await addDoc(requestSentRef, {
 
-                fromUserID,
+                sentTo: toUserID,
+                status: 'Pending',
+                timeStamp: new Date(),
+            });
+
+            //Add friend request to target user 
+            const friendRequestRef = collection(db, `userProfiles/${toUserID}/friendRequests`);
+            await addDoc(friendRequestRef, {
+
+                receivedFrom: loggedUser,
                 status: 'Pending',
                 timeStamp: new Date(),
             });
             alert('Friend Request sent!')
+            //loadUsers()
         } catch (error) {
 
             alert('ERROR SENDING REQUEST', error)
@@ -68,10 +143,13 @@ export default function Search({ navigation }) {
     }
 
     useEffect(() => {
+        const unsubscribe = loadUsers();
 
-        loadUsers();
-
-    }, [])
+        // Cleanup listener on component unmount
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
+    }, []);
 
     useEffect(() => {
         const searchResults = users.filter(user => {
@@ -103,10 +181,14 @@ export default function Search({ navigation }) {
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                         <Text>{`${item.firstName} ${item.lastName}  `}</Text>
                         {item.friend ?
-                        <Text>Friend</Text>:
-                        <Pressable onPress={() => addFriend(auth.currentUser.uid, item.id.toString())}>
-                            <Text style={{ color: 'blue' }}>Add Friend</Text>
-                        </Pressable>
+                            <Text>Friend</Text>
+                            :
+                            item.requestSent ?
+                                <Text>Friend Request Sent</Text>
+                                :
+                                <Pressable onPress={() => addFriend(item.id.toString())}>
+                                    <Text style={{ color: 'blue' }}>Add Friend</Text>
+                                </Pressable>
                         }
                     </View>
                 )}
