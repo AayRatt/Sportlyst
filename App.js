@@ -13,6 +13,9 @@ import Search from "./screens/Search"
 import Friends from "./screens/Friends"
 import Events from "./screens/Events";
 
+import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -45,23 +48,40 @@ export default function App() {
         <Tab.Screen
           name="Profile"
           component={Profile}
-          options={{ headerShown: false }}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome name="user" size={24} color="black" />
+            ),
+          }}
         />
         <Tab.Screen
           name="Search"
           component={Search}
-          options={{ headerShown: false }}
-        />        
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome name="search" size={24} color="black" />
+            ),
+          }}
+        />
         <Tab.Screen
           name="Friends"
           component={Friends}
-          options={{ headerShown: false }}
-        />
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome5 name="user-friends" size={24} color="black" />
+            ),
+          }} />
         <Tab.Screen
           name="Events"
           component={Events}
-          options={{ headerShown: false }}
-        />
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome name="list" size={24} color="black" />),
+          }} />
       </Tab.Navigator>
     );
   }
