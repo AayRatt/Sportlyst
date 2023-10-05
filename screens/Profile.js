@@ -2,10 +2,10 @@ import React from "react";
 import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, TouchableOpacity } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
-import { db, auth, firabseStorage } from "../firebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
+import { db, auth, firebaseStorage } from "../firebaseConfig";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
 
 import profileIcon from '../assets/profile-icon.png';
@@ -34,7 +34,8 @@ export default function Profile({ navigation }) {
     email: "",
     phoneNumber: "",
     country: "",
-    postalCode: ""
+    postalCode: "",
+    imageUrl: "",
   })
 
   // Function to update form fields
@@ -70,31 +71,42 @@ export default function Profile({ navigation }) {
   };
 
   const uploadImage = async () => {
-    setUploading(true)
-    const response = await fetch(image.uri)
-    const blob = response.blob()
-    const filename = image.uri.substring(image.uri.lastIndexOf('/') + 1)
-    var ref = firabseStorage.storage().ref().child(filename).put(blob)
-    try {
-      await ref;
-    } catch (e) {
-      console.log(e)
-    }
+    setUploading(true);
 
-    const storageRef = ref(storage, 'image');
+    const response = await fetch(image.uri);
+    const blob = await response.blob();
 
-    // 'file' comes from the Blob or File API
-    uploadBytes(storageRef, image).then((snapshot) => {
-      console.log('Uploaded a blob or file!');
-    });
+    const filename = auth.currentUser.uid;
+    console.log(`filename is ${filename}`);
+    const storageRef = ref(firebaseStorage, filename);
 
+    const uploadTask = uploadBytesResumable(storageRef, blob);
 
-    setUploading(false)
-    Alert.alert(
-      'Photo uploaded!'
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        // Progress function...
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+      },
+      (error) => {
+        // Error function...
+        console.log(error);
+      },
+      () => {
+        // Complete function...
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log('File available at', downloadURL);
+
+          // Store the downloadURL in Firestore under the user's profile
+          const userDocRef = doc(db, "userProfiles", auth.currentUser.uid);
+          updateDoc(userDocRef, {
+            imageUrl: downloadURL
+          });
+
+        });
+      }
     );
-    setImage(null);
-  }
+  };
 
   useEffect(() => {
     retrieveFromDb()
@@ -111,16 +123,15 @@ export default function Profile({ navigation }) {
 
           <View className="items-center">
             <Image
-              source={user.image ? { uri: user.image } : profileIcon}
+              source={image ? { uri: image.uri } : profileIcon}
               className="self-center w-40 h-40 rounded-full"
             />
-
 
             <TouchableOpacity style={styles.selectButton} onPress={pickImage}>
               <Text style={styles.btnText}>Pick an Image</Text>
             </TouchableOpacity>
             <View style={styles.imageContainer}>
-              {image && <Image source={{ uri: image.uri }} style={{ width: 300, height: 300 }} />}
+              {/* {image && <Image source={{ uri: image.uri }} style={{ width: 300, height: 300 }} />} */}
               <TouchableOpacity style={styles.uploadButton} onPress={uploadImage}>
                 <Text style={styles.btnText}>Upload Image</Text>
               </TouchableOpacity>
