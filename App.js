@@ -9,6 +9,7 @@ import { auth } from "./firebaseConfig";
 import { useState, useEffect } from "react";
 import Activities from "./screens/Activities";
 import Profile from "./screens/Profile";
+import Events from "./screens/Events";
 
 const Tab = createBottomTabNavigator();
 
@@ -41,6 +42,11 @@ export default function App() {
         <Tab.Screen
           name="Profile"
           component={Profile}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen
+          name="Events"
+          component={Events}
           options={{ headerShown: false }}
         />
       </Tab.Navigator>
