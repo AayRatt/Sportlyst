@@ -43,10 +43,6 @@ export default function Activities({ navigation }) {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text>Activities</Text>
-      <Button
-      title="Events"
-      onPress={()=> navigation.navigate("Events")}
-      />
     </View>
 
   );
