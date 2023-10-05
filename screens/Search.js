@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, Stat
 import { useState, useEffect } from 'react';
 import { db, auth } from "../firebaseConfig";
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot } from "firebase/firestore";
+import profileIcon from '../assets/profile-icon.png';
 
 
 export default function Search({ navigation }) {
@@ -164,35 +165,54 @@ export default function Search({ navigation }) {
 
     return (
         <SafeAreaView className="bg-primary flex-1">
-            <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
-                Search View
-            </Text>
+            <View className="bg-white pl-3 pr-3">
 
-            <TextInput
-                placeholder="Search Friends"
-                value={searchName}
-                onChangeText={setSearchName}
-                style={styles.textInput}
-            />
-            <FlatList
-                data={filterUser}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                        <Text>{`${item.firstName} ${item.lastName}  `}</Text>
-                        {item.friend ?
-                            <Text>Friend</Text>
-                            :
-                            item.requestSent ?
-                                <Text>Friend Request Sent</Text>
+
+                <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
+                    Search View
+                </Text>
+                <TextInput 
+                    className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
+                    placeholder="Search Friends"
+                    value={searchName}
+                    onChangeText={setSearchName}
+                    style={styles.textInput}
+
+                />
+                <FlatList
+                    data={filterUser}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View className="flex-row items-center mt-5 pl-3">
+                            {/* User profile picture */}
+                            <Image
+                                source={item.image ? { uri: item.image } : profileIcon}
+                                className="w-12 h-12 rounded-full mr-3"
+                            />
+
+                            <Text className="font-urbanist text-lg mr-3">{`${item.firstName} ${item.lastName}`}</Text>
+
+                            {item.friend ?
+                                <Text className="font-urbanist text-lg bg-gray-500 text-white"
+                                >Friend</Text>
                                 :
-                                <Pressable onPress={() => addFriend(item.id.toString())}>
-                                    <Text style={{ color: 'blue' }}>Add Friend</Text>
-                                </Pressable>
-                        }
-                    </View>
-                )}
-            />
+                                item.requestSent ?
+                                    <Text className="font-urbanist text-lg bg-gray-500 text-white"
+                                    >Friend Request Sent</Text>
+                                    :
+                                    <Pressable
+                                        className="bg-secondary rounded-lg h-8 items-center justify-center w-1/4"
+                                        onPress={() => addFriend(item.id.toString())}>
+                                        <Text className="text-sm font-urbanistBold text-primary">Add Friend</Text>
+                                    </Pressable>
+                            }
+                        </View>
+                    )}
+                />
+
+
+
+            </View>
 
         </SafeAreaView>
 
