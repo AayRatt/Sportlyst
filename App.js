@@ -9,7 +9,10 @@ import { auth } from "./firebaseConfig";
 import { useState, useEffect } from "react";
 import Activities from "./screens/Activities";
 import Profile from "./screens/Profile";
+import Search from "./screens/Search"
+import Friends from "./screens/Friends"
 import Events from "./screens/Events";
+
 
 const Tab = createBottomTabNavigator();
 
@@ -45,6 +48,13 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Tab.Screen
+          name="Search"
+          component={Search}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen
+          name="Friends"
+          component={Friends}
           name="Events"
           component={Events}
           options={{ headerShown: false }}
@@ -74,6 +84,7 @@ export default function App() {
             component={Register}
             options={{ headerShown: false }}
           />
+
         </Stack.Navigator>
       )}
     </NavigationContainer>
