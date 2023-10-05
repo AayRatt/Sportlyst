@@ -33,9 +33,9 @@ const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
 });
 //Initialise Firebase Storage
-const firabseStorage = getStorage(app);
+const firebaseStorage = getStorage(app);
 
 // TODO: Initialize Firebase Analytics
 // const analytics = getAnalytics(app);
 
-export { db, auth, firabseStorage };
+export { db, auth, firebaseStorage };
