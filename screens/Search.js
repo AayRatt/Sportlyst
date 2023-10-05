@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { db, auth } from "../firebaseConfig";
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot } from "firebase/firestore";
 import profileIcon from '../assets/profile-icon.png';
-
+import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
 
 export default function Search({ navigation }) {
 

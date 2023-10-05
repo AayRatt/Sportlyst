@@ -2,11 +2,11 @@ import React from "react";
 import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, TouchableOpacity } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
-
 import { db, auth, firabseStorage } from "../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
 
 import profileIcon from '../assets/profile-icon.png';
 

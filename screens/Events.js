@@ -42,14 +42,14 @@ export default function Events({ navigation }) {
     eventName: "",
     description: "",
     sportType: "Baseball",
-    players:"",
-    payment:"",
-    date:""
+    players: "",
+    payment: "",
+    date: ""
   })
 
   const onCreateEvent = async () => {
-      //Read Data
-      const outData = `
+    //Read Data
+    const outData = `
       EventName: ${userEventField.eventName},
       Description: ${userEventField.description},
       SportType: ${userEventField.sportType},
@@ -57,12 +57,12 @@ export default function Events({ navigation }) {
       Payment: ${userEventField.payment},
       Date: ${userEventField.date}
       `;
-      console.log(outData);
+    console.log(outData);
 
-      try {
-        if (!userEventField.eventName){
-          alert("Please Type your Event Name");
-        }else{
+    try {
+      if (!userEventField.eventName) {
+        alert("Please Type your Event Name");
+      } else {
         //Create a Firestore Collection
         //1. Add data Object
         const eventData = {
@@ -75,7 +75,7 @@ export default function Events({ navigation }) {
         }
 
         //2. Add data to firestore
-        const randomId = doc (collection(db, 'events', auth.currentUser.uid, 'sports')).id
+        const randomId = doc(collection(db, 'events', auth.currentUser.uid, 'sports')).id
         await setDoc(
           doc(db, 'events', auth.currentUser.uid, 'sports', randomId),
           eventData
@@ -86,16 +86,16 @@ export default function Events({ navigation }) {
         //Clean Field
         setUserEventField({
           eventName: "",
-          description:"",
+          description: "",
           sportType: "",
           players: "",
-          payment:"",
-          date:""
+          payment: "",
+          date: ""
         })
-        }
-      } catch (error) {
-          console.log(error);
       }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   // Function for Updating form fields
@@ -115,8 +115,8 @@ export default function Events({ navigation }) {
     return null;
   }
 
-    return (
-      <SafeAreaView className="bg-primary flex-1">
+  return (
+    <SafeAreaView className="bg-primary flex-1">
       <View className="bg-white pl-3 pr-3">
 
         <Text className="font-urbanistBold text-2xl text-start pl-3">
@@ -134,7 +134,7 @@ export default function Events({ navigation }) {
               formChanged("eventName", account);
             }}
           ></TextInput>
-          
+
           <TextInput
             className="bg-gray h-20 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
             placeholder="Event Description"
@@ -146,38 +146,38 @@ export default function Events({ navigation }) {
             }}
           ></TextInput>
 
-    <View className="flex-row gap-3">
-      <TextInput
-            className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
-            placeholder="Quantity of Players"
-            placeholderTextColor={"#666"}
-            autoCapitalize="none"
-            keyboardType='numeric'
-            value={userEventField.players}
-            onChangeText={(account) => {
-              formChanged("players", account);
-            }}
-          ></TextInput>
-      <TextInput
-            className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
-            placeholder="Price per person"
-            placeholderTextColor={"#666"}
-            autoCapitalize="none"
-            keyboardType='numeric'
-            value={userEventField.payment}
-            onChangeText={(account) => {
-              formChanged("payment", account);
-            }}
-          ></TextInput>
-    </View>
+          <View className="flex-row gap-3">
+            <TextInput
+              className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
+              placeholder="Quantity of Players"
+              placeholderTextColor={"#666"}
+              autoCapitalize="none"
+              keyboardType='numeric'
+              value={userEventField.players}
+              onChangeText={(account) => {
+                formChanged("players", account);
+              }}
+            ></TextInput>
+            <TextInput
+              className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
+              placeholder="Price per person"
+              placeholderTextColor={"#666"}
+              autoCapitalize="none"
+              keyboardType='numeric'
+              value={userEventField.payment}
+              onChangeText={(account) => {
+                formChanged("payment", account);
+              }}
+            ></TextInput>
+          </View>
 
           <Picker
-          style={{ backgroundColor: 'white', height: 215 }}
-          selectedValue='Baseball'
-          pickerData={['Soccer', 'Basket', 'Baseball', 'Tennis','Ping Pong']}
-          onValueChange={value => { 
+            style={{ backgroundColor: 'white', height: 215 }}
+            selectedValue='Baseball'
+            pickerData={['Soccer', 'Basket', 'Baseball', 'Tennis', 'Ping Pong']}
+            onValueChange={value => {
               formChanged("sportType", value)
-          }}
+            }}
           />
 
           {/* <DatePicker
@@ -189,7 +189,7 @@ export default function Events({ navigation }) {
            }}
           /> */}
 
-          
+
           <Pressable
             className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
             onPress={onCreateEvent}
@@ -203,5 +203,5 @@ export default function Events({ navigation }) {
         <StatusBar barStyle="dark-content"></StatusBar>
       </View>
     </SafeAreaView>
-      );
+  );
 }

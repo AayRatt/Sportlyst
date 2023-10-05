@@ -51,10 +51,13 @@ export default function App() {
           name="Search"
           component={Search}
           options={{ headerShown: false }}
-        />
+        />        
         <Tab.Screen
           name="Friends"
           component={Friends}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen
           name="Events"
           component={Events}
           options={{ headerShown: false }}
