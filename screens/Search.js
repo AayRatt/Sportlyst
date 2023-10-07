@@ -14,49 +14,6 @@ export default function Search({ navigation }) {
     const [friendReqSent, setfriendReqSent] = useState([])
     const loggedUser = auth.currentUser.uid
 
-    // async function loadUsers() {
-
-    //     try {
-
-    //         //Loading logged user's friend requests sent    
-    //         const sentFriendRequestSnapshot = await getDocs(collection(db, "userProfiles", loggedUser, "sentFriendRequests"))
-
-    //         const sentFriendRequests = sentFriendRequestSnapshot.docs.map(doc => doc.data().sentTo);
-
-    //         //Load logged user's friends list 
-    //         const friendsFromDB = await getDocs(collection(db, "userProfiles", loggedUser, "friends"))
-    //         const listOfFriends = friendsFromDB.docs.map(doc => doc.data().userID);
-
-    //         //Load all users in DB
-    //         const usersSnapshot = await getDocs(
-    //             collection(db, "userProfiles")
-    //         );
-
-    //         //Filtering users in DB 
-    //         const filterUsers = usersSnapshot.docs
-    //             .filter(doc => doc.id !== loggedUser) //Excluding Current User from list
-    //             .map(doc => {
-
-    //                 const friend = listOfFriends.includes(doc.id)
-    //                 const requestSent = sentFriendRequests.includes(doc.id)
-
-    //                 return {
-    //                     id: doc.id,
-    //                     friend,
-    //                     requestSent,
-    //                     ...doc.data()
-    //                 }
-
-    //             })
-
-    //         setUsers(filterUsers)
-    //         // console.log(filterUsers)
-
-    //     } catch (error) {
-
-    //     }
-
-    // }
 
     async function loadUsers() {
 
@@ -72,7 +29,7 @@ export default function Search({ navigation }) {
                     // const sentFriendRequests = sentSnapshot.docs.map(doc => doc.data().sentTo);
 
                     const sentFriendRequests = sentSnapshot.docs
-                        .filter(doc => doc.data().status !== "Declined") // Filter out declined requests
+                        .filter(doc => doc.data().status !== "Declined" && doc.data().status !== "Accepted") // Filter out declined requests
                         .map(doc => doc.data().sentTo);
 
 
@@ -171,7 +128,7 @@ export default function Search({ navigation }) {
                 <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
                     Search View
                 </Text>
-                <TextInput 
+                <TextInput
                     className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
                     placeholder="Search Friends"
                     value={searchName}
@@ -185,12 +142,16 @@ export default function Search({ navigation }) {
                     renderItem={({ item }) => (
                         <View className="flex-row items-center mt-5 pl-3">
                             {/* User profile picture */}
-                            <Image
-                                source={item.image ? { uri: item.image } : profileIcon}
-                                className="w-12 h-12 rounded-full mr-3"
-                            />
+                            <Pressable onPress={() => navigation.navigate("FriendProfile")}>
+                                <Image
+                                    source={item.image ? { uri: item.image } : profileIcon}
+                                    className="w-12 h-12 rounded-full mr-3"
+                                />
+                            </Pressable> 
 
-                            <Text className="font-urbanist text-lg mr-3">{`${item.firstName} ${item.lastName}`}</Text>
+                            <Pressable>
+                                <Text className="font-urbanist text-lg mr-3">{`${item.firstName} ${item.lastName}`}</Text>
+                            </Pressable> 
 
                             {item.friend ?
                                 <Text className="font-urbanist text-lg bg-gray-500 text-white"
@@ -198,7 +159,7 @@ export default function Search({ navigation }) {
                                 :
                                 item.requestSent ?
                                     <Text className="font-urbanist text-lg bg-gray-500 text-white"
-                                    >Friend Request Sent</Text>
+                                    >Request Sent</Text>
                                     :
                                     <Pressable
                                         className="bg-secondary rounded-lg h-8 items-center justify-center w-1/4"
