@@ -29,8 +29,8 @@ export default function Search({ navigation }) {
                     // const sentFriendRequests = sentSnapshot.docs.map(doc => doc.data().sentTo);
 
                     const sentFriendRequests = sentSnapshot.docs
-                        .filter(doc => doc.data().status !== "Declined" && doc.data().status !== "Accepted") // Filter out declined requests
-                        .map(doc => doc.data().sentTo);
+                        .filter(doc => doc.data().status !== "Declined" && doc.data().status !== "Accepted" && doc.data().status !== "Deleted") // Filter out declined requests
+                        .map(doc => doc.data().sentTo); 
 
 
                     //Load all users in DB
@@ -142,7 +142,12 @@ export default function Search({ navigation }) {
                     renderItem={({ item }) => (
                         <View className="flex-row items-center mt-5 pl-3">
                             {/* User profile picture */}
-                            <Pressable onPress={() => navigation.navigate("FriendProfile")}>
+                            <Pressable onPress={
+                                
+                                () => navigation.navigate("FriendProfile",{userID:item.id, friend:item.friend, requestSent:item.requestSent})
+                                //console.log(item.id)
+                        
+                            }>  
                                 <Image
                                     source={item.image ? { uri: item.image } : profileIcon}
                                     className="w-12 h-12 rounded-full mr-3"
@@ -150,6 +155,7 @@ export default function Search({ navigation }) {
                             </Pressable> 
 
                             <Pressable>
+                            
                                 <Text className="font-urbanist text-lg mr-3">{`${item.firstName} ${item.lastName}`}</Text>
                             </Pressable> 
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, FlatList,Alert } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, FlatList, Alert } from "react-native";
 import { useState, useEffect } from 'react';
 import { db, auth } from "../firebaseConfig";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
@@ -45,7 +45,7 @@ export default function Friends({ navigation }) {
     }
 
     function loadFriends() {
-        
+
         const friendRef = collection(db, "userProfiles", userID, "friends");
         //const q = query(friendRequestRef, where('status', '==', 'Pending'));
 
@@ -110,11 +110,11 @@ export default function Friends({ navigation }) {
 
 
             const requestRefofUser = collection(db, "userProfiles", friendID, "sentFriendRequests");
-            const q = query(requestRefofUser, where("sentTo","==",userID))
+            const q = query(requestRefofUser, where("sentTo", "==", userID))
 
             const snapShot = await getDocs(q)
 
-            if(snapShot.empty){
+            if (snapShot.empty) {
                 console.log("No user to be found")
                 return
             }
@@ -130,7 +130,7 @@ export default function Friends({ navigation }) {
             });
 
 
-            
+
 
         } catch (error) {
 
@@ -168,63 +168,145 @@ export default function Friends({ navigation }) {
         }
     }
 
-    async function onDeleteFriendPress(friendID, friendName){
+    async function onDeleteFriendPress(friendID, friendName) {
 
-        Alert.alert('Delete Friend',`Are you sure you want to delete ${friendName}?`,[
+        Alert.alert('Delete Friend', `Are you sure you want to delete ${friendName}?`, [
 
             {
-                text:'Cancel',
-                onPress: () =>{
+                text: 'Cancel',
+                onPress: () => {
                     console.log('Delete Cancelled')
                 },
-                style:'cancel'
+                style: 'cancel'
             },
             {
-                text:'Delete',
+                text: 'Delete',
                 onPress: () => deleteFriend(friendID)
             }
         ],
-        {cancelable: false}
+            { cancelable: false }
         )
     }
 
-    async function deleteFriend(friendID){ 
+    async function deleteFriend(friendID) {
 
+
+        //Reference to logged user's friend list and query to get the single user to delete
         const friendListRef = collection(db, "userProfiles", userID, "friends");
-        const q = query(friendListRef, where("userID","==",friendID));
-    
+        const q = query(friendListRef, where("userID", "==", friendID));
+
+        //Reference to friend to delete's friendlist where ID is equal to the logged user
         const friendToDeleteRef = collection(db, "userProfiles", friendID, "friends");
-        const q2 = query(friendToDeleteRef, where("userID","==",userID));
-    
+        const q2 = query(friendToDeleteRef, where("userID", "==", userID));
+
+        //Reference to logged user's sentFriendRequests list and query to get doc
+        const sentFriendRequestRef = collection(db, "userProfiles", userID, "sentFriendRequests");
+        const q3 = query(sentFriendRequestRef, where("sentTo", "==", friendID));
+
+        //Reference to logged user's friendRequests list and query to get doc
+        const friendRequests = collection(db, "userProfiles", userID, "friendRequests");
+        const q4 = query(friendRequests, where("receivedFrom", "==", friendID));
+
+        //Reference to friend to delete's sentFriendRequest
+        const sentFriendRequestFromFriend = collection(db, "userProfiles", friendID, "sentFriendRequests");
+        const q5 = query(sentFriendRequestFromFriend, where("sentTo", "==", userID));
+
+        //Reference to friend to delete's received friend Requests
+        const friendRequestsFromFriend = collection(db, "userProfiles", friendID, "friendRequests");
+        const q6 = query(friendRequestsFromFriend, where("receivedFrom", "==", userID));
+
         try {
-    
-            const querySnap = await getDocs(q); 
-            if(querySnap.empty){ 
+            //Getting doc with q query
+            const querySnap = await getDocs(q);
+            if (querySnap.empty) {
                 console.log("No friend found to delete");
                 return;
             }
-    
+            //delete friend from current user's friendlist
             querySnap.forEach(async (document) => {
                 await deleteDoc(doc(db, "userProfiles", userID, "friends", document.id));
                 console.log(`${friendID} deleted`);
             });
-    
-            const querySnap2 = await getDocs(q2); 
-            if(querySnap2.empty){ 
+            //getting doc from query2
+            const querySnap2 = await getDocs(q2);
+            if (querySnap2.empty) {
                 console.log("No friend found to delete");
                 return;
             }
-    
+            //Deleting logged user from deleted user's friend list
             querySnap2.forEach(async (document) => {
                 await deleteDoc(doc(db, "userProfiles", friendID, "friends", document.id));
                 console.log(`${userID} deleted from friend's list`);
             });
-    
+
+            //
+            const querySnap3 = await getDocs(q3)
+            const querySnap5 = await getDocs(q5)
+
+            if(querySnap3.empty){
+                console.log("Logged user sent friend's Requests does not contain user to delete")
+
+
+                querySnap5.forEach(async (document)=>{
+
+                    if(document.data().status === "Accepted"){
+                        await updateDoc(doc(db,"userProfiles",friendID,"sentFriendRequests",document.id),{
+                            status:"Deleted"
+                        })
+
+                        console.log(`Logged User was deleted from delete user's sentRequest list`)
+                    }
+
+                })
+
+                const querySnap4 = await getDocs(q4)
+
+                querySnap4.forEach(async (document)=>{
+
+                    if(document.data().status === "Accepted"){
+                        await updateDoc(doc(db,"userProfiles",userID,"friendRequests",document.id),{
+                            status:"Deleted"
+                        })
+
+                        console.log(`Deleted User's friend request updated in logged user's friendRequests`)
+                    }
+                })
+                
+
+            }else{
+                querySnap3.forEach(async (document)=>{
+
+                    if(document.data().status === "Accepted"){
+                       // await deleteDoc(doc(db,"userProfiles",userID,"sentFriendRequests",document.id))
+
+                       await updateDoc(doc(db,"userProfiles",userID,"sentFriendRequests",document.id), {
+                        status: "Deleted"
+                    });
+                        console.log(`Updated user with id${friendID} from the logged user's sentFriend Requests set to Deleted`)
+                    }
+
+
+                })
+
+                const querySnap6 = await getDocs(q6)
+
+                querySnap6.forEach(async (document)=>{
+                    if(document.data().status === "Accepted"){
+                        //await deleteDoc(doc(db,"userProfiles",friendID,"friendRequests",document.id))
+                        await updateDoc(doc(db,"userProfiles",friendID,"friendRequests",document.id), {
+                            status: "Deleted"
+                        });
+                        console.log(`Updated logged user FriendRequest from delete user's friendRequests`)
+                    }
+                })
+            }
+
+
+
         } catch (error) {
             console.error(error); // Use console.error for errors
         }
     }
-    
 
 
     useEffect(() => {
