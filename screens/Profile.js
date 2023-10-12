@@ -7,13 +7,14 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
-
 import profileIcon from '../assets/profile-icon.png';
+import { AntDesign } from '@expo/vector-icons';
 
 export default function Profile({ navigation }) {
 
   const [image, setImage] = useState(null)
   const [uploading, setUploading] = useState(false)
+  const addImage = () => { }
 
   const onLogoutClicked = async () => {
     try {
@@ -55,6 +56,20 @@ export default function Profile({ navigation }) {
       setUser(docSnap.data())
     } else {
       console.log("No such document!");
+    }
+  }
+
+  const updateDb = async () => {
+    // update data in firestore
+    try {
+      const userRef = doc(db, "userProfiles", auth.currentUser.uid);
+
+      await updateDoc(bookingRef, {
+        bookingStatus: isEnabled ? 'Confirmed' : 'Declined',
+        bookingCode: isEnabled ? bookingId : '',
+      });
+    } catch (err) {
+      console.log(err)
     }
   }
 
@@ -119,29 +134,22 @@ export default function Profile({ navigation }) {
         <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
           User Profile
         </Text>
-        <View className="mt-8">
-
-          <View className="items-center">
+        <View className="mt-2">
+          <View className="h-50 w-50 bg-gray-500 relative rounded-full">
             <Image
               source={image ? { uri: image.uri } : profileIcon}
-              className="self-center w-40 h-40 rounded-full"
+              className="self-center w-40 h-40 rounded-full border-solid border-2"
             />
-
-            <TouchableOpacity style={styles.selectButton} onPress={pickImage}>
-              <Text style={styles.btnText}>Pick an Image</Text>
-            </TouchableOpacity>
-            <View style={styles.imageContainer}>
-              {/* {image && <Image source={{ uri: image.uri }} style={{ width: 300, height: 300 }} />} */}
-              <TouchableOpacity style={styles.uploadButton} onPress={uploadImage}>
-                <Text style={styles.btnText}>Upload Image</Text>
+            <View className="opacity-80 absolute bottom-0 right-0 bg-light-gray w-full h-1/4">
+              <TouchableOpacity onPress={pickImage} className="flex items-center justify-center" >
+                <Text>{image ? 'Edit' : 'Upload'} Image</Text>
+                <AntDesign name="camera" size={20} color="black" />
               </TouchableOpacity>
             </View>
-
-
-
           </View>
+
           <TextInput
-            className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
+            className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
             placeholderTextColor={"#666"}
             value={user.email}
             editable={false}
@@ -199,7 +207,15 @@ export default function Profile({ navigation }) {
           ></TextInput>
 
           <Pressable
-            className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
+            className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
+            onPress={onLogoutClicked}
+          >
+            <Text className="text-lg font-urbanistBold text-primary">
+              Update
+            </Text>
+          </Pressable>
+          <Pressable
+            className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
             onPress={onLogoutClicked}
           >
             <Text className="text-lg font-urbanistBold text-primary">
@@ -215,13 +231,3 @@ export default function Profile({ navigation }) {
 
   );
 }
-
-const styles = StyleSheet.create({
-  image: {
-    width: 150,
-    height: 150,
-    marginTop: 5,
-    borderRadius: 75,
-    marginBottom: 10
-  },
-});

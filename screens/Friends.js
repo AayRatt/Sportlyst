@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, FlatList } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, FlatList, Alert } from "react-native";
 import { useState, useEffect } from 'react';
 import { db, auth } from "../firebaseConfig";
-import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
 import profileIcon from '../assets/profile-icon.png';
 import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
 
@@ -10,50 +10,9 @@ export default function Friends({ navigation }) {
 
     const [pendingRequests, setpendingRequests] = useState([])
     const [friends, setFriends] = useState([])
-
-
-    // async function loadFriendRequests() {
-    //     try {
-    //         const q = await getDocs(collection(db, "userProfiles", auth.currentUser.uid, "friendRequests"));
-    //         const userData = [];
-
-    //         q.forEach(async (docSnapshot) => {
-    //             try {
-    //                 const docRef = doc(db, "userProfiles", docSnapshot.data().fromUserID);
-
-    //                 console.log(docSnapshot.data().status)
-    //                 if(docSnapshot.data().status === 'Pending'){
-
-    //                     const docSnap = await getDoc(docRef);
-    //                     if (docSnap.exists()) {
-
-    //                             const userDocData = docSnap.data();
-    //                             const fullName = `${userDocData.firstName} ${userDocData.lastName}`;
-    //                             const email = userDocData.email;
-    //                             const requestID = docSnapshot.id
-    //                             const friendID = userDocData.userID
-    //                             userData.push({ requestID, friendID, fullName, email });
-    //                             console.log(fullName)
-    //                             setpendingRequests(userData)
-    //                     }
-    //                 }
-
-
-    //             } catch (error) {
-    //                 console.error("Error getting document:", error);
-    //             }
-    //         });
-
-
-
-
-    //     } catch (error) {
-    //         console.error("Error loading friend requests: ", error);
-    //     }
-    // }
+    const userID = auth.currentUser.uid;
 
     function loadFriendRequests() {
-        const userID = auth.currentUser.uid;
         const friendRequestRef = collection(db, "userProfiles", userID, "friendRequests");
         const q = query(friendRequestRef, where('status', '==', 'Pending'));
 
@@ -86,7 +45,7 @@ export default function Friends({ navigation }) {
     }
 
     function loadFriends() {
-        const userID = auth.currentUser.uid;
+
         const friendRef = collection(db, "userProfiles", userID, "friends");
         //const q = query(friendRequestRef, where('status', '==', 'Pending'));
 
@@ -117,8 +76,6 @@ export default function Friends({ navigation }) {
         return unsubscribe2;
     }
 
-
-
     async function accept(requestID, friendID) {
 
         console.log(requestID)
@@ -126,14 +83,14 @@ export default function Friends({ navigation }) {
         console.log(auth.currentUser.uid)
 
         try {
-            const requestRef = doc(db, "userProfiles", auth.currentUser.uid, "friendRequests", requestID);
-            const acceptRef = collection(db, "userProfiles", auth.currentUser.uid, "friends");
+            const requestRef = doc(db, "userProfiles", userID, "friendRequests", requestID);
+            const acceptRef = collection(db, "userProfiles", userID, "friends");
             const friendRequestUserRef = collection(db, "userProfiles", friendID, "friends");
-            const loggedUserID = auth.currentUser.uid
 
             await updateDoc(requestRef, {
                 status: "Accepted"
             })
+
 
             await addDoc(acceptRef, {
 
@@ -144,12 +101,36 @@ export default function Friends({ navigation }) {
 
             await addDoc(friendRequestUserRef, {
 
-                userID: loggedUserID,
+                userID: userID,
                 timeStamp: new Date()
 
             })
 
             console.log('User accepted')
+
+
+            const requestRefofUser = collection(db, "userProfiles", friendID, "sentFriendRequests");
+            const q = query(requestRefofUser, where("sentTo", "==", userID))
+
+            const snapShot = await getDocs(q)
+
+            if (snapShot.empty) {
+                console.log("No user to be found")
+                return
+            }
+
+            snapShot.forEach(async (document) => {
+                const docRef = doc(db, "userProfiles", friendID, "sentFriendRequests", document.id);
+
+                const status = {
+                    status: "Accepted"
+                }
+
+                await updateDoc(docRef, status);
+            });
+
+
+
 
         } catch (error) {
 
@@ -158,48 +139,16 @@ export default function Friends({ navigation }) {
 
     }
 
-    // async function decline(requestID, friendID) {
-
-    //     const friendRequestRef = doc(db, "userProfiles", auth.currentUser.uid, "friendRequests", requestID);
-    //     const friendRequestFromRef = collection(db, "userProfiles", friendID, "sentFriendRequests");
-    //     const q = query(friendRequestRef, where('sentTo', '==', auth.currentUser.uid));
-
-
-    //     try {
-
-
-
-    //         await updateDoc(friendRequestRef, {
-    //             status: "Declined"
-    //         })
-
-    //         const snapShot = await getDocs(q)
-
-    //         if(!snapShot.empty){
-    //             const requestDoc = snapShot.docs[0]
-
-    //             await updateDoc(requestDoc.ref,{
-    //                 status: "Declined"
-    //             })
-    //         }
-
-    //         console.log('User declined')
-
-    //     } catch (error) {
-
-    //     }
-
-    // }
     async function decline(requestID, friendID) {
         try {
-            const friendRequestRef = doc(db, "userProfiles", auth.currentUser.uid, "friendRequests", requestID);
+            const friendRequestRef = doc(db, "userProfiles", userID, "friendRequests", requestID);
             await updateDoc(friendRequestRef, {
                 status: "Declined"
             });
             console.log('Friend request reference updated successfully.');
 
             const sentFriendRequestsCollection = collection(db, "userProfiles", friendID, "sentFriendRequests");
-            const q = query(sentFriendRequestsCollection, where('sentTo', '==', auth.currentUser.uid));
+            const q = query(sentFriendRequestsCollection, where('sentTo', '==', userID));
             const snapShot = await getDocs(q);
 
             console.log('Query executed successfully.');
@@ -216,6 +165,146 @@ export default function Friends({ navigation }) {
 
         } catch (error) {
             console.error("Error in decline function:", error);
+        }
+    }
+
+    async function onDeleteFriendPress(friendID, friendName) {
+
+        Alert.alert('Delete Friend', `Are you sure you want to delete ${friendName}?`, [
+
+            {
+                text: 'Cancel',
+                onPress: () => {
+                    console.log('Delete Cancelled')
+                },
+                style: 'cancel'
+            },
+            {
+                text: 'Delete',
+                onPress: () => deleteFriend(friendID)
+            }
+        ],
+            { cancelable: false }
+        )
+    }
+
+    async function deleteFriend(friendID) {
+
+
+        //Reference to logged user's friend list and query to get the single user to delete
+        const friendListRef = collection(db, "userProfiles", userID, "friends");
+        const q = query(friendListRef, where("userID", "==", friendID));
+
+        //Reference to friend to delete's friendlist where ID is equal to the logged user
+        const friendToDeleteRef = collection(db, "userProfiles", friendID, "friends");
+        const q2 = query(friendToDeleteRef, where("userID", "==", userID));
+
+        //Reference to logged user's sentFriendRequests list and query to get doc
+        const sentFriendRequestRef = collection(db, "userProfiles", userID, "sentFriendRequests");
+        const q3 = query(sentFriendRequestRef, where("sentTo", "==", friendID));
+
+        //Reference to logged user's friendRequests list and query to get doc
+        const friendRequests = collection(db, "userProfiles", userID, "friendRequests");
+        const q4 = query(friendRequests, where("receivedFrom", "==", friendID));
+
+        //Reference to friend to delete's sentFriendRequest
+        const sentFriendRequestFromFriend = collection(db, "userProfiles", friendID, "sentFriendRequests");
+        const q5 = query(sentFriendRequestFromFriend, where("sentTo", "==", userID));
+
+        //Reference to friend to delete's received friend Requests
+        const friendRequestsFromFriend = collection(db, "userProfiles", friendID, "friendRequests");
+        const q6 = query(friendRequestsFromFriend, where("receivedFrom", "==", userID));
+
+        try {
+            //Getting doc with q query
+            const querySnap = await getDocs(q);
+            if (querySnap.empty) {
+                console.log("No friend found to delete");
+                return;
+            }
+            //delete friend from current user's friendlist
+            querySnap.forEach(async (document) => {
+                await deleteDoc(doc(db, "userProfiles", userID, "friends", document.id));
+                console.log(`${friendID} deleted`);
+            });
+            //getting doc from query2
+            const querySnap2 = await getDocs(q2);
+            if (querySnap2.empty) {
+                console.log("No friend found to delete");
+                return;
+            }
+            //Deleting logged user from deleted user's friend list
+            querySnap2.forEach(async (document) => {
+                await deleteDoc(doc(db, "userProfiles", friendID, "friends", document.id));
+                console.log(`${userID} deleted from friend's list`);
+            });
+
+            //
+            const querySnap3 = await getDocs(q3)
+            const querySnap5 = await getDocs(q5)
+
+            if (querySnap3.empty) {
+                console.log("Logged user sent friend's Requests does not contain user to delete")
+
+
+                querySnap5.forEach(async (document) => {
+
+                    if (document.data().status === "Accepted") {
+                        await updateDoc(doc(db, "userProfiles", friendID, "sentFriendRequests", document.id), {
+                            status: "Deleted"
+                        })
+
+                        console.log(`Logged User was deleted from delete user's sentRequest list`)
+                    }
+
+                })
+
+                const querySnap4 = await getDocs(q4)
+
+                querySnap4.forEach(async (document) => {
+
+                    if (document.data().status === "Accepted") {
+                        await updateDoc(doc(db, "userProfiles", userID, "friendRequests", document.id), {
+                            status: "Deleted"
+                        })
+
+                        console.log(`Deleted User's friend request updated in logged user's friendRequests`)
+                    }
+                })
+
+
+            } else {
+                querySnap3.forEach(async (document) => {
+
+                    if (document.data().status === "Accepted") {
+                        // await deleteDoc(doc(db,"userProfiles",userID,"sentFriendRequests",document.id))
+
+                        await updateDoc(doc(db, "userProfiles", userID, "sentFriendRequests", document.id), {
+                            status: "Deleted"
+                        });
+                        console.log(`Updated user with id${friendID} from the logged user's sentFriend Requests set to Deleted`)
+                    }
+
+
+                })
+
+                const querySnap6 = await getDocs(q6)
+
+                querySnap6.forEach(async (document) => {
+                    if (document.data().status === "Accepted") {
+                        //await deleteDoc(doc(db,"userProfiles",friendID,"friendRequests",document.id))
+                        await updateDoc(doc(db, "userProfiles", friendID, "friendRequests", document.id), {
+                            status: "Deleted"
+                        });
+                        console.log(`Updated logged user FriendRequest from delete user's friendRequests`)
+                    }
+                })
+            }
+
+
+
+        } catch (error) {
+            console.error(error); // Use console.error for errors
         }
     }
 
@@ -283,29 +372,46 @@ export default function Friends({ navigation }) {
                         )}
                     />
                 ) : (
-                    <View className="flex-row items-center mt-5 pl-3">
+                    <View className="flex-row items-center mt-5 pl-3 justify-center">
                         <Text>No pending requests</Text>
                     </View>
                 )}
                 <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
-                    Friends
+                    Friends List
                 </Text>
 
                 <FlatList
                     data={friends}
-                    keyExtractor={(item) => item.userID}
+                    keyExtractor={(item) => item.friendID}
                     renderItem={({ item }) => (
 
                         <View className="flex-row items-center mt-5 pl-3">
                             {/* User profile picture */}
-                            <Image
-                                source={item.image ? { uri: item.image } : profileIcon}
-                                className="w-12 h-12 rounded-full"
-                            />
+                            <Pressable onPress={
+
+                                () => navigation.navigate("FriendProfile", { userID: item.friendID })
+                                //console.log(item.id)
+
+                            }>
+                                <Image
+                                    source={item.image ? { uri: item.image } : profileIcon}
+                                    className="w-12 h-12 rounded-full"
+                                />
+                            </Pressable>
 
                             <Text
                                 className="font-urbanist text-2xl mr-3"
                             >{`${item.fullName}`}</Text>
+
+                            <Pressable
+                                className="bg-secondary rounded-lg h-5 items-center justify-center w-1/4"
+                                onPress={() => {
+                                    // Handle the decline action
+                                    onDeleteFriendPress(item.friendID, item.fullName);
+                                }}
+                            >
+                                <Text style={{ color: 'white' }}>Delete</Text>
+                            </Pressable>
 
                         </View>
                     )}
