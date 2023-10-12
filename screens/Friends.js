@@ -243,15 +243,15 @@ export default function Friends({ navigation }) {
             const querySnap3 = await getDocs(q3)
             const querySnap5 = await getDocs(q5)
 
-            if(querySnap3.empty){
+            if (querySnap3.empty) {
                 console.log("Logged user sent friend's Requests does not contain user to delete")
 
 
-                querySnap5.forEach(async (document)=>{
+                querySnap5.forEach(async (document) => {
 
-                    if(document.data().status === "Accepted"){
-                        await updateDoc(doc(db,"userProfiles",friendID,"sentFriendRequests",document.id),{
-                            status:"Deleted"
+                    if (document.data().status === "Accepted") {
+                        await updateDoc(doc(db, "userProfiles", friendID, "sentFriendRequests", document.id), {
+                            status: "Deleted"
                         })
 
                         console.log(`Logged User was deleted from delete user's sentRequest list`)
@@ -261,27 +261,27 @@ export default function Friends({ navigation }) {
 
                 const querySnap4 = await getDocs(q4)
 
-                querySnap4.forEach(async (document)=>{
+                querySnap4.forEach(async (document) => {
 
-                    if(document.data().status === "Accepted"){
-                        await updateDoc(doc(db,"userProfiles",userID,"friendRequests",document.id),{
-                            status:"Deleted"
+                    if (document.data().status === "Accepted") {
+                        await updateDoc(doc(db, "userProfiles", userID, "friendRequests", document.id), {
+                            status: "Deleted"
                         })
 
                         console.log(`Deleted User's friend request updated in logged user's friendRequests`)
                     }
                 })
-                
 
-            }else{
-                querySnap3.forEach(async (document)=>{
 
-                    if(document.data().status === "Accepted"){
-                       // await deleteDoc(doc(db,"userProfiles",userID,"sentFriendRequests",document.id))
+            } else {
+                querySnap3.forEach(async (document) => {
 
-                       await updateDoc(doc(db,"userProfiles",userID,"sentFriendRequests",document.id), {
-                        status: "Deleted"
-                    });
+                    if (document.data().status === "Accepted") {
+                        // await deleteDoc(doc(db,"userProfiles",userID,"sentFriendRequests",document.id))
+
+                        await updateDoc(doc(db, "userProfiles", userID, "sentFriendRequests", document.id), {
+                            status: "Deleted"
+                        });
                         console.log(`Updated user with id${friendID} from the logged user's sentFriend Requests set to Deleted`)
                     }
 
@@ -290,10 +290,10 @@ export default function Friends({ navigation }) {
 
                 const querySnap6 = await getDocs(q6)
 
-                querySnap6.forEach(async (document)=>{
-                    if(document.data().status === "Accepted"){
+                querySnap6.forEach(async (document) => {
+                    if (document.data().status === "Accepted") {
                         //await deleteDoc(doc(db,"userProfiles",friendID,"friendRequests",document.id))
-                        await updateDoc(doc(db,"userProfiles",friendID,"friendRequests",document.id), {
+                        await updateDoc(doc(db, "userProfiles", friendID, "friendRequests", document.id), {
                             status: "Deleted"
                         });
                         console.log(`Updated logged user FriendRequest from delete user's friendRequests`)
@@ -372,25 +372,32 @@ export default function Friends({ navigation }) {
                         )}
                     />
                 ) : (
-                    <View className="flex-row items-center mt-5 pl-3">
+                    <View className="flex-row items-center mt-5 pl-3 justify-center">
                         <Text>No pending requests</Text>
                     </View>
                 )}
                 <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
-                    Friends
+                    Friends List
                 </Text>
 
                 <FlatList
                     data={friends}
-                    keyExtractor={(item) => item.userID}
+                    keyExtractor={(item) => item.friendID}
                     renderItem={({ item }) => (
 
                         <View className="flex-row items-center mt-5 pl-3">
                             {/* User profile picture */}
-                            <Image
-                                source={item.image ? { uri: item.image } : profileIcon}
-                                className="w-12 h-12 rounded-full"
-                            />
+                            <Pressable onPress={
+
+                                () => navigation.navigate("FriendProfile", { userID: item.friendID })
+                                //console.log(item.id)
+
+                            }>
+                                <Image
+                                    source={item.image ? { uri: item.image } : profileIcon}
+                                    className="w-12 h-12 rounded-full"
+                                />
+                            </Pressable>
 
                             <Text
                                 className="font-urbanist text-2xl mr-3"

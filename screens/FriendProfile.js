@@ -137,23 +137,23 @@ export default function FriendProfile({ navigation, route }) {
 
 
 
-    return (
+    return ( 
         <SafeAreaView className="bg-primary flex-1">
-            <View className="bg-white pl-3 pr-3">
+            <View className="bg-white pl-3 pr-3 flex justify-center items-center">
                 {userInfo && (
                     <>
                         <Text
                             className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
                             {`${userInfo.firstName} ${userInfo.lastName}`}
                         </Text>
-
+    
                         <Image
                             source={userInfo.image ? { uri: userInfo.image } : profileIcon}
                             className="self-center w-40 h-40 rounded-full"
                         />
-
-                        {requestStatus === 'Accepted' ? (
-                            <Text>Friend</Text>
+    
+                        {requestStatus === 'Accepted' ? (    
+                            <Text className="font-urbanistBold text-lg text-start pl-2 text-center">You are friends with {`${userInfo.firstName} `}</Text>
                         ) : requestStatus === 'Pending' ? (
                             <Text>Friend Request Sent</Text>
                         ) : (
@@ -168,6 +168,7 @@ export default function FriendProfile({ navigation, route }) {
             </View>
         </SafeAreaView>
     )
+    
 
 
 }

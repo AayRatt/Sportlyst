@@ -69,7 +69,7 @@ export default function App() {
         />
         <Tab.Screen
           name="Friends"
-          component={Friends}
+          component={FriendStack}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
@@ -92,6 +92,15 @@ export default function App() {
     return (
       <Stack.Navigator initialRouteName="Search" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Search" component={Search} />
+        <Stack.Screen name="FriendProfile" component={FriendProfile} options={{headerShown:true }}/>
+      </Stack.Navigator>
+    );
+  }
+
+  function FriendStack() {
+    return (
+      <Stack.Navigator initialRouteName="Friends" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Friends" component={Friends} />
         <Stack.Screen name="FriendProfile" component={FriendProfile} options={{headerShown:true }}/>
       </Stack.Navigator>
     );
