@@ -16,10 +16,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import ActivityDetails from "./screens/ActivityDetails";
 import Chat from "./screens/Chat";
 import FriendProfile from "./screens/FriendProfile";
-import { FontAwesome } from '@expo/vector-icons';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
-
+import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
 
@@ -94,41 +93,58 @@ export default function App() {
             ),
           }}
         />
-          }} />        
-          <Tab.Screen
+        <Tab.Screen
           name="ActivityDetails"
           component={ActivityDetails}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="list" size={24} color="black" />),
-          }} />
+              <FontAwesome name="list" size={24} color="black" />
+            ),
+          }}
+        />
         <Tab.Screen
           name="Chat"
           component={Chat}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="chatbubbles" size={24} color="black" />),
-          }} />
+              <Ionicons name="chatbubbles" size={24} color="black" />
+            ),
+          }}
+        />
       </Tab.Navigator>
     );
   }
 
   function SearchStack() {
     return (
-      <Stack.Navigator initialRouteName="Search" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName="Search"
+        screenOptions={{ headerShown: false }}
+      >
         <Stack.Screen name="Search" component={Search} />
-        <Stack.Screen name="FriendProfile" component={FriendProfile} options={{headerShown:true }}/>
+        <Stack.Screen
+          name="FriendProfile"
+          component={FriendProfile}
+          options={{ headerShown: true }}
+        />
       </Stack.Navigator>
     );
   }
 
   function FriendStack() {
     return (
-      <Stack.Navigator initialRouteName="Friends" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName="Friends"
+        screenOptions={{ headerShown: false }}
+      >
         <Stack.Screen name="Friends" component={Friends} />
-        <Stack.Screen name="FriendProfile" component={FriendProfile} options={{headerShown:true }}/>
+        <Stack.Screen
+          name="FriendProfile"
+          component={FriendProfile}
+          options={{ headerShown: true }}
+        />
       </Stack.Navigator>
     );
   }
