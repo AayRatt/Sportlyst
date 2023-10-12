@@ -124,7 +124,7 @@ export default function Profile({ navigation }) {
     };
 
     useEffect(() => {
-        retrieveFromDb()
+        // retrieveFromDb()
     }, [])
 
     return (
@@ -137,7 +137,7 @@ export default function Profile({ navigation }) {
                         <Text style={styles.title}>5v5 Indoor Football</Text>
                         <Text style={styles.grayText}>Event Location</Text>
                         <Text style={styles.grayText}>27 October, 6:00 PM</Text>
-                        <Text style={styles.grayText}>INR 400</Text>
+                        <Text style={styles.grayText}>CAD 50</Text>
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Venue</Text>
@@ -152,9 +152,12 @@ export default function Profile({ navigation }) {
                     </View>
                     <View style={styles.attendees}>
                         <Text style={styles.sectionTitle}>Who's going?</Text>
-                        {/* Add attendees icons and names here */}
-                        <View style={styles.circle}>
-                        </View>                        
+                        <Image source={require('../assets/user-profile-1.jpg')} style={{
+                            width: 80,
+                            height: 80,
+                            borderRadius: 80 / 2,
+                            borderWidth: 3,
+                        }} />
                     </View>
                     <StatusBar barStyle="dark-content" />
                 </View>
@@ -225,7 +228,7 @@ const styles = StyleSheet.create({
     circle: {
         width: 60,
         height: 60,
-        borderRadius: 60/2,
+        borderRadius: 60 / 2,
         borderWidth: 3,
-     }
+    }
 });
