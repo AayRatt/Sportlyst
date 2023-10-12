@@ -9,16 +9,16 @@ import { auth } from "./firebaseConfig";
 import { useState, useEffect } from "react";
 import Activities from "./screens/Activities";
 import Profile from "./screens/Profile";
-import Search from "./screens/Search"
-import Friends from "./screens/Friends"
+import Search from "./screens/Search";
+import Friends from "./screens/Friends";
 import Events from "./screens/Events";
+import { MaterialIcons } from "@expo/vector-icons";
 import ActivityDetails from "./screens/ActivityDetails";
 import Chat from "./screens/Chat";
 import FriendProfile from "./screens/FriendProfile";
 import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
-
 
 
 const Tab = createBottomTabNavigator();
@@ -47,7 +47,12 @@ export default function App() {
         <Tab.Screen
           name="Activities"
           component={Activities}
-          options={{ headerShown: false }}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name="local-activity" size={24} color="black" />
+            ),
+          }}
         />
         <Tab.Screen
           name="Profile"
@@ -77,16 +82,19 @@ export default function App() {
             tabBarIcon: ({ color, size }) => (
               <FontAwesome5 name="user-friends" size={24} color="black" />
             ),
-          }} />
+          }}
+        />
         <Tab.Screen
           name="Events"
           component={Events}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="list" size={24} color="black" />),
+              <FontAwesome name="list" size={24} color="black" />
+            ),
+          }}
+        />
           }} />        
-          
           <Tab.Screen
           name="ActivityDetails"
           component={ActivityDetails}
@@ -146,12 +154,6 @@ export default function App() {
             component={Register}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="FriendProfile"
-            component={FriendProfile}
-            options={{ headerShown: false }}
-          />
-
         </Stack.Navigator>
       )}
     </NavigationContainer>
