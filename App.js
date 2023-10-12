@@ -12,9 +12,9 @@ import Profile from "./screens/Profile";
 import Search from "./screens/Search"
 import Friends from "./screens/Friends"
 import Events from "./screens/Events";
+import ActivityDetails from "./screens/ActivityDetails";
 import Chat from "./screens/Chat";
 import FriendProfile from "./screens/FriendProfile";
-
 import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
@@ -81,6 +81,15 @@ export default function App() {
         <Tab.Screen
           name="Events"
           component={Events}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome name="list" size={24} color="black" />),
+          }} />        
+          
+          <Tab.Screen
+          name="ActivityDetails"
+          component={ActivityDetails}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
