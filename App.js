@@ -12,9 +12,11 @@ import Profile from "./screens/Profile";
 import Search from "./screens/Search"
 import Friends from "./screens/Friends"
 import Events from "./screens/Events";
+import FriendProfile from "./screens/FriendProfile";
 
 import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
+
 
 
 const Tab = createBottomTabNavigator();
@@ -57,7 +59,7 @@ export default function App() {
         />
         <Tab.Screen
           name="Search"
-          component={Search}
+          component={SearchStack}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
@@ -67,7 +69,7 @@ export default function App() {
         />
         <Tab.Screen
           name="Friends"
-          component={Friends}
+          component={FriendStack}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
@@ -83,6 +85,24 @@ export default function App() {
               <FontAwesome name="list" size={24} color="black" />),
           }} />
       </Tab.Navigator>
+    );
+  }
+
+  function SearchStack() {
+    return (
+      <Stack.Navigator initialRouteName="Search" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Search" component={Search} />
+        <Stack.Screen name="FriendProfile" component={FriendProfile} options={{headerShown:true }}/>
+      </Stack.Navigator>
+    );
+  }
+
+  function FriendStack() {
+    return (
+      <Stack.Navigator initialRouteName="Friends" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Friends" component={Friends} />
+        <Stack.Screen name="FriendProfile" component={FriendProfile} options={{headerShown:true }}/>
+      </Stack.Navigator>
     );
   }
 
@@ -105,6 +125,11 @@ export default function App() {
           <Stack.Screen
             name="Register"
             component={Register}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="FriendProfile"
+            component={FriendProfile}
             options={{ headerShown: false }}
           />
 

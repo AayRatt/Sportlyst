@@ -14,104 +14,109 @@ export default function Search({ navigation }) {
     const [friendReqSent, setfriendReqSent] = useState([])
     const loggedUser = auth.currentUser.uid
 
+
     // async function loadUsers() {
 
-    //     try {
+    //     //Listener for any changes in the friend's subcollection
+    //     const friendsListener = onSnapshot(collection(db, "userProfiles", loggedUser, "friends"), snapshot => {
 
-    //         //Loading logged user's friend requests sent    
-    //         const sentFriendRequestSnapshot = await getDocs(collection(db, "userProfiles", loggedUser, "sentFriendRequests"))
+    //         const listOfFriends = snapshot.docs.map(doc => doc.data().userID)
 
-    //         const sentFriendRequests = sentFriendRequestSnapshot.docs.map(doc => doc.data().sentTo);
+    //         //Listener for any changes in the friends request subcollection
+    //         const friendRequestListener = onSnapshot(collection(db, "userProfiles", loggedUser, "sentFriendRequests"), async sentSnapshot => {
 
-    //         //Load logged user's friends list 
-    //         const friendsFromDB = await getDocs(collection(db, "userProfiles", loggedUser, "friends"))
-    //         const listOfFriends = friendsFromDB.docs.map(doc => doc.data().userID);
+    //             try {
+    //                 // const sentFriendRequests = sentSnapshot.docs.map(doc => doc.data().sentTo);
 
-    //         //Load all users in DB
-    //         const usersSnapshot = await getDocs(
-    //             collection(db, "userProfiles")
-    //         );
+    //                 const sentFriendRequests = sentSnapshot.docs
+    //                     .filter(doc => doc.data().status !== "Declined" && doc.data().status !== "Accepted" && doc.data().status !== "Deleted") // Filter out declined requests
+    //                     .map(doc => doc.data().sentTo); 
 
-    //         //Filtering users in DB 
-    //         const filterUsers = usersSnapshot.docs
-    //             .filter(doc => doc.id !== loggedUser) //Excluding Current User from list
-    //             .map(doc => {
 
-    //                 const friend = listOfFriends.includes(doc.id)
-    //                 const requestSent = sentFriendRequests.includes(doc.id)
+    //                 //Load all users in DB
+    //                 const usersSnapshot = await getDocs(
+    //                     collection(db, "userProfiles")
+    //                 );
 
-    //                 return {
-    //                     id: doc.id,
-    //                     friend,
-    //                     requestSent,
-    //                     ...doc.data()
-    //                 }
+    //                 //Filtering users in DB 
+    //                 const filterUsers = usersSnapshot.docs
+    //                     .filter(doc => doc.id !== loggedUser) //Excluding Current User from list
+    //                     .map(doc => {
 
-    //             })
+    //                         const friend = listOfFriends.includes(doc.id)
+    //                         const requestSent = sentFriendRequests.includes(doc.id)
 
-    //         setUsers(filterUsers)
-    //         // console.log(filterUsers)
+    //                         return {
+    //                             id: doc.id,
+    //                             friend,
+    //                             requestSent,
+    //                             ...doc.data()
+    //                         }
 
-    //     } catch (error) {
+    //                     })
 
-    //     }
+    //                 setUsers(filterUsers)
+    //             } catch (error) {
+    //                 console.error("Error in loadUsers function:", error);
+    //             }
+    //         })
+
+    //         return friendRequestListener
+
+    //     })
+
+    //     return friendsListener
+
 
     // }
 
     async function loadUsers() {
-
         //Listener for any changes in the friend's subcollection
         const friendsListener = onSnapshot(collection(db, "userProfiles", loggedUser, "friends"), snapshot => {
 
-            const listOfFriends = snapshot.docs.map(doc => doc.data().userID)
+            const listOfFriends = snapshot.docs.map(doc => doc.data().userID);
 
-            //Listener for any changes in the friends request subcollection
-            const friendRequestListener = onSnapshot(collection(db, "userProfiles", loggedUser, "sentFriendRequests"), async sentSnapshot => {
+            const receivedFriendRequestsListener = onSnapshot(collection(db, "userProfiles", loggedUser, "friendRequests"), async receivedSnapshot => {
+                const receivedFriendRequests = receivedSnapshot.docs
+                    .filter(doc => doc.data().status === "Pending")
+                    .map(doc => doc.data().receivedFrom);
 
-                try {
-                    // const sentFriendRequests = sentSnapshot.docs.map(doc => doc.data().sentTo);
+                // Listener for any changes in the sent friend requests sub-collection
+                const sentFriendRequestsListener = onSnapshot(collection(db, "userProfiles", loggedUser, "sentFriendRequests"), async sentSnapshot => {
 
                     const sentFriendRequests = sentSnapshot.docs
-                        .filter(doc => doc.data().status !== "Declined") // Filter out declined requests
+                        .filter(doc => doc.data().status !== "Declined" && doc.data().status !== "Accepted" && doc.data().status !== "Deleted")
                         .map(doc => doc.data().sentTo);
 
+                    // Load all users in DB
+                    const usersSnapshot = await getDocs(collection(db, "userProfiles"));
 
-                    //Load all users in DB
-                    const usersSnapshot = await getDocs(
-                        collection(db, "userProfiles")
-                    );
-
-                    //Filtering users in DB 
                     const filterUsers = usersSnapshot.docs
-                        .filter(doc => doc.id !== loggedUser) //Excluding Current User from list
+                        .filter(doc => doc.id !== loggedUser)
                         .map(doc => {
-
-                            const friend = listOfFriends.includes(doc.id)
-                            const requestSent = sentFriendRequests.includes(doc.id)
+                            const friend = listOfFriends.includes(doc.id);
+                            const requestSent = sentFriendRequests.includes(doc.id);
+                            const requestReceived = receivedFriendRequests.includes(doc.id);
 
                             return {
                                 id: doc.id,
                                 friend,
                                 requestSent,
+                                requestReceived,
                                 ...doc.data()
-                            }
+                            };
+                        });
 
-                        })
+                    setUsers(filterUsers);
+                });
+                return sentFriendRequestsListener;
+            });
+            return receivedFriendRequestsListener;
+        });
 
-                    setUsers(filterUsers)
-                } catch (error) {
-                    console.error("Error in loadUsers function:", error);
-                }
-            })
-
-            return friendRequestListener
-
-        })
-
-        return friendsListener
-
-
+        return friendsListener;
     }
+
 
     async function addFriend(toUserID) {
 
@@ -171,7 +176,7 @@ export default function Search({ navigation }) {
                 <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
                     Search View
                 </Text>
-                <TextInput 
+                <TextInput
                     className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
                     placeholder="Search Friends"
                     value={searchName}
@@ -185,27 +190,40 @@ export default function Search({ navigation }) {
                     renderItem={({ item }) => (
                         <View className="flex-row items-center mt-5 pl-3">
                             {/* User profile picture */}
-                            <Image
-                                source={item.image ? { uri: item.image } : profileIcon}
-                                className="w-12 h-12 rounded-full mr-3"
-                            />
+                            <Pressable onPress={
 
-                            <Text className="font-urbanist text-lg mr-3">{`${item.firstName} ${item.lastName}`}</Text>
+                                () => navigation.navigate("FriendProfile", { userID: item.id, friend: item.friend, requestSent: item.requestSent })
+                                //console.log(item.id)
 
-                            {item.friend ?
-                                <Text className="font-urbanist text-lg bg-gray-500 text-white"
-                                >Friend</Text>
-                                :
-                                item.requestSent ?
-                                    <Text className="font-urbanist text-lg bg-gray-500 text-white"
-                                    >Friend Request Sent</Text>
-                                    :
-                                    <Pressable
-                                        className="bg-secondary rounded-lg h-8 items-center justify-center w-1/4"
-                                        onPress={() => addFriend(item.id.toString())}>
-                                        <Text className="text-sm font-urbanistBold text-primary">Add Friend</Text>
-                                    </Pressable>
-                            }
+                            }>
+                                <Image
+                                    source={item.image ? { uri: item.image } : profileIcon}
+                                    className="w-12 h-12 rounded-full mr-3"
+                                />
+                            </Pressable>
+
+                            <Pressable>
+
+                                <Text className="font-urbanist text-lg mr-3">{`${item.firstName} ${item.lastName}`}</Text>
+                            </Pressable>
+
+                            {item.friend ? (
+                                <Text className="font-urbanist text-lg bg-gray-500 text-white">Friend</Text>
+                            ) : item.requestSent ? (
+                                <Text className="font-urbanist text-lg bg-gray-500 text-white">Request Sent</Text>
+                            ) : item.requestReceived ? (
+
+                                <Pressable onPress={() => navigation.navigate('Friends')}>
+                                    <Text className="font-urbanist text-base bg-gray-500 text-white">Pending Approval</Text>
+                                </Pressable>
+                            ) : (
+                                <Pressable
+                                    className="bg-secondary rounded-lg h-8 items-center justify-center w-1/4"
+                                    onPress={() => addFriend(item.id.toString())}>
+                                    <Text className="text-sm font-urbanistBold text-primary">Add Friend</Text>
+                                </Pressable>
+                            )}
+
                         </View>
                     )}
                 />
