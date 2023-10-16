@@ -19,6 +19,7 @@ import FriendProfile from "./screens/FriendProfile";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import ChatFriends from "./screens/ChatFriends";
 
 const Tab = createBottomTabNavigator();
 
@@ -104,8 +105,8 @@ export default function App() {
           }}
         />
         <Tab.Screen
-          name="Chat"
-          component={Chat}
+          name="ChatFriends"
+          component={ChatStack}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
@@ -144,6 +145,25 @@ export default function App() {
           name="FriendProfile"
           component={FriendProfile}
           options={{ headerShown: true }}
+        />
+      </Stack.Navigator>
+    );
+  }
+
+  function ChatStack() {
+    return (
+      <Stack.Navigator
+        initialRouteName="ChatFriends"
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="ChatFriends" component={ChatFriends} />
+        <Stack.Screen
+          name="Chat"
+          component={Chat}
+          options={{ 
+            headerShown: true,
+            title:null 
+          }}
         />
       </Stack.Navigator>
     );

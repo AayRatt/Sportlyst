@@ -74,7 +74,7 @@ export default function Events({ navigation }) {
     hideTimePicker()
   }
 
-
+  //Event State
   const [userEventField, setUserEventField] = useState({
     eventName: "",
     description: "",
@@ -84,6 +84,25 @@ export default function Events({ navigation }) {
     date: "",
     time: ""
   })
+
+  //API State 
+  const [sportsAPI, setSportsAPI] = useState([])
+
+
+  const getSportFromAPI = async () => {
+    const apiURL = `https://sportlystapi.onrender.com/sportlyst/getSports`;
+    console.log(`apiURL : ${apiURL}`);
+
+    return await fetch(apiURL)
+      .then((response) => response.json()
+        .then((json) => {
+          console.log(`json : ${JSON.stringify(json.sports)}`);
+          setSportsAPI(json.sports)
+        })
+        .catch((error) => { console.error(error) })
+      );
+  }
+
 
 
   const onCreateEvent = async () => {
@@ -123,7 +142,6 @@ Time: ${userEventField.time}
           eventData
         )
 
-
         console.log("Event created");
         alert("Event created")
         //Clean Field
@@ -149,6 +167,11 @@ Time: ${userEventField.time}
     temp[key] = updatedValue;
     setUserEventField(temp);
   };
+
+
+  useEffect( () => {
+    getSportFromAPI()
+  }, [])
 
 
   let [fontsLoaded] = useFonts({
@@ -213,7 +236,7 @@ Time: ${userEventField.time}
             ></TextInput>
             <TextInput
               className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
-              placeholder="Price per person"
+              placeholder="Price per person - CAD"
               placeholderTextColor={"#666"}
               autoCapitalize="none"
               keyboardType='numeric'
@@ -233,7 +256,7 @@ Time: ${userEventField.time}
             }}
           >
             <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-              <View style={{ backgroundColor: 'white', height: 350 }}>
+              <View style={{ backgroundColor: 'white', height: 250 }}>
                 <Picker
                   selectedValue={userEventField.sportType}
                   onValueChange={(value) => {
@@ -241,13 +264,14 @@ Time: ${userEventField.time}
                     setPickerVisible(false);
                   }}
                 >
-                  <Picker.Item label="Soccer" value="Soccer" />
-                  <Picker.Item label="Basket" value="Basket" />
-                  <Picker.Item label="Baseball" value="Baseball" />
-                  <Picker.Item label="Tennis" value="Tennis" />
-                  <Picker.Item label="Ping Pong" value="Ping Pong" />
+                  {
+                    sportsAPI.map( (sport, index) => (
+                      <Picker.Item key={index} label={sport.sportsType} value={sport.sportsType}
+                      />
+                    ))
+                  }
                 </Picker>
-                <Button title="Close Picker" onPress={() => setPickerVisible(false)} />
+                {/* <Button title="Close Picker" onPress={() => setPickerVisible(false)} /> */}
               </View>
             </View>
           </Modal>
@@ -294,9 +318,8 @@ Time: ${userEventField.time}
             </Text>
           </Pressable>
 
-
           <Pressable
-            className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
+            className="bg-secondary rounded-lg h-14 mt-10 items-center justify-center"
             onPress={onCreateEvent}
           >
             <Text className="text-lg font-urbanistBold text-primary">
