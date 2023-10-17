@@ -7,8 +7,6 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import profileIcon from '../assets/profile-icon.png';
-import { AntDesign } from '@expo/vector-icons';
-import { Ionicons } from "@expo/vector-icons";
 
 import {
   useFonts,
@@ -18,10 +16,7 @@ import {
 
 export default function Profile({ navigation }) {
 
-  const [image, setImage] = useState(null)
   const [uploading, setUploading] = useState(false)
-  const [modalVisible, setModalVisible] = useState(false);
-  const addImage = () => { }
 
   const onLogoutClicked = async () => {
     try {
@@ -44,8 +39,8 @@ export default function Profile({ navigation }) {
     country: "",
     postalCode: "",
     imageUrl: "",
-  })  
-  
+  })
+
   const [tmpUser, setTmpUser] = useState({
     firstName: "",
     lastName: "",
@@ -72,7 +67,6 @@ export default function Profile({ navigation }) {
       console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
       setUser(docSnap.data())
       setTmpUser(docSnap.data())
-      // setImage(docSnap.data().imageUrl)
     } else {
       console.log("No such document!");
     }
@@ -100,7 +94,6 @@ export default function Profile({ navigation }) {
       postalCode: tmpUser.postalCode,
       imageUrl: tmpUser.imageUrl
     }
-
     setUser(userReset)
   }
 
@@ -119,7 +112,6 @@ export default function Profile({ navigation }) {
 
     const source = { uri: result.assets[0].uri }
     console.log(`source is: ${JSON.stringify(source)}`)
-    // setImage(source.uri)
     updateUser("imageUrl", source.uri)
   }
 
@@ -160,13 +152,6 @@ export default function Profile({ navigation }) {
     );
   };
 
-  const setImageURI = () => {
-    if (user.imageUrl != null){
-      console.log("IMAGE SETTTTT!!!!")
-      setImage(user.imageUrl)
-    }
-  }
-
   // //fucntion to retrieve data from the API
   // const getDataFromAPI = async () => {
   //   const apiURL = `https://sportlystapi.onrender.com/sportlyst/getVenues`
@@ -195,7 +180,6 @@ export default function Profile({ navigation }) {
 
   useEffect(() => {
     retrieveFromDb()
-    // getDataFromAPI()
   }, [])
 
   let [fontsLoaded] = useFonts({
@@ -224,41 +208,13 @@ export default function Profile({ navigation }) {
           <View className="mt-2">
             <View className="h-50 w-50 bg-gray-500 relative rounded-full">
               <Image
-                source={user.imageUrl? { uri: user.imageUrl } : profileIcon}
+                source={user.imageUrl ? { uri: user.imageUrl } : profileIcon}
                 className="self-center w-40 h-40 rounded-full border-solid border-2"
               />
               <TouchableOpacity onPress={pickImage} className="flex items-center justify-center mt-2" >
                 <Text>Change Image</Text>
               </TouchableOpacity>
             </View>
-
-            {/* <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                Alert.alert('Modal has been closed.');
-                setModalVisible(!modalVisible);
-              }}>
-              <SafeAreaView className="bg-primary flex-1">
-                <View className="bg-primary mt-10 mx-4 border-t border-l border-r border-gray-300 rounded-t-lg flex-1">
-                <View className="flex-row justify-between items-center px-6">
-                  <Text>Cancel</Text>
-                  <Text className="font-urbanistBold text-2xl">User Profile</Text>
-                  <Text>Save</Text>
-                </View>
-                <View className="h-50 w-50 bg-gray-500 relative rounded-full mt-5">
-                  <Image
-                    source={image ? { uri: image.uri } : profileIcon}
-                    className="self-center w-40 h-40 rounded-full border-solid border-2"
-                  />
-                  <TouchableOpacity onPress={pickImage} className="flex items-center justify-center mt-2 " >
-                    <Text className="font-bold">Change photo</Text>
-                  </TouchableOpacity>
-                </View>
-                </View>
-              </SafeAreaView>
-            </Modal> */}
 
             <TextInput
               className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
@@ -318,15 +274,6 @@ export default function Profile({ navigation }) {
               }}
             ></TextInput>
 
-            {/* <Pressable
-              className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
-              onPress={updateDb}
-            // onPress={test}
-            >
-              <Text className="text-lg font-urbanistBold text-primary">
-                Update
-              </Text>
-            </Pressable> */}
             <Pressable
               className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
               onPress={onLogoutClicked}
