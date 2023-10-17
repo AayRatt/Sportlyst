@@ -309,15 +309,22 @@ export default function Friends({ navigation }) {
     }
 
 
-    useEffect(() => {
+    useEffect(() => { 
         const unsubscribe = loadFriendRequests();
+        console.log('unsubscribe:', unsubscribe, typeof unsubscribe);
         const unsubscribe2 = loadFriends();
+        console.log('unsubscribe2:', unsubscribe2, typeof unsubscribe2);
 
         // Cleanup listener on component unmount
         return () => {
-            if (unsubscribe) unsubscribe();
-            if (unsubscribe2) unsubscribe2();
+            if (typeof unsubscribe === 'function') {
+                unsubscribe();
+            }
+            if (typeof unsubscribe2 === 'function') {
+                unsubscribe2();
+            }
         };
+        
     }, []);
 
 

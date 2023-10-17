@@ -10,7 +10,7 @@ import { Bubble } from 'react-native-gifted-chat'
 import { db, auth } from "../firebaseConfig";
 import { setDoc, doc, collection, onSnapshot, query, orderBy } from "firebase/firestore";
 
-export default function Chat({ route }) {
+export default function Chat({ navigation, route }) {
 
   const { friendID, firstName, lastName } = route.params;
   const [messages, setMessages] = useState([]);
@@ -36,6 +36,12 @@ export default function Chat({ route }) {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    navigation.setOptions({
+        title: firstName ?  `${firstName} ${lastName}`: 'Cannot load user data'
+    });
+}, []);
+
   const onSend = useCallback((messages = []) => {
     setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
     const { _id, createdAt, text, user } = messages[0];
@@ -60,9 +66,6 @@ export default function Chat({ route }) {
 
   return (
     <SafeAreaView className="bg-primary flex-1">
-      {/* <Text className="mt-1 font-urbanistBold text-1xl text-start pl-3 text-center">
-        {firstName} {lastName}
-      </Text> */}
       <GiftedChat
         messages={messages}
         showAvatarForEveryMessage={true}

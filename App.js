@@ -121,12 +121,12 @@ export default function App() {
   function SearchStack() {
     return (
       <Stack.Navigator
-        initialRouteName="Search"
+        initialRouteName="SearchHome"
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="Search" component={Search} />
+        <Stack.Screen name="SearchHome" component={Search} />
         <Stack.Screen
-          name="FriendProfile"
+          name="SearchFriendProfile"
           component={FriendProfile}
           options={{ headerShown: true }}
         />
@@ -137,10 +137,10 @@ export default function App() {
   function FriendStack() {
     return (
       <Stack.Navigator
-        initialRouteName="Friends"
+        initialRouteName="FriendsHome"
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="Friends" component={Friends} />
+        <Stack.Screen name="FriendsHome" component={Friends} />
         <Stack.Screen
           name="FriendProfile"
           component={FriendProfile}
@@ -153,10 +153,10 @@ export default function App() {
   function ChatStack() {
     return (
       <Stack.Navigator
-        initialRouteName="ChatFriends"
+        initialRouteName="ChatFriendsHome"
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="ChatFriends" component={ChatFriends} />
+        <Stack.Screen name="ChatFriendsHome" component={ChatFriends} />
         <Stack.Screen
           name="Chat"
           component={Chat}
