@@ -1,19 +1,26 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, TouchableOpacity } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, TouchableOpacity, ScrollView, Modal } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
 import { db, auth, firebaseStorage } from "../firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
 import profileIcon from '../assets/profile-icon.png';
 import { AntDesign } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
+
+import {
+  useFonts,
+  Urbanist_600SemiBold,
+  Urbanist_500Medium,
+} from "@expo-google-fonts/urbanist";
 
 export default function Profile({ navigation }) {
 
   const [image, setImage] = useState(null)
   const [uploading, setUploading] = useState(false)
+  const [modalVisible, setModalVisible] = useState(false);
   const addImage = () => { }
 
   const onLogoutClicked = async () => {
@@ -37,6 +44,16 @@ export default function Profile({ navigation }) {
     country: "",
     postalCode: "",
     imageUrl: "",
+  })  
+  
+  const [tmpUser, setTmpUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    country: "",
+    postalCode: "",
+    imageUrl: "",
   })
 
   // Function to update form fields
@@ -46,14 +63,16 @@ export default function Profile({ navigation }) {
     setUser(temp);
   };
 
+
   const retrieveFromDb = async () => {
     const docRef = doc(db, "userProfiles", auth.currentUser.uid);
     const docSnap = await getDoc(docRef);
-    console.log(`docSnap ${JSON.stringify(docSnap)}`);
-
 
     if (docSnap.exists()) {
+      console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
       setUser(docSnap.data())
+      setTmpUser(docSnap.data())
+      // setImage(docSnap.data().imageUrl)
     } else {
       console.log("No such document!");
     }
@@ -63,14 +82,31 @@ export default function Profile({ navigation }) {
     // update data in firestore
     try {
       const userRef = doc(db, "userProfiles", auth.currentUser.uid);
+      alert("Profile Updated");
 
-      await updateDoc(bookingRef, {
-        bookingStatus: isEnabled ? 'Confirmed' : 'Declined',
-        bookingCode: isEnabled ? bookingId : '',
-      });
+      await updateDoc(userRef, user);
     } catch (err) {
       console.log(err)
     }
+  }
+
+  const resetForm = () => {
+    const userReset = {
+      firstName: tmpUser.firstName,
+      lastName: tmpUser.lastName,
+      email: tmpUser.email,
+      phoneNumber: tmpUser.phoneNumber,
+      country: tmpUser.country,
+      postalCode: tmpUser.postalCode,
+      imageUrl: tmpUser.imageUrl
+    }
+
+    setUser(userReset)
+  }
+
+  const saveUserProfile = () => {
+    updateDb()
+    uploadImage()
   }
 
   const pickImage = async () => {
@@ -79,16 +115,18 @@ export default function Profile({ navigation }) {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1
-    });
+    })
+
     const source = { uri: result.assets[0].uri }
-    console.log('source is: ${source}')
-    setImage(source)
-  };
+    console.log(`source is: ${JSON.stringify(source)}`)
+    // setImage(source.uri)
+    updateUser("imageUrl", source.uri)
+  }
 
   const uploadImage = async () => {
     setUploading(true);
 
-    const response = await fetch(image.uri);
+    const response = await fetch(user.imageUrl);
     const blob = await response.blob();
 
     const filename = auth.currentUser.uid;
@@ -117,117 +155,190 @@ export default function Profile({ navigation }) {
           updateDoc(userDocRef, {
             imageUrl: downloadURL
           });
-
         });
       }
     );
   };
 
+  const setImageURI = () => {
+    if (user.imageUrl != null){
+      console.log("IMAGE SETTTTT!!!!")
+      setImage(user.imageUrl)
+    }
+  }
+
+  // //fucntion to retrieve data from the API
+  // const getDataFromAPI = async () => {
+  //   const apiURL = `https://sportlystapi.onrender.com/sportlyst/getVenues`
+  //   const apiURL2 = `https://sportlystapi.onrender.com/sportlyst/getSports`
+
+  //   const response = await fetch(apiURL2)
+
+  //   try {
+  //     const json = await response.json()
+  //     console.log(`json is: ${JSON.stringify(json)}`)
+  //     setApiDataList(json)
+  //   } catch (error) {
+  //     console.error(error)
+  //   }
+  // }
+
+  // const test = () => {
+  //   // console.log(`json2 is: ${JSON.stringify(json)}`)
+  //   apiDataList.sports.map(
+  //     (currVehicle) => {
+  //       // console.log(`Venue : ${currVehicle.venue}`)
+  //       console.log(`Venue : ${currVehicle.sportsType}`)
+  //     }
+  //   )
+  // }
+
   useEffect(() => {
     retrieveFromDb()
+    // getDataFromAPI()
   }, [])
 
-  return (
-    <SafeAreaView className="bg-primary flex-1">
-      <View className="bg-white pl-3 pr-3">
+  let [fontsLoaded] = useFonts({
+    Urbanist_600SemiBold,
 
-        <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
-          User Profile
-        </Text>
-        <View className="mt-2">
-          <View className="h-50 w-50 bg-gray-500 relative rounded-full">
-            <Image
-              source={image ? { uri: image.uri } : profileIcon}
-              className="self-center w-40 h-40 rounded-full border-solid border-2"
-            />
-            <View className="opacity-80 absolute bottom-0 right-0 bg-light-gray w-full h-1/4">
-              <TouchableOpacity onPress={pickImage} className="flex items-center justify-center" >
-                <Text>{image ? 'Edit' : 'Upload'} Image</Text>
-                <AntDesign name="camera" size={20} color="black" />
+    Urbanist_500Medium,
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+  return (
+    <SafeAreaView className="bg-primary flex-1 h-full">
+      <View className="flex-row justify-between items-center px-6 pb-5">
+        <TouchableOpacity onPress={resetForm}>
+          <Text>Cancel</Text>
+        </TouchableOpacity>
+        <Text className="font-urbanistBold text-2xl">User Profile</Text>
+        <TouchableOpacity onPress={saveUserProfile}>
+          <Text>Save</Text>
+        </TouchableOpacity>
+      </View>
+      <ScrollView className="h-fit">
+        <View className="bg-white pl-3 pr-3">
+          <View className="mt-2">
+            <View className="h-50 w-50 bg-gray-500 relative rounded-full">
+              <Image
+                source={user.imageUrl? { uri: user.imageUrl } : profileIcon}
+                className="self-center w-40 h-40 rounded-full border-solid border-2"
+              />
+              <TouchableOpacity onPress={pickImage} className="flex items-center justify-center mt-2" >
+                <Text>Change Image</Text>
               </TouchableOpacity>
             </View>
-          </View>
 
-          <TextInput
-            className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
-            placeholderTextColor={"#666"}
-            value={user.email}
-            editable={false}
-          ></TextInput>
+            {/* <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                Alert.alert('Modal has been closed.');
+                setModalVisible(!modalVisible);
+              }}>
+              <SafeAreaView className="bg-primary flex-1">
+                <View className="bg-primary mt-10 mx-4 border-t border-l border-r border-gray-300 rounded-t-lg flex-1">
+                <View className="flex-row justify-between items-center px-6">
+                  <Text>Cancel</Text>
+                  <Text className="font-urbanistBold text-2xl">User Profile</Text>
+                  <Text>Save</Text>
+                </View>
+                <View className="h-50 w-50 bg-gray-500 relative rounded-full mt-5">
+                  <Image
+                    source={image ? { uri: image.uri } : profileIcon}
+                    className="self-center w-40 h-40 rounded-full border-solid border-2"
+                  />
+                  <TouchableOpacity onPress={pickImage} className="flex items-center justify-center mt-2 " >
+                    <Text className="font-bold">Change photo</Text>
+                  </TouchableOpacity>
+                </View>
+                </View>
+              </SafeAreaView>
+            </Modal> */}
 
-          <View className="flex-row gap-3">
             <TextInput
-              className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
-              placeholder="Enter First Name"
+              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
               placeholderTextColor={"#666"}
-              autoCapitalize="none"
-              value={user.firstName}
+              value={user.email}
+              editable={false}
+            ></TextInput>
+
+            <View className="flex-row gap-3">
+              <TextInput
+                className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
+                placeholder="Enter First Name"
+                placeholderTextColor={"#666"}
+                autoCapitalize="none"
+                value={user.firstName}
+                onChangeText={(account) => {
+                  updateUser("firstName", account);
+                }}
+              ></TextInput>
+              <TextInput
+                className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
+                placeholder="Enter Last Name"
+                placeholderTextColor={"#666"}
+                value={user.lastName}
+                onChangeText={(account) => {
+                  updateUser("lastName", account);
+                }}
+              ></TextInput>
+            </View>
+
+            <TextInput
+              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
+              placeholder="Phone number (optional)"
+              placeholderTextColor={"#666"}
+              value={user.phoneNumber}
+              keyboardType="numeric"
               onChangeText={(account) => {
-                updateUser("firstName", account);
+                updateUser("phoneNumber", account);
               }}
             ></TextInput>
             <TextInput
-              className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
-              placeholder="Enter Last Name"
+              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
+              placeholder="Country"
               placeholderTextColor={"#666"}
-              value={user.lastName}
+              value={user.country}
               onChangeText={(account) => {
-                updateUser("lastName", account);
+                updateUser("country", account);
               }}
             ></TextInput>
+            <TextInput
+              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
+              placeholder="Postal code"
+              placeholderTextColor={"#666"}
+              value={user.postalCode}
+              onChangeText={(account) => {
+                updateUser("postalCode", account);
+              }}
+            ></TextInput>
+
+            {/* <Pressable
+              className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
+              onPress={updateDb}
+            // onPress={test}
+            >
+              <Text className="text-lg font-urbanistBold text-primary">
+                Update
+              </Text>
+            </Pressable> */}
+            <Pressable
+              className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
+              onPress={onLogoutClicked}
+            >
+              <Text className="text-lg font-urbanistBold text-primary">
+                Logout
+              </Text>
+            </Pressable>
           </View>
-
-          <TextInput
-            className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
-            placeholder="Phone number (optional)"
-            placeholderTextColor={"#666"}
-            value={user.phoneNumber}
-            keyboardType="numeric"
-            onChangeText={(account) => {
-              updateUser("phoneNumber", account);
-            }}
-          ></TextInput>
-          <TextInput
-            className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
-            placeholder="Country"
-            placeholderTextColor={"#666"}
-            value={user.country}
-            onChangeText={(account) => {
-              updateUser("country", account);
-            }}
-          ></TextInput>
-          <TextInput
-            className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
-            placeholder="Postal code"
-            placeholderTextColor={"#666"}
-            value={user.phoneNumber}
-            onChangeText={(account) => {
-              updateUser("postalCode", account);
-            }}
-          ></TextInput>
-
-          <Pressable
-            className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
-            onPress={onLogoutClicked}
-          >
-            <Text className="text-lg font-urbanistBold text-primary">
-              Update
-            </Text>
-          </Pressable>
-          <Pressable
-            className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
-            onPress={onLogoutClicked}
-          >
-            <Text className="text-lg font-urbanistBold text-primary">
-              Logout
-            </Text>
-          </Pressable>
+          <StatusBar barStyle="dark-content"></StatusBar>
         </View>
-        <StatusBar barStyle="dark-content"></StatusBar>
-      </View>
+      </ScrollView>
     </SafeAreaView>
-
-
-
   );
 }
