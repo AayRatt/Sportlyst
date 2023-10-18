@@ -185,14 +185,14 @@ export default function Search({ navigation }) {
 
                 />
                 <FlatList
-                    data={filterUser}
+                    data={filterUser} 
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <View className="flex-row items-center mt-5 pl-3">
                             {/* User profile picture */}
                             <Pressable onPress={
 
-                                () => navigation.navigate("FriendProfile", { userID: item.id, friend: item.friend, requestSent: item.requestSent })
+                                () => navigation.navigate("SearchFriendProfile", { userID: item.id, friend: item.friend, requestSent: item.requestSent })
                                 //console.log(item.id)
 
                             }>

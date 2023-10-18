@@ -19,6 +19,7 @@ import FriendProfile from "./screens/FriendProfile";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import ChatFriends from "./screens/ChatFriends";
 
 const Tab = createBottomTabNavigator();
 
@@ -104,8 +105,8 @@ export default function App() {
           }}
         />
         <Tab.Screen
-          name="Chat"
-          component={Chat}
+          name="ChatFriends"
+          component={ChatStack}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
@@ -120,12 +121,12 @@ export default function App() {
   function SearchStack() {
     return (
       <Stack.Navigator
-        initialRouteName="Search"
+        initialRouteName="SearchHome"
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="Search" component={Search} />
+        <Stack.Screen name="SearchHome" component={Search} />
         <Stack.Screen
-          name="FriendProfile"
+          name="SearchFriendProfile"
           component={FriendProfile}
           options={{ headerShown: true }}
         />
@@ -136,14 +137,33 @@ export default function App() {
   function FriendStack() {
     return (
       <Stack.Navigator
-        initialRouteName="Friends"
+        initialRouteName="FriendsHome"
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="Friends" component={Friends} />
+        <Stack.Screen name="FriendsHome" component={Friends} />
         <Stack.Screen
           name="FriendProfile"
           component={FriendProfile}
           options={{ headerShown: true }}
+        />
+      </Stack.Navigator>
+    );
+  }
+
+  function ChatStack() {
+    return (
+      <Stack.Navigator
+        initialRouteName="ChatFriendsHome"
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="ChatFriendsHome" component={ChatFriends} />
+        <Stack.Screen
+          name="Chat"
+          component={Chat}
+          options={{ 
+            headerShown: true,
+            title:null 
+          }}
         />
       </Stack.Navigator>
     );
