@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, TouchableOpacity, ScrollView, Modal } from "react-native";
+import { View, Text, Image, Pressable, SafeAreaView, TextInput, StatusBar, TouchableOpacity, ScrollView, Modal, Button } from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
 import { db, auth, firebaseStorage } from "../firebaseConfig";
@@ -7,6 +8,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import profileIcon from '../assets/profile-icon.png';
+import countries from '../data/countries.json'
 
 import {
   useFonts,
@@ -14,9 +16,21 @@ import {
   Urbanist_500Medium,
 } from "@expo-google-fonts/urbanist";
 
-export default function Profile({ navigation }) {
+export default function Profile({}) {
 
   const [uploading, setUploading] = useState(false)
+  //Countries Picker Visibiilty
+  const [pickerVisible, setPickerVisible] = useState(false)
+
+  const [countriesDataList, setCountriesDataList] = useState([])
+
+  const retrieveCountryNames = () => {
+    console.log(`Countries data ${JSON.stringify(countries)}`)
+
+    const countryNames = Object.values(countries).map(country => country.name.common)
+    setCountriesDataList(countryNames)
+    console.log(`Countries ${JSON.stringify(countryNames)}`)
+  }
 
   const onLogoutClicked = async () => {
     try {
@@ -180,6 +194,7 @@ export default function Profile({ navigation }) {
 
   useEffect(() => {
     retrieveFromDb()
+    retrieveCountryNames()
   }, [])
 
   let [fontsLoaded] = useFonts({
@@ -192,11 +207,19 @@ export default function Profile({ navigation }) {
     return null;
   }
 
+  const countriesListItem = ({ item }) => (
+    countriesDataList.map(
+      (currCountry) => {
+        <Picker.Item label={currCountry} value={currCountry} />
+      }
+    )
+  )
+
   return (
     <SafeAreaView className="bg-primary flex-1 h-full">
       <View className="flex-row justify-between items-center px-6 pb-5">
         <TouchableOpacity onPress={resetForm}>
-          <Text>Cancel</Text>
+          <Text>Reset</Text>
         </TouchableOpacity>
         <Text className="font-urbanistBold text-2xl">User Profile</Text>
         <TouchableOpacity onPress={saveUserProfile}>
@@ -246,7 +269,7 @@ export default function Profile({ navigation }) {
             </View>
 
             <TextInput
-              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
+              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-3 font-urbanist"
               placeholder="Phone number (optional)"
               placeholderTextColor={"#666"}
               value={user.phoneNumber}
@@ -255,17 +278,43 @@ export default function Profile({ navigation }) {
                 updateUser("phoneNumber", account);
               }}
             ></TextInput>
-            <TextInput
-              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
-              placeholder="Country"
-              placeholderTextColor={"#666"}
-              value={user.country}
-              onChangeText={(account) => {
-                updateUser("country", account);
+
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={pickerVisible}
+              onRequestClose={() => {
+                setPickerVisible(false)
               }}
-            ></TextInput>
+            >
+              <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <View style={{ backgroundColor: 'white', height: 350 }}>
+                  <Picker
+                    selectedValue={user.country}
+                    onValueChange={(account) => {
+                      updateUser("country", account);
+                      setPickerVisible(false);
+                    }}
+                  >
+                    {countriesDataList.map((country) => (
+                      <Picker.Item key={country} label={country} value={country} />
+                    ))}
+                  </Picker>
+                  <Button title="Close Picker" onPress={() => setPickerVisible(false)} />
+                </View>
+              </View>
+            </Modal>
+            <Pressable
+              className="bg-secondary rounded-lg h-10 mt-1 items-center justify-center"
+              onPress={() => setPickerVisible(true)}
+            >
+              <Text className="text-lg font-urbanistBold text-primary">
+                {user.country ? user.country : "Country"}
+              </Text>
+            </Pressable>
+
             <TextInput
-              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
+              className="bg-gray h-12 rounded-lg w=11/12 p-4 mt-3 mb-5 font-urbanist"
               placeholder="Postal code"
               placeholderTextColor={"#666"}
               value={user.postalCode}
