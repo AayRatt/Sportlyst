@@ -5,6 +5,7 @@ import { db, auth } from "../firebaseConfig";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
 import profileIcon from '../assets/profile-icon.png';
 import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
+import { AntDesign } from "@expo/vector-icons";
 
 
 export default function FriendProfile({ navigation, route }) {
@@ -160,11 +161,12 @@ export default function FriendProfile({ navigation, route }) {
                         {requestStatus === 'Accepted' ? (
                             <View>
                                 <Text className="font-urbanistBold text-lg text-start pl-2 text-center">You are friends with {`${userInfo.firstName} `}</Text>
-                                <Pressable className="bg-secondary rounded-lg h-8 items-center justify-center w-1/4"
+                                <Pressable className="bg-primary rounded-lg h-8 items-center justify-center w-1/4"
                                 onPress={navigateToChat}>
-                                    <Text
+                                    <AntDesign name="message1" size={24} color="black" />
+                                    {/* <Text
                                     className="text-sm font-urbanistBold text-primary"
-                                    >Message {`${userInfo.firstName}`}</Text>
+                                    >Message {`${userInfo.firstName}`}</Text> */}
                                 </Pressable>
                             </View>
                         ) : requestStatus === 'Pending' ? (
