@@ -7,10 +7,10 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
-import profileIcon from '../assets/profile-icon.png';
-import { AntDesign } from '@expo/vector-icons';
 
-export default function Profile({ navigation }) {
+export default function ActivityDetails({ route }) {
+
+    const { activity } = route.params
 
     const [image, setImage] = useState(null)
     const [uploading, setUploading] = useState(false)
@@ -56,20 +56,6 @@ export default function Profile({ navigation }) {
             setUser(docSnap.data())
         } else {
             console.log("No such document!");
-        }
-    }
-
-    const updateDb = async () => {
-        // update data in firestore
-        try {
-            const userRef = doc(db, "userProfiles", auth.currentUser.uid);
-
-            await updateDoc(bookingRef, {
-                bookingStatus: isEnabled ? 'Confirmed' : 'Declined',
-                bookingCode: isEnabled ? bookingId : '',
-            });
-        } catch (err) {
-            console.log(err)
         }
     }
 
@@ -123,6 +109,23 @@ export default function Profile({ navigation }) {
         );
     };
 
+    const updateDb = async () => {
+        // update data in firestore
+        try {
+            const eventsRef = doc(db, "userProfiles", auth.currentUser.uid);
+            alert("Profile Updated");
+
+            //   await updateDoc(userRef, user);
+
+            // Atomically add a new region to the "regions" array field.
+            await updateDoc(washingtonRef, {
+                regions: arrayUnion("greater_virginia")
+            });
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     useEffect(() => {
         // retrieveFromDb()
     }, [])
@@ -134,19 +137,19 @@ export default function Profile({ navigation }) {
                     <Image source={require('../assets/football.jpg')} style={{ width: '100%', height: 160 }} />
 
                     <View style={styles.eventDetails}>
-                        <Text style={styles.title}>5v5 Indoor Football</Text>
-                        <Text style={styles.grayText}>Event Location</Text>
-                        <Text style={styles.grayText}>27 October, 6:00 PM</Text>
-                        <Text style={styles.grayText}>CAD 50</Text>
+                        <Text style={styles.title}>{activity.title}</Text>
+                        <Text style={styles.grayText}>{activity.date} {activity.time}</Text>
+                        <Text style={styles.grayText}>CAD {activity.price}</Text>
+                        <Text style={styles.grayText}>{activity.joinedPlayers}/{activity.players} joined</Text>
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Venue</Text>
                             {/* Add venue details here */}
-                            <Text style={styles.title}>Toronto Soccerplex</Text>
-                            <Text style={styles.grayText}>101 Railside Rd, North York, ON M3A 1B2</Text>
+                            <Text style={styles.title}>{activity.venue}</Text>
+                            <Text style={styles.grayText}>{activity.venueAddress}</Text>
                         </View>
 
-                        <TouchableOpacity style={styles.joinButton}>
+                        <TouchableOpacity className="bg-secondary rounded-lg h-10 mt-2 items-center justify-center">
                             <Text style={styles.joinButtonText}>Join</Text>
                         </TouchableOpacity>
                     </View>

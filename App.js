@@ -14,6 +14,7 @@ import Friends from "./screens/Friends";
 import Events from "./screens/Events";
 import { MaterialIcons } from "@expo/vector-icons";
 import ActivityDetails from "./screens/ActivityDetails";
+import ActivityCard from "./components/ActivityCard";
 import Chat from "./screens/Chat";
 import FriendProfile from "./screens/FriendProfile";
 import { FontAwesome } from "@expo/vector-icons";
@@ -46,7 +47,7 @@ export default function App() {
       <Tab.Navigator>
         <Tab.Screen
           name="Activities"
-          component={Activities}
+          component={ActivityDetailsStack}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
@@ -87,16 +88,6 @@ export default function App() {
         <Tab.Screen
           name="Events"
           component={Events}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="list" size={24} color="black" />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="ActivityDetails"
-          component={ActivityDetails}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
@@ -160,10 +151,26 @@ export default function App() {
         <Stack.Screen
           name="Chat"
           component={Chat}
-          options={{ 
+          options={{
             headerShown: true,
-            title:null 
+            title: null
           }}
+        />
+      </Stack.Navigator>
+    );
+  }
+
+  function ActivityDetailsStack() {
+    return (
+      <Stack.Navigator initialRouteName="Activities">
+        <Stack.Screen name="Activities" component={Activities}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="ActivityDetails" component={ActivityDetails}
+          options={{
+            title: null
+          }}
+
         />
       </Stack.Navigator>
     );
@@ -190,6 +197,21 @@ export default function App() {
             component={Register}
             options={{ headerShown: false }}
           />
+          {/* <Stack.Screen
+            name="Activities"
+            component={Activities}
+            options={{ headerShown: false, headerLeft: false }}
+          />                */}
+          {/* <Stack.Screen
+            name="ActivityCard"
+            component={ActivityCard}
+            options={{ headerShown: false, headerLeft: false }}
+          />          
+          <Stack.Screen
+            name="ActivityDetails"
+            component={ActivityDetails}
+            options={{ headerShown: false, headerLeft: false }}
+          /> */}
         </Stack.Navigator>
       )}
     </NavigationContainer>
