@@ -169,7 +169,7 @@ Time: ${userEventField.time}
   };
 
 
-  useEffect( () => {
+  useEffect(() => {
     getSportFromAPI()
   }, [])
 
@@ -265,7 +265,7 @@ Time: ${userEventField.time}
                   }}
                 >
                   {
-                    sportsAPI.map( (sport, index) => (
+                    sportsAPI.map((sport, index) => (
                       <Picker.Item key={index} label={sport.sportsType} value={sport.sportsType}
                       />
                     ))
@@ -334,4 +334,3 @@ Time: ${userEventField.time}
     </SafeAreaView>
   );
 }
-
