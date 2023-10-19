@@ -227,6 +227,10 @@ Location: ${userEventField.location}
               className="h-17 w=11/12 mb-5 font-urbanistBold text-3xl"
               placeholder="Activity Name"
               placeholderTextColor={"#000"}
+              value={userEventField.eventName}
+              onChangeText={(account) => {
+                formChanged("eventName", account);
+              }}
             ></TextInput>
             <AntDesign name="edit" size={23} color="#999" />
           </View>

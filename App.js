@@ -16,11 +16,11 @@ import { MaterialIcons } from "@expo/vector-icons";
 import ActivityDetails from "./screens/ActivityDetails";
 import ActivityCard from "./components/ActivityCard";
 import Chat from "./screens/Chat";
-import FriendProfile from "./screens/FriendProfile";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import ChatFriends from "./screens/ChatFriends";
+import FriendProfile from "./screens/FriendProfile";
 
 const Tab = createBottomTabNavigator();
 
@@ -134,6 +134,14 @@ export default function App() {
           component={CreateActivity}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="ActivityDetails"
+          component={ActivityDetails}
+          options={{
+            title: null,
+            headerShown: true,
+          }}
+        />
       </Stack.Navigator>
     );
   }
@@ -156,26 +164,6 @@ export default function App() {
       </Stack.Navigator>
     );
   }
-
-  function ActivityDetailsStack() {
-    return (
-      <Stack.Navigator initialRouteName="Activities">
-        <Stack.Screen
-          name="Activities"
-          component={Activities}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ActivityDetails"
-          component={ActivityDetails}
-          options={{
-            title: null,
-          }}
-        />
-      </Stack.Navigator>
-    );
-  }
-
   return (
     <NavigationContainer>
       {user ? (
