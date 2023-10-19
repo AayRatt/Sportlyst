@@ -76,7 +76,7 @@ export default function App() {
           }}
         />
         <Tab.Screen
-          name="ChatFriends"
+          name="Chat"
           component={ChatStack}
           options={{
             headerShown: false,
