@@ -1,10 +1,18 @@
 import React from "react";
-import { View, Text, Pressable, Button, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  Button,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import ActivityCard from "../components/ActivityCard";
+import CreateActivity from "./CreateActivity";
 import {
   useFonts,
   Urbanist_600SemiBold,
@@ -85,6 +93,27 @@ export default function Activities({ navigation }) {
           datetime="9:30PM 19/12/2023"
         />
       </ScrollView>
+      <TouchableOpacity
+        style={{
+          borderWidth: 1,
+          borderColor: "black",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 65,
+          position: "absolute",
+          top: 750,
+          right: 15,
+          height: 65,
+          backgroundColor: "black",
+          borderRadius: 100,
+        }}
+        onPress={() => {
+          //NAVIGATE HERE
+          navigation.navigate("CreateActivity");
+        }}
+      >
+        <Ionicons name="add" size={35} color="white" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }

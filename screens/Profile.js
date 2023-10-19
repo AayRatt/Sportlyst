@@ -1,14 +1,26 @@
 import React from "react";
-import { View, Text, Image, Pressable, SafeAreaView, TextInput, StatusBar, TouchableOpacity, ScrollView, Modal, Button } from "react-native";
-import { Picker } from '@react-native-picker/picker';
-import * as ImagePicker from 'expo-image-picker';
-import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  SafeAreaView,
+  TextInput,
+  StatusBar,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Button,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from "expo-image-picker";
+import { useState, useEffect } from "react";
 import { db, auth, firebaseStorage } from "../firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import profileIcon from '../assets/profile-icon.png';
-import countries from '../data/countries.json'
+import profileIcon from "../assets/profile-icon.png";
+import countries from "../data/countries.json";
 
 import {
   useFonts,
@@ -17,20 +29,21 @@ import {
 } from "@expo-google-fonts/urbanist";
 
 export default function Profile({}) {
-
-  const [uploading, setUploading] = useState(false)
+  const [uploading, setUploading] = useState(false);
   //Countries Picker Visibiilty
-  const [pickerVisible, setPickerVisible] = useState(false)
+  const [pickerVisible, setPickerVisible] = useState(false);
 
-  const [countriesDataList, setCountriesDataList] = useState([])
+  const [countriesDataList, setCountriesDataList] = useState([]);
 
   const retrieveCountryNames = () => {
-    console.log(`Countries data ${JSON.stringify(countries)}`)
+    console.log(`Countries data ${JSON.stringify(countries)}`);
 
-    const countryNames = Object.values(countries).map(country => country.name.common)
-    setCountriesDataList(countryNames)
-    console.log(`Countries ${JSON.stringify(countryNames)}`)
-  }
+    const countryNames = Object.values(countries).map(
+      (country) => country.name.common
+    );
+    setCountriesDataList(countryNames);
+    console.log(`Countries ${JSON.stringify(countryNames)}`);
+  };
 
   const onLogoutClicked = async () => {
     try {
@@ -53,7 +66,7 @@ export default function Profile({}) {
     country: "",
     postalCode: "",
     imageUrl: "",
-  })
+  });
 
   const [tmpUser, setTmpUser] = useState({
     firstName: "",
@@ -63,7 +76,7 @@ export default function Profile({}) {
     country: "",
     postalCode: "",
     imageUrl: "",
-  })
+  });
 
   // Function to update form fields
   const updateUser = (key, updatedValue) => {
@@ -72,19 +85,18 @@ export default function Profile({}) {
     setUser(temp);
   };
 
-
   const retrieveFromDb = async () => {
     const docRef = doc(db, "userProfiles", auth.currentUser.uid);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
       console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
-      setUser(docSnap.data())
-      setTmpUser(docSnap.data())
+      setUser(docSnap.data());
+      setTmpUser(docSnap.data());
     } else {
       console.log("No such document!");
     }
-  }
+  };
 
   const updateDb = async () => {
     // update data in firestore
@@ -94,9 +106,9 @@ export default function Profile({}) {
 
       await updateDoc(userRef, user);
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   const resetForm = () => {
     const userReset = {
@@ -106,28 +118,28 @@ export default function Profile({}) {
       phoneNumber: tmpUser.phoneNumber,
       country: tmpUser.country,
       postalCode: tmpUser.postalCode,
-      imageUrl: tmpUser.imageUrl
-    }
-    setUser(userReset)
-  }
+      imageUrl: tmpUser.imageUrl,
+    };
+    setUser(userReset);
+  };
 
   const saveUserProfile = () => {
-    updateDb()
-    uploadImage()
-  }
+    updateDb();
+    uploadImage();
+  };
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1
-    })
+      quality: 1,
+    });
 
-    const source = { uri: result.assets[0].uri }
-    console.log(`source is: ${JSON.stringify(source)}`)
-    updateUser("imageUrl", source.uri)
-  }
+    const source = { uri: result.assets[0].uri };
+    console.log(`source is: ${JSON.stringify(source)}`);
+    updateUser("imageUrl", source.uri);
+  };
 
   const uploadImage = async () => {
     setUploading(true);
@@ -141,11 +153,13 @@ export default function Profile({}) {
 
     const uploadTask = uploadBytesResumable(storageRef, blob);
 
-    uploadTask.on('state_changed',
+    uploadTask.on(
+      "state_changed",
       (snapshot) => {
         // Progress function...
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload is ' + progress + '% done');
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
       },
       (error) => {
         // Error function...
@@ -154,12 +168,12 @@ export default function Profile({}) {
       () => {
         // Complete function...
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          console.log('File available at', downloadURL);
+          console.log("File available at", downloadURL);
 
           // Store the downloadURL in Firestore under the user's profile
           const userDocRef = doc(db, "userProfiles", auth.currentUser.uid);
           updateDoc(userDocRef, {
-            imageUrl: downloadURL
+            imageUrl: downloadURL,
           });
         });
       }
@@ -193,9 +207,9 @@ export default function Profile({}) {
   // }
 
   useEffect(() => {
-    retrieveFromDb()
-    retrieveCountryNames()
-  }, [])
+    retrieveFromDb();
+    retrieveCountryNames();
+  }, []);
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -207,13 +221,10 @@ export default function Profile({}) {
     return null;
   }
 
-  const countriesListItem = ({ item }) => (
-    countriesDataList.map(
-      (currCountry) => {
-        <Picker.Item label={currCountry} value={currCountry} />
-      }
-    )
-  )
+  const countriesListItem = ({ item }) =>
+    countriesDataList.map((currCountry) => {
+      <Picker.Item label={currCountry} value={currCountry} />;
+    });
 
   return (
     <SafeAreaView className="bg-primary flex-1 h-full">
@@ -234,7 +245,10 @@ export default function Profile({}) {
                 source={user.imageUrl ? { uri: user.imageUrl } : profileIcon}
                 className="self-center w-40 h-40 rounded-full border-solid border-2"
               />
-              <TouchableOpacity onPress={pickImage} className="flex items-center justify-center mt-2" >
+              <TouchableOpacity
+                onPress={pickImage}
+                className="flex items-center justify-center mt-2"
+              >
                 <Text>Change Image</Text>
               </TouchableOpacity>
             </View>
@@ -284,11 +298,17 @@ export default function Profile({}) {
               transparent={true}
               visible={pickerVisible}
               onRequestClose={() => {
-                setPickerVisible(false)
+                setPickerVisible(false);
               }}
             >
-              <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                <View style={{ backgroundColor: 'white', height: 350 }}>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "flex-end",
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                }}
+              >
+                <View style={{ backgroundColor: "white", height: 350 }}>
                   <Picker
                     selectedValue={user.country}
                     onValueChange={(account) => {
@@ -297,10 +317,17 @@ export default function Profile({}) {
                     }}
                   >
                     {countriesDataList.map((country) => (
-                      <Picker.Item key={country} label={country} value={country} />
+                      <Picker.Item
+                        key={country}
+                        label={country}
+                        value={country}
+                      />
                     ))}
                   </Picker>
-                  <Button title="Close Picker" onPress={() => setPickerVisible(false)} />
+                  <Button
+                    title="Close Picker"
+                    onPress={() => setPickerVisible(false)}
+                  />
                 </View>
               </View>
             </Modal>
