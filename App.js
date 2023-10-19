@@ -14,6 +14,7 @@ import Friends from "./screens/Friends";
 import CreateActivity from "./screens/CreateActivity";
 import { MaterialIcons } from "@expo/vector-icons";
 import ActivityDetails from "./screens/ActivityDetails";
+import ActivityCard from "./components/ActivityCard";
 import Chat from "./screens/Chat";
 import FriendProfile from "./screens/FriendProfile";
 import { FontAwesome } from "@expo/vector-icons";
@@ -156,6 +157,25 @@ export default function App() {
     );
   }
 
+  function ActivityDetailsStack() {
+    return (
+      <Stack.Navigator initialRouteName="Activities">
+        <Stack.Screen
+          name="Activities"
+          component={Activities}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ActivityDetails"
+          component={ActivityDetails}
+          options={{
+            title: null,
+          }}
+        />
+      </Stack.Navigator>
+    );
+  }
+
   return (
     <NavigationContainer>
       {user ? (
@@ -177,6 +197,21 @@ export default function App() {
             component={Register}
             options={{ headerShown: false }}
           />
+          {/* <Stack.Screen
+            name="Activities"
+            component={Activities}
+            options={{ headerShown: false, headerLeft: false }}
+          />                */}
+          {/* <Stack.Screen
+            name="ActivityCard"
+            component={ActivityCard}
+            options={{ headerShown: false, headerLeft: false }}
+          />          
+          <Stack.Screen
+            name="ActivityDetails"
+            component={ActivityDetails}
+            options={{ headerShown: false, headerLeft: false }}
+          /> */}
         </Stack.Navigator>
       )}
     </NavigationContainer>

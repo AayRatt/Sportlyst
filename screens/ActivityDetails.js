@@ -1,163 +1,131 @@
 import React from "react";
 import { SafeAreaView, ScrollView, View, Image, Text, TouchableOpacity, StatusBar, StyleSheet } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
-import { db, auth, firebaseStorage } from "../firebaseConfig";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { signOut } from "firebase/auth";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
-import profileIcon from '../assets/profile-icon.png';
-import { AntDesign } from '@expo/vector-icons';
+import { db, auth } from "../firebaseConfig";
+import { doc, updateDoc, arrayUnion, onSnapshot, getDocs, collection } from "firebase/firestore";
+// import profileIcon from '../assets/profile-icon.png';
 
-export default function Profile({ navigation }) {
+export default function ActivityDetails({ route }) {
 
-    const [image, setImage] = useState(null)
-    const [uploading, setUploading] = useState(false)
-    const addImage = () => { }
-
-    const onLogoutClicked = async () => {
-        try {
-            if (auth.currentUser === null) {
-                alert("logoutPressed: There is no user to logout!");
-            } else {
-                await signOut(auth);
-                alert("User LogOut");
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const [user, setUser] = useState({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        country: "",
-        postalCode: "",
-        imageUrl: "",
-    })
-
-    // Function to update form fields
-    const updateUser = (key, updatedValue) => {
-        const temp = { ...user };
-        temp[key] = updatedValue;
-        setUser(temp);
-    };
-
-    const retrieveFromDb = async () => {
-        const docRef = doc(db, "userProfiles", auth.currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        console.log(`docSnap ${JSON.stringify(docSnap)}`);
-
-
-        if (docSnap.exists()) {
-            setUser(docSnap.data())
-        } else {
-            console.log("No such document!");
-        }
-    }
+    const { activity } = route.params
+    const [joinedUsersCount, setJoinedUsersCount] = useState(activity.joinedUsers ? activity.joinedUsers.length : 0)
+    const [joinedUsers, setJoinedUsers] = useState([])
+    const [userImages, setUserImages] = useState([])
 
     const updateDb = async () => {
         // update data in firestore
         try {
-            const userRef = doc(db, "userProfiles", auth.currentUser.uid);
+            const eventsRef = doc(db, "events", activity.eventCollectionId, "sports", activity.docId)
+            //   await updateDoc(userRef, user);
 
-            await updateDoc(bookingRef, {
-                bookingStatus: isEnabled ? 'Confirmed' : 'Declined',
-                bookingCode: isEnabled ? bookingId : '',
+            // Atomically add a new region to the "regions" array field.
+            await updateDoc(eventsRef, {
+                joinedUsers: arrayUnion(auth.currentUser.uid)
             });
+            alert("Profile Updated");
         } catch (err) {
             console.log(err)
         }
     }
 
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1
-        });
-        const source = { uri: result.assets[0].uri }
-        console.log('source is: ${source}')
-        setImage(source)
-    };
-
-    const uploadImage = async () => {
-        setUploading(true);
-
-        const response = await fetch(image.uri);
-        const blob = await response.blob();
-
-        const filename = auth.currentUser.uid;
-        console.log(`filename is ${filename}`);
-        const storageRef = ref(firebaseStorage, filename);
-
-        const uploadTask = uploadBytesResumable(storageRef, blob);
-
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                // Progress function...
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
-            },
-            (error) => {
-                // Error function...
-                console.log(error);
-            },
-            () => {
-                // Complete function...
-                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    console.log('File available at', downloadURL);
-
-                    // Store the downloadURL in Firestore under the user's profile
-                    const userDocRef = doc(db, "userProfiles", auth.currentUser.uid);
-                    updateDoc(userDocRef, {
-                        imageUrl: downloadURL
-                    });
-
-                });
+    const retrieveAllUsersDataFromDb = async () => {
+        console.log("retrieveAllUsersDataFromDb!!!!");
+        const imagesArr = [];
+        const querySnapshot = await getDocs(collection(db, "userProfiles"));
+        querySnapshot.forEach((doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            if (joinedUsers.includes(doc.id)) {
+                console.log(doc.id, " => ");
+                imagesArr.push(doc.data().imageUrl);
             }
-        );
-    };
+        });
+        imagesArr.map(
+            (currCountry) => {
+                console.log(`imagesArr => ${currCountry}`)
+            }
+        )
+        setUserImages(imagesArr)
+    }
+
+    const realtimeDbListener = async () => {
+        const eventsRef = doc(db, "events", activity.eventCollectionId, "sports", activity.docId);
+
+        // Setting up the real-time listener
+        const unsubscribe = onSnapshot(eventsRef, (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                docSnapshot.data().joinedUsers ? setJoinedUsersCount(docSnapshot.data().joinedUsers.length) : setJoinedUsersCount(0)
+            } else {
+                console.log("No such document!");
+            }
+        });
+
+        // Cleanup listener on component unmount
+        return () => {
+            unsubscribe()
+        };
+    }
+
+    const retrieveSingleEventData = async () => {
+        console.log("test!!!!");
+        const querySnapshot = await getDocs(collection(db, "events", activity.eventCollectionId, "sports"));
+        querySnapshot.forEach((doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            if (doc.id == activity.docId) {
+                console.log(doc.data().joinedUsers, " => ");
+                setJoinedUsers(doc.data().joinedUsers)
+            }
+        });
+    }
 
     useEffect(() => {
-        // retrieveFromDb()
-    }, [])
+        realtimeDbListener();  // This sets up the realtime listener
+        retrieveSingleEventData();  // This fetches joined users
+    }, []);  // Called only once when component is mounted
+
+    useEffect(() => {
+        if (joinedUsers.length > 0) {  // Ensure that we have some joined users
+            retrieveAllUsersDataFromDb();  // Fetch images for joined users
+        }
+    }, [joinedUsers]);  // Called whenever joinedUsers changes
+
 
     return (
         <SafeAreaView style={styles.safeAreaView}>
             <ScrollView style={styles.scrollView}>
                 <View style={styles.container}>
                     <Image source={require('../assets/football.jpg')} style={{ width: '100%', height: 160 }} />
-
                     <View style={styles.eventDetails}>
-                        <Text style={styles.title}>5v5 Indoor Football</Text>
-                        <Text style={styles.grayText}>Event Location</Text>
-                        <Text style={styles.grayText}>27 October, 6:00 PM</Text>
-                        <Text style={styles.grayText}>CAD 50</Text>
+                        <Text style={styles.title}>{activity.title}</Text>
+                        <Text style={styles.grayText}>{activity.date} {activity.time}</Text>
+                        <Text style={styles.grayText}>CAD {activity.price}</Text>
+                        <Text style={styles.grayText}>{joinedUsersCount ? joinedUsersCount : 0}/{activity.players} joined</Text>
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Venue</Text>
                             {/* Add venue details here */}
-                            <Text style={styles.title}>Toronto Soccerplex</Text>
-                            <Text style={styles.grayText}>101 Railside Rd, North York, ON M3A 1B2</Text>
+                            <Text style={styles.title}>{activity.venue}</Text>
+                            <Text style={styles.grayText}>{activity.venueAddress}</Text>
                         </View>
 
-                        <TouchableOpacity style={styles.joinButton}>
+                        <TouchableOpacity onPress={updateDb} className="bg-secondary rounded-lg h-10 mt-2 items-center justify-center">
                             <Text style={styles.joinButtonText}>Join</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.attendees}>
                         <Text style={styles.sectionTitle}>Who's going?</Text>
-                        <Image source={require('../assets/user-profile-1.jpg')} style={{
-                            width: 80,
-                            height: 80,
-                            borderRadius: 80 / 2,
-                            borderWidth: 3,
-                        }} />
+                        <View style={styles.imagesContainer}>
+                            {userImages.map((image, index) => (
+                                <Image
+                                    key={index}
+                                    source={image ? { uri: image } : require("../assets/profile-icon.png")}
+                                    style={{
+                                        width: 60,
+                                        height: 60,
+                                        borderRadius: 60 / 2,
+                                        borderWidth: 2,
+                                    }} />
+                            ))}
+                        </View>
                     </View>
                     <StatusBar barStyle="dark-content" />
                 </View>
@@ -224,6 +192,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 8,
         // flexDirection: "row"
+    },
+    imagesContainer: {
+        flex: 1,
+        gap: 5,
+        flexDirection: "row"
     },
     circle: {
         width: 60,

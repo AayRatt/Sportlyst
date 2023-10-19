@@ -18,11 +18,23 @@ import {
   Urbanist_600SemiBold,
   Urbanist_500Medium,
 } from "@expo-google-fonts/urbanist";
+import { db, auth } from "../firebaseConfig";
+import { collection, getDoc, getDocs, doc } from "firebase/firestore";
 
 export default function Activities({ navigation }) {
   ///Variables
   //Location State
-  const [deviceLocation, setDeviceLocation] = useState(null);
+  const [deviceLocation, setDeviceLocation] = useState(null)
+  const [activityDataList, setActivityDataList] = useState([])
+  const [user, setUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    country: "",
+    postalCode: "",
+    imageUrl: "",
+  })
 
   // Current Location
   // const getCurrentLocation = async () => {
@@ -50,9 +62,68 @@ export default function Activities({ navigation }) {
   // };
 
   //Use effect State
-  // useEffect(() => {
-  //   getCurrentLocation();
-  // }, []);
+  useEffect(() => {
+    // getCurrentLocation();
+    retrieveFromDb()
+    retrieveUserDataFromDb()
+  }, []);
+
+  // const retrieveFromDb = async () => {
+  //   const allSportsEvents = [];
+  //   const querySnapshot = await getDocs(collection(db, "events"));
+  //   querySnapshot.forEach(async (doc) => {
+  //     const userId = doc.id
+  //     const querySnapshot = await getDocs(collection(db, "events", userId, "sports"));
+  //     querySnapshot.forEach((doc) => {
+  //       // doc.data() is never undefined for query doc snapshots
+  //       console.log(doc.id, " => ", doc.data());
+  //       allSportsEvents.push(doc.data());
+  //     });
+  //   });
+  //   setActivityData(allSportsEvents)
+  // }
+
+  const retrieveUserDataFromDb = async () => {
+    const docRef = doc(db, "userProfiles", auth.currentUser.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
+      setUser(docSnap.data())
+    } else {
+      console.log("No such document!");
+    }
+  }
+
+  const retrieveFromDb = async () => {
+    const allSportsEvents = [];
+    const querySnapshot = await getDocs(collection(db, "events"));
+
+
+    // Using for...of loop to handle asynchronous operations
+    for (let userDoc of querySnapshot.docs) {
+      console.log(`userDoc => ${userDoc.id}`);
+      const userId = userDoc.id;
+      const sportsSnapshot = await getDocs(collection(db, "events", userId, "sports"));
+
+      for (let sportDoc of sportsSnapshot.docs) {
+        console.log(sportDoc.id, " => ", sportDoc.data());
+        const sportData = sportDoc.data();
+        // Combine the retrieved data with the docId and eventCollectionId
+        const combinedData = {
+          ...sportData,
+          docId: sportDoc.id,
+          eventCollectionId: userId,
+        };
+
+        // setActivityData(combinedData)
+        allSportsEvents.push(combinedData);
+      }
+    }
+
+    setActivityDataList(allSportsEvents)
+  }
+
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -74,24 +145,34 @@ export default function Activities({ navigation }) {
       <ScrollView className="h-fit">
         <View className="px-3">
           <Text className="font-urbanist text-xl text-start pl-3">
-            Hey, John
+            Hello, {user.firstName}
           </Text>
           <Text className="font-urbanistBold text-2xl text-start pl-3">
             Discover Activities
           </Text>
         </View>
-        <ActivityCard
-          title="Soccer"
-          img={require("../assets/cherry.jpg")}
-          location="Cherry Sports Field"
-          datetime="9:30PM 04/11/2023"
-        />
-        <ActivityCard
-          title="Tennis"
-          img={require("../assets/trinity.jpeg")}
-          location="Trinity Bellwoods Park"
-          datetime="9:30PM 19/12/2023"
-        />
+
+        {activityDataList.map((activity, index) => (
+          <ActivityCard
+            key={index} // use a unique key, if there's an id in the data, prefer to use that
+            title={activity.eventName}
+            img={require("../assets/cherry.jpg")}
+            location={activity.venue}
+            // location="Cherry Sports Field"
+            date={activity.date}
+            time={activity.time}
+            navigation={navigation}
+            price={activity.payment}
+            players={activity.players}
+            sportType={activity.sportType}
+            venue={activity.venue}
+            venueAddress={activity.venueAddress}
+            joinedPlayers={activity.joinedPlayers}
+            joinedUsers={activity.joinedUsers ? activity.joinedUsers : []}
+            docId={activity.docId}
+            eventCollectionId={activity.eventCollectionId}
+          />
+        ))}
       </ScrollView>
       <TouchableOpacity
         style={{
