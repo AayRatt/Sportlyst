@@ -101,9 +101,7 @@ export default function Login({ navigation, route }) {
           </View>
         </Pressable>
 
-        <Text className="font-urbanistBold text-2xl text-start pl-3">
-          Login
-        </Text>
+        <Text className="font-urbanistBold text-xl text-start pl-3">Login</Text>
         <View className="mt-8">
           <TextInput
             className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"

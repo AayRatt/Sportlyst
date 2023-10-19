@@ -1,20 +1,29 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, Pressable, SafeAreaView, TextInput, StatusBar, TouchableOpacity } from "react-native";
-import * as ImagePicker from 'expo-image-picker';
-import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Pressable,
+  SafeAreaView,
+  TextInput,
+  StatusBar,
+  TouchableOpacity,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useState, useEffect } from "react";
 import { db, auth, firebaseStorage } from "../firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
-import profileIcon from '../assets/profile-icon.png';
-import { AntDesign } from '@expo/vector-icons';
+import profileIcon from "../assets/profile-icon.png";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function Profile({ navigation }) {
-
-  const [image, setImage] = useState(null)
-  const [uploading, setUploading] = useState(false)
-  const addImage = () => { }
+  const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const addImage = () => {};
 
   const onLogoutClicked = async () => {
     try {
@@ -37,7 +46,7 @@ export default function Profile({ navigation }) {
     country: "",
     postalCode: "",
     imageUrl: "",
-  })
+  });
 
   // Function to update form fields
   const updateUser = (key, updatedValue) => {
@@ -51,13 +60,12 @@ export default function Profile({ navigation }) {
     const docSnap = await getDoc(docRef);
     console.log(`docSnap ${JSON.stringify(docSnap)}`);
 
-
     if (docSnap.exists()) {
-      setUser(docSnap.data())
+      setUser(docSnap.data());
     } else {
       console.log("No such document!");
     }
-  }
+  };
 
   const updateDb = async () => {
     // update data in firestore
@@ -65,24 +73,24 @@ export default function Profile({ navigation }) {
       const userRef = doc(db, "userProfiles", auth.currentUser.uid);
 
       await updateDoc(bookingRef, {
-        bookingStatus: isEnabled ? 'Confirmed' : 'Declined',
-        bookingCode: isEnabled ? bookingId : '',
+        bookingStatus: isEnabled ? "Confirmed" : "Declined",
+        bookingCode: isEnabled ? bookingId : "",
       });
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1
+      quality: 1,
     });
-    const source = { uri: result.assets[0].uri }
-    console.log('source is: ${source}')
-    setImage(source)
+    const source = { uri: result.assets[0].uri };
+    console.log("source is: ${source}");
+    setImage(source);
   };
 
   const uploadImage = async () => {
@@ -97,11 +105,13 @@ export default function Profile({ navigation }) {
 
     const uploadTask = uploadBytesResumable(storageRef, blob);
 
-    uploadTask.on('state_changed',
+    uploadTask.on(
+      "state_changed",
       (snapshot) => {
         // Progress function...
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload is ' + progress + '% done');
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
       },
       (error) => {
         // Error function...
@@ -110,39 +120,40 @@ export default function Profile({ navigation }) {
       () => {
         // Complete function...
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          console.log('File available at', downloadURL);
+          console.log("File available at", downloadURL);
 
           // Store the downloadURL in Firestore under the user's profile
           const userDocRef = doc(db, "userProfiles", auth.currentUser.uid);
           updateDoc(userDocRef, {
-            imageUrl: downloadURL
+            imageUrl: downloadURL,
           });
-
         });
       }
     );
   };
 
   useEffect(() => {
-    retrieveFromDb()
-  }, [])
+    retrieveFromDb();
+  }, []);
 
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="bg-white pl-3 pr-3">
-
-        <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
+        <Text className="mt-5 font-urbanistBold text-3xl text-start pl-3">
           User Profile
         </Text>
-        <View className="mt-2">
+        <View className="mt-4">
           <View className="h-50 w-50 bg-gray-500 relative rounded-full">
             <Image
               source={image ? { uri: image.uri } : profileIcon}
               className="self-center w-40 h-40 rounded-full border-solid border-2"
             />
             <View className="opacity-80 absolute bottom-0 right-0 bg-light-gray w-full h-1/4">
-              <TouchableOpacity onPress={pickImage} className="flex items-center justify-center" >
-                <Text>{image ? 'Edit' : 'Upload'} Image</Text>
+              <TouchableOpacity
+                onPress={pickImage}
+                className="flex items-center justify-center"
+              >
+                <Text>{image ? "Edit" : "Upload"} Image</Text>
                 <AntDesign name="camera" size={20} color="black" />
               </TouchableOpacity>
             </View>
@@ -226,8 +237,5 @@ export default function Profile({ navigation }) {
         <StatusBar barStyle="dark-content"></StatusBar>
       </View>
     </SafeAreaView>
-
-
-
   );
 }
