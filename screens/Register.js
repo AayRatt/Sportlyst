@@ -80,7 +80,7 @@ export default function Register({ route, navigation }) {
           firstName: formField.firstName,
           lastName: formField.lastName,
           email: formField.email,
-          userID: auth.currentUser.uid
+          userID: auth.currentUser.uid,
         };
         //2. Add data to firestore
         await setDoc(
@@ -138,7 +138,7 @@ export default function Register({ route, navigation }) {
           </View>
         </Pressable>
 
-        <Text className="font-urbanistBold text-2xl text-start pl-3">
+        <Text className="font-urbanistBold text-3xl text-start pl-3">
           Register
         </Text>
         <View className="mt-8">

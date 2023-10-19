@@ -11,14 +11,16 @@ import Activities from "./screens/Activities";
 import Profile from "./screens/Profile";
 import Search from "./screens/Search";
 import Friends from "./screens/Friends";
-import Events from "./screens/Events";
+import CreateActivity from "./screens/CreateActivity";
 import { MaterialIcons } from "@expo/vector-icons";
 import ActivityDetails from "./screens/ActivityDetails";
+import ActivityCard from "./components/ActivityCard";
 import Chat from "./screens/Chat";
-import FriendProfile from "./screens/FriendProfile";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import ChatFriends from "./screens/ChatFriends";
+import FriendProfile from "./screens/FriendProfile";
 
 const Tab = createBottomTabNavigator();
 
@@ -45,7 +47,7 @@ export default function App() {
       <Tab.Navigator>
         <Tab.Screen
           name="Activities"
-          component={Activities}
+          component={CreateActivityStack}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
@@ -64,16 +66,6 @@ export default function App() {
           }}
         />
         <Tab.Screen
-          name="Search"
-          component={SearchStack}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="search" size={24} color="black" />
-            ),
-          }}
-        />
-        <Tab.Screen
           name="Friends"
           component={FriendStack}
           options={{
@@ -84,28 +76,8 @@ export default function App() {
           }}
         />
         <Tab.Screen
-          name="Events"
-          component={Events}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="list" size={24} color="black" />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="ActivityDetails"
-          component={ActivityDetails}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="list" size={24} color="black" />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Chat"
-          component={Chat}
+          name="ChatFriends"
+          component={ChatStack}
           options={{
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
@@ -120,12 +92,12 @@ export default function App() {
   function SearchStack() {
     return (
       <Stack.Navigator
-        initialRouteName="Search"
+        initialRouteName="SearchHome"
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="Search" component={Search} />
+        <Stack.Screen name="SearchHome" component={Search} />
         <Stack.Screen
-          name="FriendProfile"
+          name="SearchFriendProfile"
           component={FriendProfile}
           options={{ headerShown: true }}
         />
@@ -136,19 +108,62 @@ export default function App() {
   function FriendStack() {
     return (
       <Stack.Navigator
-        initialRouteName="Friends"
+        initialRouteName="FriendsHome"
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="Friends" component={Friends} />
+        <Stack.Screen name="FriendsHome" component={Friends} />
         <Stack.Screen
           name="FriendProfile"
           component={FriendProfile}
           options={{ headerShown: true }}
         />
+        <Stack.Screen name="Search" component={SearchStack} />
       </Stack.Navigator>
     );
   }
 
+  function CreateActivityStack() {
+    return (
+      <Stack.Navigator
+        initialRouteName="Activities"
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="Activities" component={Activities} />
+        <Stack.Screen
+          name="CreateActivity"
+          component={CreateActivity}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ActivityDetails"
+          component={ActivityDetails}
+          options={{
+            title: null,
+            headerShown: true,
+          }}
+        />
+      </Stack.Navigator>
+    );
+  }
+
+  function ChatStack() {
+    return (
+      <Stack.Navigator
+        initialRouteName="ChatFriendsHome"
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="ChatFriendsHome" component={ChatFriends} />
+        <Stack.Screen
+          name="Chat"
+          component={Chat}
+          options={{
+            headerShown: true,
+            title: null,
+          }}
+        />
+      </Stack.Navigator>
+    );
+  }
   return (
     <NavigationContainer>
       {user ? (
@@ -170,6 +185,21 @@ export default function App() {
             component={Register}
             options={{ headerShown: false }}
           />
+          {/* <Stack.Screen
+            name="Activities"
+            component={Activities}
+            options={{ headerShown: false, headerLeft: false }}
+          />                */}
+          {/* <Stack.Screen
+            name="ActivityCard"
+            component={ActivityCard}
+            options={{ headerShown: false, headerLeft: false }}
+          />          
+          <Stack.Screen
+            name="ActivityDetails"
+            component={ActivityDetails}
+            options={{ headerShown: false, headerLeft: false }}
+          /> */}
         </Stack.Navigator>
       )}
     </NavigationContainer>

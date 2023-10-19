@@ -7,7 +7,7 @@ import {
 } from "@expo-google-fonts/urbanist";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function ActivityCard(props) {
+export default function ActivityCard( props) {
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
 
@@ -16,6 +16,13 @@ export default function ActivityCard(props) {
 
   if (!fontsLoaded) {
     return null;
+  }
+
+  const onButtonClicked = () => {
+    //navigate to Bookings Details screen when a booking is clicked
+    props.navigation.navigate('ActivityDetails', {
+      activity: props
+    });
   }
 
   return (
@@ -42,12 +49,14 @@ export default function ActivityCard(props) {
             <View className="flex-row items-center">
               <Ionicons name="time-outline" size={24} color="gray" />
               <Text className="font-urbanist text-[#777]">
-                {props.datetime}
+              {props.time} {props.date}
               </Text>
             </View>
           </View>
           <View className="w-full">
-            <Pressable className="bg-gray rounded-lg w-1/5 h-10 mt-5 items-center justify-center">
+            <Pressable className="bg-gray rounded-lg w-1/5 h-10 mt-5 items-center justify-center"
+              onPress={onButtonClicked}
+            >
               <Text className="text-lg font-urbanistBold">View</Text>
             </Pressable>
           </View>

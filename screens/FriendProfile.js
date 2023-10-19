@@ -5,6 +5,7 @@ import { db, auth } from "../firebaseConfig";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
 import profileIcon from '../assets/profile-icon.png';
 import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
+import { AntDesign } from "@expo/vector-icons";
 
 
 export default function FriendProfile({ navigation, route }) {
@@ -84,7 +85,7 @@ export default function FriendProfile({ navigation, route }) {
             if (request) {
                 setRequestStatus(request.data().status);
                 setRequestSent(true);
-                
+
             }
 
         })
@@ -109,24 +110,29 @@ export default function FriendProfile({ navigation, route }) {
 
     }
 
-    useEffect(() => {
-        const unsubscribe = loadUserInfo();
+    function navigateToChat() {
 
-        return () => {
-            if (unsubscribe) {
-                unsubscribe();  // Cleaning up the listener
-            }
-        };
+        navigation.navigate('ChatFriends', { screen: 'ChatFriendsHome' });
+       
+        navigation.navigate('ChatFriends', { screen: 'Chat', params: { friendID: userID,
+            firstName: userInfo.firstName,
+            lastName: userInfo.lastName} });
+    }
+    
+
+    useEffect(() => {
+        loadUserInfo();
+
     }, []);
 
     useEffect(() => {
         const unsubscribe = setRequestListeners();
-    
+
         return () => {
             unsubscribe();
         };
     }, []);
-    
+
 
 
     useEffect(() => {
@@ -137,7 +143,7 @@ export default function FriendProfile({ navigation, route }) {
 
 
 
-    return ( 
+    return (
         <SafeAreaView className="bg-primary flex-1">
             <View className="bg-white pl-3 pr-3 flex justify-center items-center">
                 {userInfo && (
@@ -146,14 +152,23 @@ export default function FriendProfile({ navigation, route }) {
                             className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
                             {`${userInfo.firstName} ${userInfo.lastName}`}
                         </Text>
-    
+
                         <Image
                             source={userInfo.image ? { uri: userInfo.image } : profileIcon}
                             className="self-center w-40 h-40 rounded-full"
                         />
-    
-                        {requestStatus === 'Accepted' ? (    
-                            <Text className="font-urbanistBold text-lg text-start pl-2 text-center">You are friends with {`${userInfo.firstName} `}</Text>
+
+                        {requestStatus === 'Accepted' ? (
+                            <View>
+                                <Text className="font-urbanistBold text-lg text-start pl-2 text-center">You are friends with {`${userInfo.firstName} `}</Text>
+                                <Pressable className="bg-primary rounded-lg h-8 items-center justify-center w-1/4"
+                                onPress={navigateToChat}>
+                                    <AntDesign name="message1" size={24} color="black" />
+                                    {/* <Text
+                                    className="text-sm font-urbanistBold text-primary"
+                                    >Message {`${userInfo.firstName}`}</Text> */}
+                                </Pressable>
+                            </View>
                         ) : requestStatus === 'Pending' ? (
                             <Text>Friend Request Sent</Text>
                         ) : (
@@ -168,7 +183,7 @@ export default function FriendProfile({ navigation, route }) {
             </View>
         </SafeAreaView>
     )
-    
+
 
 
 }
