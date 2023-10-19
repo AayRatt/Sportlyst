@@ -17,7 +17,7 @@ export default function Activities({ navigation }) {
   ///Variables
   //Location State
   const [deviceLocation, setDeviceLocation] = useState(null)
-  const [activityData, setActivityData] = useState([])
+  const [activityDataList, setActivityDataList] = useState([])
   const [user, setUser] = useState({
     firstName: "",
     lastName: "",
@@ -82,7 +82,6 @@ export default function Activities({ navigation }) {
     if (docSnap.exists()) {
       console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
       setUser(docSnap.data())
-      setTmpUser(docSnap.data())
     } else {
       console.log("No such document!");
     }
@@ -92,10 +91,6 @@ export default function Activities({ navigation }) {
     const allSportsEvents = [];
     const querySnapshot = await getDocs(collection(db, "events"));
 
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id);
-    });
 
     // Using for...of loop to handle asynchronous operations
     for (let userDoc of querySnapshot.docs) {
@@ -105,13 +100,22 @@ export default function Activities({ navigation }) {
 
       for (let sportDoc of sportsSnapshot.docs) {
         console.log(sportDoc.id, " => ", sportDoc.data());
-        allSportsEvents.push(sportDoc);
+        const sportData = sportDoc.data();
+        // Combine the retrieved data with the docId and eventCollectionId
+        const combinedData = {
+          ...sportData,
+          docId: sportDoc.id,
+          eventCollectionId: userId,
+        };
+
+        // setActivityData(combinedData)
+        allSportsEvents.push(combinedData);
       }
     }
 
-    setActivityData(allSportsEvents)
+    setActivityDataList(allSportsEvents)
   }
-  
+
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -140,23 +144,25 @@ export default function Activities({ navigation }) {
           </Text>
         </View>
 
-        {activityData.map((activity, index) => (
+        {activityDataList.map((activity, index) => (
           <ActivityCard
             key={index} // use a unique key, if there's an id in the data, prefer to use that
-            title={activity.data().eventName}
+            title={activity.eventName}
             img={require("../assets/cherry.jpg")}
-            location={activity.data().venue}
+            location={activity.venue}
             // location="Cherry Sports Field"
-            date={activity.data().date}
-            time={activity.data().time}
+            date={activity.date}
+            time={activity.time}
             navigation={navigation}
-            price={activity.data().payment}
-            players={activity.data().players}
-            sportType={activity.data().sportType}
-            venue={activity.data().venue}
-            venueAddress={activity.data().venueAddress}
-            joinedPlayers={activity.data().joinedPlayers}
-            docId={activity.id}
+            price={activity.payment}
+            players={activity.players}
+            sportType={activity.sportType}
+            venue={activity.venue}
+            venueAddress={activity.venueAddress}
+            joinedPlayers={activity.joinedPlayers}
+            joinedUsers={activity.joinedUsers ? activity.joinedUsers : []}
+            docId={activity.docId}
+            eventCollectionId={activity.eventCollectionId}
           />
         ))}
       </ScrollView>
