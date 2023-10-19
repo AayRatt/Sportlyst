@@ -117,6 +117,7 @@ Location: ${userEventField.location}
           date: userEventField.date,
           time: userEventField.time,
           location: userEventField.location,
+          joinedUsers: []
         };
 
         //2. Add data to firestore
@@ -139,7 +140,7 @@ Location: ${userEventField.location}
           payment: "",
           date: "",
           time: "",
-          location: "",
+          location: ""
         });
       }
     } catch (error) {
