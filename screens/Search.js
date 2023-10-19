@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { db, auth } from "../firebaseConfig";
+import { Entypo } from "@expo/vector-icons";
 import {
   addDoc,
   collection,
@@ -198,9 +199,13 @@ export default function Search({ navigation }) {
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="bg-white pl-3 pr-3">
-        <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
-          Search View
-        </Text>
+        <Pressable
+          className="flex-row mt-5 align-baseline"
+          onPress={() => navigation.goBack()}
+        >
+          <Entypo name="chevron-left" size={35} color="black" />
+          <Text className="font-urbanistBold text-3xl text-start">Search</Text>
+        </Pressable>
         <TextInput
           className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
           placeholder="Search Friends"
