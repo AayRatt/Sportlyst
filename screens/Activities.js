@@ -6,6 +6,7 @@ import {
   Button,
   ScrollView,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,10 +23,11 @@ import { db, auth } from "../firebaseConfig";
 import { collection, getDoc, getDocs, doc } from "firebase/firestore";
 
 export default function Activities({ navigation }) {
+  const { width, height } = Dimensions.get("window");
   ///Variables
   //Location State
-  const [deviceLocation, setDeviceLocation] = useState(null)
-  const [activityDataList, setActivityDataList] = useState([])
+  const [deviceLocation, setDeviceLocation] = useState(null);
+  const [activityDataList, setActivityDataList] = useState([]);
   const [user, setUser] = useState({
     firstName: "",
     lastName: "",
@@ -34,7 +36,7 @@ export default function Activities({ navigation }) {
     country: "",
     postalCode: "",
     imageUrl: "",
-  })
+  });
 
   // Current Location
   // const getCurrentLocation = async () => {
@@ -64,8 +66,8 @@ export default function Activities({ navigation }) {
   //Use effect State
   useEffect(() => {
     // getCurrentLocation();
-    retrieveFromDb()
-    retrieveUserDataFromDb()
+    retrieveFromDb();
+    retrieveUserDataFromDb();
   }, []);
 
   // const retrieveFromDb = async () => {
@@ -89,22 +91,23 @@ export default function Activities({ navigation }) {
 
     if (docSnap.exists()) {
       console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
-      setUser(docSnap.data())
+      setUser(docSnap.data());
     } else {
       console.log("No such document!");
     }
-  }
+  };
 
   const retrieveFromDb = async () => {
     const allSportsEvents = [];
     const querySnapshot = await getDocs(collection(db, "events"));
 
-
     // Using for...of loop to handle asynchronous operations
     for (let userDoc of querySnapshot.docs) {
       console.log(`userDoc => ${userDoc.id}`);
       const userId = userDoc.id;
-      const sportsSnapshot = await getDocs(collection(db, "events", userId, "sports"));
+      const sportsSnapshot = await getDocs(
+        collection(db, "events", userId, "sports")
+      );
 
       for (let sportDoc of sportsSnapshot.docs) {
         console.log(sportDoc.id, " => ", sportDoc.data());
@@ -121,9 +124,8 @@ export default function Activities({ navigation }) {
       }
     }
 
-    setActivityDataList(allSportsEvents)
-  }
-
+    setActivityDataList(allSportsEvents);
+  };
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -147,9 +149,12 @@ export default function Activities({ navigation }) {
           <Text className="font-urbanist text-xl text-start pl-3">
             Hello, {user.firstName}
           </Text>
-          <Text className="font-urbanistBold text-2xl text-start pl-3">
-            Discover Activities
-          </Text>
+          <View className="flex-row items-baseline">
+            <Text className="font-urbanistBold text-2xl text-start pl-3">
+              Your Activities
+            </Text>
+            <Ionicons name="chevron-forward" size={21} color="black" />
+          </View>
         </View>
 
         {activityDataList.map((activity, index) => (
@@ -182,8 +187,8 @@ export default function Activities({ navigation }) {
           justifyContent: "center",
           width: 65,
           position: "absolute",
-          top: 690,
-          right: 15,
+          bottom: height * 0.03,
+          right: width * 0.05,
           height: 65,
           backgroundColor: "black",
           borderRadius: 100,
