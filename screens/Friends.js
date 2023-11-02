@@ -506,33 +506,35 @@ export default function Friends({ navigation }) {
           data={friends}
           keyExtractor={(item) => item.friendID}
           renderItem={({ item }) => (
-            <View className="flex-row items-center mt-5 pl-3">
+            <View className="flex-row items-center mt-4 bg-gray rounded-lg p-2 justify-between">
               {/* User profile picture */}
-              <Pressable
-                onPress={
-                  () =>
-                    navigation.navigate("FriendProfile", {
-                      userID: item.friendID,
-                    })
-                  //console.log(item.id)
-                }
-              >
-                <Image
-                  source={item.image ? { uri: item.image } : profileIcon}
-                  className="w-12 h-12 rounded-full"
-                />
-              </Pressable>
+              <View className="flex-row items-center">
+                <Pressable
+                  onPress={
+                    () =>
+                      navigation.navigate("FriendProfile", {
+                        userID: item.friendID,
+                      })
+                    //console.log(item.id)
+                  }
+                >
+                  <Image
+                    source={item.image ? { uri: item.image } : profileIcon}
+                    className="w-12 h-12 rounded-full"
+                  />
+                </Pressable>
 
-              <Text className="font-urbanist text-2xl mr-3">{`${item.fullName}`}</Text>
+                <Text className="font-urbanist text-xl mr-3">{`${item.fullName}`}</Text>
+              </View>
 
               <Pressable
-                className="bg-secondary rounded-lg h-5 items-center justify-center w-1/4"
                 onPress={() => {
                   // Handle the decline action
                   onDeleteFriendPress(item.friendID, item.fullName);
                 }}
+                className="pr-3"
               >
-                <Text style={{ color: "white" }}>Delete</Text>
+                <FontAwesome name="trash-o" size={26} color="black" />
               </Pressable>
             </View>
           )}
