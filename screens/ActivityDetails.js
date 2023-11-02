@@ -2,8 +2,7 @@ import React from "react";
 import { SafeAreaView, ScrollView, View, Image, Text, TouchableOpacity, StatusBar, StyleSheet, Modal, Button, FlatList, Pressable } from 'react-native';
 import { useState, useEffect } from 'react';
 import { db, auth } from "../firebaseConfig";
-import { doc, updateDoc, arrayUnion, onSnapshot, getDocs, collection } from "firebase/firestore";
-// import profileIcon from '../assets/profile-icon.png';
+import { doc, updateDoc, arrayUnion, onSnapshot, getDocs, collection, arrayRemove } from "firebase/firestore";
 import { Entypo } from "@expo/vector-icons";
 
 export default function ActivityDetails({ route, navigation }) {
@@ -49,20 +48,21 @@ export default function ActivityDetails({ route, navigation }) {
             await updateDoc(eventsRef, {
                 joinedUsers: arrayUnion(auth.currentUser.uid)
             });
-            alert("Profile Updated");
+            alert("You Joined The Activity");
         } catch (err) {
             console.log(err)
         }
     }
 
-    const removeDbJoinedOrPendingUsers = async (arrayField) => {
+    const removeDbJoinedOrPendingUsers = async () => {
         // update data in firestore
         try {
             const eventsRef = doc(db, "events", activity.eventCollectionId, "sports", activity.docId)
             //   await updateDoc(userRef, user);
             // Update the document
             updateDoc(eventsRef, {
-                yourArrayField: arrayRemove(valueToRemove)
+                joinedUsers: arrayRemove(auth.currentUser.uid),
+                pendingUsers: arrayRemove(auth.currentUser.uid)
             }).then(() => {
                 console.log("Value removed from array");
             }).catch((error) => {
@@ -137,7 +137,7 @@ export default function ActivityDetails({ route, navigation }) {
         })
     }
 
-    const test = () => {
+    const onPendingButtonClicked = () => {
         setModalVisible(true)
     }
 
@@ -160,7 +160,7 @@ export default function ActivityDetails({ route, navigation }) {
                     <Entypo name="chevron-left" size={35} color="black" />
                 </Pressable>
                 <Text className="font-urbanistBold text-2xl">Activity Details</Text>
-                <TouchableOpacity onPress={test}>
+                <TouchableOpacity onPress={removeDbJoinedOrPendingUsers}>
                     <Text>Leave</Text>
                 </TouchableOpacity>
                 {/* <Ionicons name="notifications" size={24} color="black" /> */}
@@ -186,26 +186,26 @@ export default function ActivityDetails({ route, navigation }) {
 
                         {
                             !isUserActivity && !isPendingUsers && !isJoinedUser && (
-                                <TouchableOpacity onPress={test} className="bg-secondary rounded-lg h-10 items-center justify-center">
+                                <TouchableOpacity onPress={updateDbJoinedUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
                                     <Text style={styles.joinButtonText}>Join</Text>
                                 </TouchableOpacity>
                             )
                         }
 
                         {isUserActivity && (
-                            <TouchableOpacity onPress={test} className="bg-secondary rounded-lg h-10 items-center justify-center">
+                            <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-10 items-center justify-center">
                                 <Text style={styles.joinButtonText}>View Pending Requests</Text>
                             </TouchableOpacity>
                         )}
 
                         {isPendingUsers && (
-                            <View onPress={test} className="bg-secondary rounded-lg h-10 items-center justify-center">
+                            <View className="bg-secondary rounded-lg h-10 items-center justify-center">
                                 <Text style={styles.joinButtonText}>Pending</Text>
                             </View>
                         )}
 
                         {isJoinedUser && (
-                            <View onPress={test} className="bg-secondary rounded-lg h-10 items-center justify-center">
+                            <View className="bg-secondary rounded-lg h-10 items-center justify-center">
                                 <Text style={styles.joinButtonText}>Joined</Text>
                             </View>
                         )}
