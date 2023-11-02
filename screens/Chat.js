@@ -3,28 +3,32 @@ import { useFonts, Urbanist_600SemiBold, Urbanist_500Medium } from "@expo-google
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useCallback, useEffect, useLayoutEffect } from 'react';
 
-import { GiftedChat } from 'react-native-gifted-chat'
-import { Bubble } from 'react-native-gifted-chat'
+import { GiftedChat, Bubble } from 'react-native-gifted-chat'
 
 
 import { db, auth } from "../firebaseConfig";
-import { setDoc, doc, collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { setDoc, getDoc, doc, collection, onSnapshot, query, orderBy } from "firebase/firestore";
 
 export default function Chat({ navigation, route }) {
 
-  const { friendID, firstName, lastName } = route.params;
-  const [messages, setMessages] = useState([]);
+  const { friendID, firstName, lastName, groupID, groupName, groupMembers } = route.params
+  const [messages, setMessages] = useState([])
+
+  const isGroupChat = groupID ? true : false
+
+  const [membersProfile, setMembersProfile] = useState([])
+  const [currentUserData, setCurrentUserData] = useState(null);
 
   //Order Alfabeticamente
   const generateChatID = (uidOne, uidTwo) => {
     return [uidOne, uidTwo].sort().join('_')
   }
-  const chatID = generateChatID(auth.currentUser.uid, friendID)
+  const chatID = isGroupChat ? groupID : generateChatID(auth.currentUser.uid, friendID)
   console.log(chatID)
 
   useLayoutEffect(() => {
-    const chatCollection = collection(db, 'chats', chatID, 'messages');
-    const q = query(chatCollection, orderBy('createdAt', 'desc'));
+    const chatCollection = collection(db, isGroupChat ? 'chats' : 'chats', isGroupChat ? groupID : chatID, 'messages')
+    const q = query(chatCollection, orderBy('createdAt', 'desc'))
     const unsubscribe = onSnapshot(q, snapshot => {
       setMessages(snapshot.docs.map(doc => ({
         _id: doc.id,
@@ -38,22 +42,83 @@ export default function Chat({ navigation, route }) {
 
   useEffect(() => {
     navigation.setOptions({
-        title: firstName ?  `${firstName} ${lastName}`: 'Cannot load user data'
-    });
-}, []);
+      title: isGroupChat ? groupName : (firstName ? `${firstName} ${lastName}` : 'Cannot load user data')
+    })
+  }, []);
+
+  //Get Actual user Data
+  const getCurrentUserData = async () => {
+    try {
+      const userDoc = await getDoc(doc(db, "userProfiles", auth.currentUser.uid))
+      if (userDoc.exists()) {
+        return userDoc.data()
+      } else {
+        console.error("No such document!")
+        return null
+      }
+    } catch (error) {
+      console.error("Error fetching user data: ", error)
+      return null;
+    }
+  }
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getCurrentUserData();
+      setCurrentUserData(data);
+    };
+  
+    fetchData()
+  }, []);
+
+
+  //Get Member Data
+  const getMemberProfile = async () => {
+    try {
+      const arrayMember = [];
+      for (const member of groupMembers) {
+        const docSnapshot = await getDoc(doc(db, "userProfiles", member))
+        if (docSnapshot.exists()) {
+          arrayMember.push({ uid: member, ...docSnapshot.data() })
+        }
+      }
+      setMembersProfile(arrayMember)
+    } catch (error) {
+      console.error(error)
+    }
+  };
+
+  useEffect(() => {
+    if (isGroupChat) {
+      getMemberProfile()
+    }
+  }, [groupMembers])
+
+  
+  const getNameForUser = (uid) => {
+    if (isGroupChat) {
+      const user = membersProfile.find((member) => member.uid === uid)
+      return user ? `${user.firstName} ${user.lastName}` : "No data loaded"
+    }
+    if (currentUserData) {
+      return `${currentUserData.firstName} ${currentUserData.lastName}`;
+    } else {
+      return "Loading...";
+    }
+  }
 
   const onSend = useCallback((messages = []) => {
-    setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-    const { _id, createdAt, text, user } = messages[0];
+    setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+    const { _id, createdAt, text, user } = messages[0]
     const chatDoc = doc(db, 'chats', chatID, 'messages', _id);
     setDoc(chatDoc, {
       _id,
       createdAt,
       text,
-      user
+      user,
+      isGroupChat,
+      groupMembers: isGroupChat ? groupMembers : 'No hay miembros'
     });
   }, []);
-
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -64,14 +129,17 @@ export default function Chat({ navigation, route }) {
     return null;
   }
 
+
   return (
     <SafeAreaView className="bg-primary flex-1">
       <GiftedChat
         messages={messages}
-        showAvatarForEveryMessage={true}
+        showAvatarForEveryMessage={isGroupChat}
+        renderUsernameOnMessage={isGroupChat}
         onSend={messages => onSend(messages)}
         user={{
           _id: auth?.currentUser?.email,
+          name: getNameForUser(auth?.currentUser?.uid)
         }}
         renderBubble={(props) => {
           return (

@@ -183,7 +183,7 @@ export default function Activities({ navigation }) {
           justifyContent: "center",
           width: 65,
           position: "absolute",
-          top: 750,
+          top: 690,
           right: 15,
           height: 65,
           backgroundColor: "black",
