@@ -12,41 +12,50 @@ import {
 } from "react-native-safe-area-context";
 import { useState, useEffect } from "react";
 import profileIcon from "../assets/profile-icon.png";
+import groupIcon from "../assets/group-icon.png"
 
 import { db, auth } from "../firebaseConfig";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 
 export default function ChatFriends({ navigation }) {
   //State Variables
   const [friends, setFriends] = useState([]);
+  const [groups, setGroups] = useState([]);
 
   //Get Friends
-  const getFriends = async () => {
+  const getFriends = () => {
     try {
       const friendsDb = collection(
         db,
         "userProfiles",
         auth.currentUser.uid,
         "friends"
-      );
-      const friendsData = await getDocs(friendsDb);
-      const friendsArray = [];
+      )
+      //Friends Listener 
+      const unsubscribeFriends = onSnapshot(friendsDb, async snapshot => {
+        const friendsArray = [];
+        
+        const friendsPromises = snapshot.docs.map(async friendDoc => {
+          const friend = {
+            id: friendDoc.id,
+            ...friendDoc.data()
+          }
 
-      for (const friendDoc of friendsData.docs) {
-        const friend = {
-          id: friendDoc.id,
-          ...friendDoc.data(),
-        };
-        const friendProfile = await getFriendProfile(friend.userID);
-        //Validation
-        if (friendProfile) {
-          friend.friendProfile = friendProfile;
-        }
-        friendsArray.push(friend);
+          const friendProfile = await getFriendProfile(friend.userID)
+          if (friendProfile) {
+            friend.friendProfile = friendProfile
+          }
+          friendsArray.push(friend)
+        })
+        //Promises (get all the data correctly)
+        await Promise.all(friendsPromises)
+        setFriends(friendsArray)
+        console.log("Friends Array:", friendsArray);
+      })
+      return () => {
+        unsubscribeFriends()
       }
 
-      setFriends(friendsArray);
-      console.log("Friends Array:", friendsArray);
     } catch (error) {
       console.log(error);
     }
@@ -61,10 +70,46 @@ export default function ChatFriends({ navigation }) {
     return null;
   };
 
+
+  //Get Group Friends
+  const getGroups = () => {
+    try {
+      const chatGroupsDb = collection(db, "chatGroups")
+  
+      // ChatGroups Listener
+      const unsubscribeChatGroups = onSnapshot(chatGroupsDb, async snapshot => {
+        const groupsArray = []
+        const groupPromises = snapshot.docs.map(async groupDoc => {
+          const group = {
+            id: groupDoc.id,
+            ...groupDoc.data()
+          }
+          // Verify the user belongs to a group
+          if (group.members && group.members.includes(auth.currentUser.uid)) {
+            groupsArray.push(group)
+          }
+        })
+  
+        // Promise to get all the data completed
+        await Promise.all(groupPromises);
+        setGroups(groupsArray)
+        console.log("Groups Array:", groupsArray)
+      })
+  
+      return () => {
+        unsubscribeChatGroups()
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  };
+  
+
   //Use Effect State
   useEffect(() => {
-    getFriends();
-  });
+    getFriends()
+    getGroups()
+  }, []);
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -76,14 +121,41 @@ export default function ChatFriends({ navigation }) {
     return null;
   }
 
+  //Array Friends & Groups Data
+  const arrayData = [...friends, ...groups.map(group => ({ isGroup: true, ...group }))]
+
   return (
     <SafeAreaView className="bg-primary flex-1">
       <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
         Chat List
       </Text>
       <FlatList
-        data={friends}
+        data={arrayData}
         renderItem={(rowData) => {
+          if (rowData.item.isGroup) {
+            return (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("Chat", {
+                    groupID: rowData.item.id,
+                    groupName: rowData.item.groupName,
+                    groupMembers: rowData.item.members
+                  })
+                }
+              >
+                <View className="flex-row items-center mt-5 pl-3">
+                  <Image
+                    source={groupIcon}
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <Text className="font-urbanist text-1xl mr-3">
+                    {rowData.item.groupName}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          }
+  
           return (
             <TouchableOpacity
               onPress={() =>
@@ -103,7 +175,9 @@ export default function ChatFriends({ navigation }) {
                   }
                   className="w-12 h-12 rounded-full"
                 />
-                <Text className="font-urbanist text-1xl mr-3">{` ${rowData.item.friendProfile.firstName} ${rowData.item.friendProfile.lastName}`}</Text>
+                <Text className="font-urbanist text-1xl mr-3">
+                  {`${rowData.item.friendProfile.firstName} ${rowData.item.friendProfile.lastName}`}
+                </Text>
               </View>
             </TouchableOpacity>
           );
@@ -111,4 +185,7 @@ export default function ChatFriends({ navigation }) {
       />
     </SafeAreaView>
   );
+  
 }
+
+
