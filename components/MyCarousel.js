@@ -30,6 +30,7 @@ const MyCarousel = ({ data,navigation }) => {
         joinedUsers={item.joinedUsers ? item.joinedUsers : []}
         docId={item.docId}
         eventCollectionId={item.eventCollectionId}
+        isUserActivity={true}
       />
 
 
