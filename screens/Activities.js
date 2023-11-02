@@ -21,6 +21,8 @@ import {
 } from "@expo-google-fonts/urbanist";
 import { db, auth } from "../firebaseConfig";
 import { collection, getDoc, getDocs, doc } from "firebase/firestore";
+import Carousel from 'react-native-snap-carousel';//NEW
+import MyCarousel from "../components/MyCarousel" //NEW
 
 export default function Activities({ navigation }) {
   const { width, height } = Dimensions.get("window");
@@ -28,6 +30,7 @@ export default function Activities({ navigation }) {
   //Location State
   const [deviceLocation, setDeviceLocation] = useState(null);
   const [activityDataList, setActivityDataList] = useState([]);
+  const [userActivityList, setUserActivityList] = useState([]);
   const [user, setUser] = useState({
     firstName: "",
     lastName: "",
@@ -68,6 +71,7 @@ export default function Activities({ navigation }) {
     // getCurrentLocation();
     retrieveFromDb();
     retrieveUserDataFromDb();
+    getUserEvents()
   }, []);
 
   // const retrieveFromDb = async () => {
@@ -127,6 +131,32 @@ export default function Activities({ navigation }) {
     setActivityDataList(allSportsEvents);
   };
 
+  //NEW Function
+
+  const getUserEvents = async () => {
+    const allSportsEvents = [];
+    const currentUserId = auth.currentUser.uid;
+  
+    const userEventsRef = doc(db, "events", currentUserId);
+    
+    const sportsSnapshot = await getDocs(collection(userEventsRef, "sports"));
+  
+    for (let sportDoc of sportsSnapshot.docs) {
+      console.log(sportDoc.id, " => ", sportDoc.data());
+      const sportData = sportDoc.data();
+      const combinedData = {
+        ...sportData,
+        docId: sportDoc.id,
+        eventCollectionId: currentUserId,
+      };
+  
+      allSportsEvents.push(combinedData);
+    }
+  
+    setUserActivityList(allSportsEvents);
+  };
+  
+
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
 
@@ -155,6 +185,11 @@ export default function Activities({ navigation }) {
             </Text>
             <Ionicons name="chevron-forward" size={21} color="black" />
           </View>
+        </View>
+
+        <View>
+          <MyCarousel data={userActivityList}
+          navigation={navigation} />
         </View>
 
         {activityDataList.map((activity, index) => (
