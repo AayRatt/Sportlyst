@@ -78,37 +78,39 @@ export default function ChatFriends({ navigation }) {
 
   return (
     <SafeAreaView className="bg-primary flex-1">
-      <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">
-        Chat List
-      </Text>
-      <FlatList
-        data={friends}
-        renderItem={(rowData) => {
-          return (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("Chat", {
-                  friendID: rowData.item.userID,
-                  firstName: rowData.item.friendProfile.firstName,
-                  lastName: rowData.item.friendProfile.lastName,
-                })
-              }
-            >
-              <View className="flex-row items-center mt-5 pl-3">
-                <Image
-                  source={
-                    rowData.item.friendProfile?.image
-                      ? { uri: rowData.item.friendProfile.image }
-                      : profileIcon
-                  }
-                  className="w-12 h-12 rounded-full"
-                />
-                <Text className="font-urbanist text-1xl mr-3">{` ${rowData.item.friendProfile.firstName} ${rowData.item.friendProfile.lastName}`}</Text>
-              </View>
-            </TouchableOpacity>
-          );
-        }}
-      />
+      <View className="bg-white pl-3 pr-3 mt-5">
+        <Text className="font-urbanistBold text-3xl text-start pl-3">
+          Chats
+        </Text>
+        <FlatList
+          data={friends}
+          renderItem={(rowData) => {
+            return (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("Chat", {
+                    friendID: rowData.item.userID,
+                    firstName: rowData.item.friendProfile.firstName,
+                    lastName: rowData.item.friendProfile.lastName,
+                  })
+                }
+              >
+                <View className="flex-row items-center mt-4  bg-gray rounded-lg p-2">
+                  <Image
+                    source={
+                      rowData.item.friendProfile?.image
+                        ? { uri: rowData.item.friendProfile.image }
+                        : profileIcon
+                    }
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <Text className="font-urbanist text-xl mr-3 ml-1">{` ${rowData.item.friendProfile.firstName} ${rowData.item.friendProfile.lastName}`}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </View>
     </SafeAreaView>
   );
 }

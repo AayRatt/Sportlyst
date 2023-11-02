@@ -21,6 +21,7 @@ import { signOut } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import profileIcon from "../assets/profile-icon.png";
 import countries from "../data/countries.json";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import {
   useFonts,
@@ -32,6 +33,8 @@ export default function Profile({}) {
   const [uploading, setUploading] = useState(false);
   //Countries Picker Visibiilty
   const [pickerVisible, setPickerVisible] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
 
   const [countriesDataList, setCountriesDataList] = useState([]);
 
@@ -229,13 +232,36 @@ export default function Profile({}) {
   return (
     <SafeAreaView className="bg-primary flex-1 h-full">
       <View className="flex-row justify-between items-center px-6 pb-5">
-        <TouchableOpacity onPress={resetForm}>
-          <Text>Reset</Text>
-        </TouchableOpacity>
-        <Text className="font-urbanistBold text-2xl">User Profile</Text>
-        <TouchableOpacity onPress={saveUserProfile}>
-          <Text>Save</Text>
-        </TouchableOpacity>
+        {isEditing ? (
+          <>
+            <TouchableOpacity onPress={resetForm}>
+              <Text className="font-urbanist text-lg">Reset</Text>
+            </TouchableOpacity>
+            <Text className="font-urbanistBold text-2xl">User Profile</Text>
+            <TouchableOpacity
+              onPress={() => {
+                saveUserProfile();
+                setIsEditing(false);
+              }}
+            >
+              <Text className="font-urbanist text-lg">Save</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity onPress={() => setIsEditing(true)}>
+              <Text className="font-urbanist text-lg">Edit</Text>
+            </TouchableOpacity>
+            <Text className="font-urbanistBold text-2xl">User Profile</Text>
+            <TouchableOpacity>
+              <MaterialCommunityIcons
+                name="dots-vertical-circle-outline"
+                size={25}
+                color="black"
+              />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
       <ScrollView className="h-fit">
         <View className="bg-white pl-3 pr-3">
