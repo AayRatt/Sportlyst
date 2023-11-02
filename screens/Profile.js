@@ -221,11 +221,6 @@ export default function Profile({}) {
     return null;
   }
 
-  const countriesListItem = ({ item }) =>
-    countriesDataList.map((currCountry) => {
-      <Picker.Item label={currCountry} value={currCountry} />;
-    });
-
   return (
     <SafeAreaView className="bg-primary flex-1 h-full">
       <View className="flex-row justify-between items-center px-6 pb-5">
