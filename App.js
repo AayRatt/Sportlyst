@@ -139,9 +139,15 @@ export default function App() {
           component={ActivityDetails}
           options={{
             title: null,
-            headerShown: true,
+            headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="FriendProfile"
+          component={FriendProfile}
+          options={{ headerShown: true }}
+        />
+        <Stack.Screen name="Search" component={SearchStack} />
       </Stack.Navigator>
     );
   }
