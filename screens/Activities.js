@@ -208,6 +208,7 @@ export default function Activities({ navigation }) {
             venue={activity.venue}
             venueAddress={activity.venueAddress}
             joinedPlayers={activity.joinedPlayers}
+            pendingUsers={activity.pendingUsers ? activity.pendingUsers : []}
             joinedUsers={activity.joinedUsers ? activity.joinedUsers : []}
             docId={activity.docId}
             eventCollectionId={activity.eventCollectionId}
