@@ -14,10 +14,11 @@ export default function ActivityDetails({ route, navigation }) {
     const [pendingUsers, setPendingUsers] = useState([])
     const [isPendingUsers, setIsPendingUsers] = useState(false)
     const [isJoinedUser, setIsJoinedUser] = useState(false)
-    const [users, setUsers] = useState([])
+    const [joinedUserProfiles, setJoinedUserProfiles] = useState([])
+    const [pendingUserProfiles, setPendingUserProfiles] = useState([])
 
     //tmp
-    const [isUserActivity, setIsUserActivity] = useState(false);
+    // const [isUserActivity, setIsUserActivity] = useState(false);
     // const [isUserActivity, setIsUserActivity] = useState(true);
 
     const [modalVisible, setModalVisible] = useState(false);
@@ -75,7 +76,8 @@ export default function ActivityDetails({ route, navigation }) {
     }
 
     const retrieveAllUsersDataFromDb = async () => {
-        const usersArr = [];
+        const joinedUsersArr = [];
+        const pendingUsersArr = [];
         const querySnapshot = await getDocs(collection(db, "userProfiles"));
         querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
@@ -86,18 +88,26 @@ export default function ActivityDetails({ route, navigation }) {
                     firstName: doc.data().firstName,
                     lastName: doc.data().lastName
                 }
-                usersArr.push(userObj);
+                joinedUsersArr.push(userObj);
             }
+
+            if (pendingUsers.includes(doc.id)) {
+                const userObj = {
+                    imageUrl: doc.data().imageUrl,
+                    userId: doc.id,
+                    firstName: doc.data().firstName,
+                    lastName: doc.data().lastName
+                }
+                pendingUsersArr.push(userObj);
+            }
+
             if (joinedUsers.includes(auth.currentUser.uid)) {
                 setIsJoinedUser(true)
             }
         });
-        usersArr.map(
-            (currCountry) => {
-                console.log(`usersArr => ${JSON.stringify(currCountry)}`)
-            }
-        )
-        setUsers(usersArr)
+
+        setJoinedUserProfiles(joinedUsersArr)
+        setPendingUserProfiles(pendingUsersArr)
     }
 
     const realtimeDbListener = async () => {
@@ -107,6 +117,7 @@ export default function ActivityDetails({ route, navigation }) {
         const unsubscribe = onSnapshot(eventsRef, (docSnapshot) => {
             if (docSnapshot.exists()) {
                 docSnapshot.data().joinedUsers ? setJoinedUsersCount(docSnapshot.data().joinedUsers.length) : setJoinedUsersCount(0)
+                docSnapshot.data().pendingUsers ? setPendingUsersCount(docSnapshot.data().pendingUsers.length) : setPendingUsersCount(0)
             } else {
                 console.log("No such document!");
             }
@@ -120,15 +131,20 @@ export default function ActivityDetails({ route, navigation }) {
 
     const retrieveSingleEventData = async () => {
         const joinedUsersArr = [];
+        const pendingUsersArr = [];
         const querySnapshot = await getDocs(collection(db, "events", activity.eventCollectionId, "sports"));
         querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
             if (doc.id == activity.docId) {
-                console.log(doc.data().joinedUsers, " tttt=> ");
                 setJoinedUsers(doc.data().joinedUsers)
                 joinedUsersArr.push(doc.data().joinedUsers)
+                pendingUsersArr.push(doc.data().pendingUsers)
+
+                setPendingUsers(doc.data().pendingUsers)
             }
         });
+        // setJoinedUsers(joinedUsersArr)
+        // setPendingUsers(pendingUsersArr)
     }
 
     const onImageClicked = (userId) => {
@@ -173,7 +189,7 @@ export default function ActivityDetails({ route, navigation }) {
                         <Text style={styles.grayText}>{activity.date} {activity.time}</Text>
                         <Text style={styles.grayText}>CAD {activity.price}</Text>
                         <Text style={styles.grayText}>{joinedUsersCount ? joinedUsersCount : 0}/{activity.players} joined</Text>
-                        {isUserActivity && (
+                        {activity.isUserActivity && (
                             <Text style={styles.grayText}>{pendingUsersCount ? pendingUsersCount : 0} pending</Text>
                         )}
 
@@ -185,14 +201,14 @@ export default function ActivityDetails({ route, navigation }) {
                         </View>
 
                         {
-                            !isUserActivity && !isPendingUsers && !isJoinedUser && (
+                            !activity.isUserActivity && !isPendingUsers && !isJoinedUser && (
                                 <TouchableOpacity onPress={updateDbJoinedUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
                                     <Text style={styles.joinButtonText}>Join</Text>
                                 </TouchableOpacity>
                             )
                         }
 
-                        {isUserActivity && (
+                        {activity.isUserActivity && (
                             <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-10 items-center justify-center">
                                 <Text style={styles.joinButtonText}>View Pending Requests</Text>
                             </TouchableOpacity>
@@ -213,7 +229,7 @@ export default function ActivityDetails({ route, navigation }) {
                     <View style={styles.attendees}>
                         <Text style={styles.sectionTitle}>Who's going?</Text>
                         <View style={styles.imagesContainer}>
-                            {users.map((image, index) => (
+                            {joinedUserProfiles.map((image, index) => (
                                 <TouchableOpacity key={index} onPress={() => onImageClicked(image.userId)}>
                                     <Image
                                         key={index}
@@ -245,7 +261,7 @@ export default function ActivityDetails({ route, navigation }) {
                         >
                             <View style={{ backgroundColor: "white", height: 350 }}>
                                 <FlatList
-                                    data={users}
+                                    data={pendingUserProfiles}
                                     renderItem={
                                         (rowData) => {
                                             return (
@@ -254,10 +270,15 @@ export default function ActivityDetails({ route, navigation }) {
                                                         <Image
                                                             source={rowData.item.imageUrl ? { uri: rowData.item.imageUrl } : require("../assets/profile-icon.png")}
                                                             className="w-12 h-12 rounded-full" />
-                                                        <Text
-                                                            className="font-urbanist text-1xl mr-3"
-                                                        >{` ${rowData.item.firstName} ${rowData.item.lastName}`}</Text>
-
+                                                        <Text className="font-urbanist text-1xl mr-3">
+                                                            {rowData.item.firstName} {rowData.item.lastName}
+                                                        </Text>
+                                                        <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-8 w-20 mr-2 items-center justify-center">
+                                                            <Text style={styles.joinButtonText}>Accept</Text>
+                                                        </TouchableOpacity>
+                                                        <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-8 w-20 items-center justify-center">
+                                                            <Text style={styles.joinButtonText}>Decline</Text>
+                                                        </TouchableOpacity>
                                                     </View>
                                                 </TouchableOpacity>
                                             )
