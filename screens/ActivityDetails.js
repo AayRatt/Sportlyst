@@ -40,14 +40,15 @@ export default function ActivityDetails({ route, navigation }) {
         }
     }
 
-    const updateDbJoinedUsers = async () => {
+    const updateDbJoinedUsers = async (userId) => {
+        removeDbJoinedOrPendingUsers(userId)
         // update data in firestore
         try {
             const eventsRef = doc(db, "events", activity.eventCollectionId, "sports", activity.docId)
             //   await updateDoc(userRef, user);
 
             await updateDoc(eventsRef, {
-                joinedUsers: arrayUnion(auth.currentUser.uid)
+                joinedUsers: arrayUnion(userId)
             });
             alert("You Joined The Activity");
         } catch (err) {
@@ -55,21 +56,21 @@ export default function ActivityDetails({ route, navigation }) {
         }
     }
 
-    const removeDbJoinedOrPendingUsers = async () => {
+    const removeDbJoinedOrPendingUsers = async (userIdToRemove) => {
         // update data in firestore
         try {
             const eventsRef = doc(db, "events", activity.eventCollectionId, "sports", activity.docId)
             //   await updateDoc(userRef, user);
             // Update the document
             updateDoc(eventsRef, {
-                joinedUsers: arrayRemove(auth.currentUser.uid),
-                pendingUsers: arrayRemove(auth.currentUser.uid)
+                joinedUsers: arrayRemove(userIdToRemove),
+                pendingUsers: arrayRemove(userIdToRemove)
             }).then(() => {
                 console.log("Value removed from array");
             }).catch((error) => {
                 console.error("Error removing value from array", error);
             });
-            alert("Profile Updated");
+            alert("User Removed");
         } catch (err) {
             console.log(err)
         }
@@ -176,7 +177,7 @@ export default function ActivityDetails({ route, navigation }) {
                     <Entypo name="chevron-left" size={35} color="black" />
                 </Pressable>
                 <Text className="font-urbanistBold text-2xl">Activity Details</Text>
-                <TouchableOpacity onPress={removeDbJoinedOrPendingUsers}>
+                <TouchableOpacity onPress={() => removeDbJoinedOrPendingUsers(auth.currentUser.uid)}>
                     <Text>Leave</Text>
                 </TouchableOpacity>
                 {/* <Ionicons name="notifications" size={24} color="black" /> */}
@@ -202,7 +203,7 @@ export default function ActivityDetails({ route, navigation }) {
 
                         {
                             !activity.isUserActivity && !isPendingUsers && !isJoinedUser && (
-                                <TouchableOpacity onPress={updateDbJoinedUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
+                                <TouchableOpacity onPress={updatePendingUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
                                     <Text style={styles.joinButtonText}>Join</Text>
                                 </TouchableOpacity>
                             )
@@ -273,10 +274,10 @@ export default function ActivityDetails({ route, navigation }) {
                                                         <Text className="font-urbanist text-1xl mr-3">
                                                             {rowData.item.firstName} {rowData.item.lastName}
                                                         </Text>
-                                                        <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-8 w-20 mr-2 items-center justify-center">
+                                                        <TouchableOpacity onPress={() => updateDbJoinedUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 mr-2 items-center justify-center">
                                                             <Text style={styles.joinButtonText}>Accept</Text>
                                                         </TouchableOpacity>
-                                                        <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-8 w-20 items-center justify-center">
+                                                        <TouchableOpacity onPress={() => removeDbJoinedOrPendingUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 items-center justify-center">
                                                             <Text style={styles.joinButtonText}>Decline</Text>
                                                         </TouchableOpacity>
                                                     </View>
