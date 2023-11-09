@@ -21,6 +21,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import ChatFriends from "./screens/ChatFriends";
 import FriendProfile from "./screens/FriendProfile";
+import ChatGroup from "./screens/ChatGroup";
 
 const Tab = createBottomTabNavigator();
 
@@ -162,6 +163,14 @@ export default function App() {
         <Stack.Screen
           name="Chat"
           component={Chat}
+          options={{
+            headerShown: true,
+            title: null,
+          }}
+        />
+        <Stack.Screen
+          name="ChatGroup"
+          component={ChatGroup}
           options={{
             headerShown: true,
             title: null,
