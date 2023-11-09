@@ -5,7 +5,12 @@ import Login from "./screens/Login";
 import Register from "./screens/Register";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { auth } from "./firebaseConfig";
+import { auth, db } from "./firebaseConfig";
+import {
+  doc,
+  getDoc
+} from "firebase/firestore";
+import { Alert, Text } from "react-native";
 import { useState, useEffect } from "react";
 import Activities from "./screens/Activities";
 import Profile from "./screens/Profile";
@@ -21,6 +26,11 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import ChatFriends from "./screens/ChatFriends";
 import FriendProfile from "./screens/FriendProfile";
+import Onboarding from 'react-native-onboarding-swiper';
+import { Pressable } from 'react-native'; //NEW
+import OnBoardingScreen from "./screens/OnBoardingScreen";
+import AsyncStorage, { useAsyncStorage } from "@react-native-async-storage/async-storage";
+import ChatGroup from "./screens/ChatGroup";
 
 const Tab = createBottomTabNavigator();
 
@@ -29,6 +39,10 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
+  const [onBoarding, setOnBoarding] = useState(false);
+  const [launch, setLaunch] = useState(false);
+
+  console.log(onBoarding)
 
   function onAuthStateChanged(user) {
     setUser(user);
@@ -40,7 +54,85 @@ export default function App() {
     return subscriber;
   }, []);
 
+
+  useEffect(() => {
+
+    let isMounted = true;
+
+    const getOnBoardingStatus = async () => {
+      const loggedUser = auth.currentUser;
+      if (loggedUser) {
+        const userRef = doc(db, "userProfiles", loggedUser.uid);
+        try {
+          const docSnap = await getDoc(userRef);
+          if (docSnap.exists()) {
+            
+            print(`STATUS${docSnap.data().onBoardPending}`)
+            if (docSnap.data().onBoardPending) {
+
+              setOnBoarding(true)
+
+              // try {
+
+              //   AsyncStorage.getItem("launched").then(value => {
+
+              //     if (value !== null) {
+              //       setLaunch(true)
+              //       setOnBoarding(true)
+              //     } else {
+              //       setOnBoarding(true)
+              //     }
+
+              //   }
+              //   )
+
+              // } catch (error) {
+
+              //   console.log(error)
+
+              // }
+
+
+            } else {
+              setOnBoarding(false)
+            }
+
+          } else {
+            // Consider how to handle the case where user data doesn't exist
+          }
+
+          console.log(`LAUNCH:${launch}, ONBOARDING:${onBoarding} USER:${user}`)
+        } catch (error) {
+          // Handle any errors
+        }
+      }
+      console.log(`LAUNCH:${launch}, ONBOARDING:${onBoarding} USER:${user}`)
+    };
+
+    if (user) {
+      getOnBoardingStatus();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+
+  }, [user]);
+
+
+
   if (initializing) return null;
+
+  function Onboarding() {
+
+    return (
+      <Stack.Navigator>
+        <Stack.Screen options={{ headerShown: false }} name="OnBoardingScreen" component={OnBoardingScreen} />
+        <Stack.Screen options={{ headerShown: false }} name="BottomTab" component={BottomTabNavigator} />
+      </Stack.Navigator>
+    );
+
+  }
 
   function BottomTabNavigator() {
     return (
@@ -167,14 +259,33 @@ export default function App() {
             title: null,
           }}
         />
+        <Stack.Screen
+          name="ChatGroup"
+          component={ChatGroup}
+          options={{
+            headerShown: true,
+            title: null,
+          }}
+        />
       </Stack.Navigator>
     );
   }
+
+
   return (
     <NavigationContainer>
-      {user ? (
+      {/* Assuming OnBoardingModal is correctly imported and used */}
+      {user && onBoarding && launch ? (
+        // If there is a user and onboarding is true, show the onboarding screen
+        <BottomTabNavigator />
+      ) : user && onBoarding ? (
+        // If there is a user and onboarding is true, show the onboarding screen
+        <Onboarding />
+      ) : user ? (
+        // If there is a user but onboarding is not true, show the bottom tab navigator
         <BottomTabNavigator />
       ) : (
+        // If there is no user, show the authentication flow
         <Stack.Navigator initialRouteName="Launch">
           <Stack.Screen
             name="Launch"
@@ -191,23 +302,9 @@ export default function App() {
             component={Register}
             options={{ headerShown: false }}
           />
-          {/* <Stack.Screen
-            name="Activities"
-            component={Activities}
-            options={{ headerShown: false, headerLeft: false }}
-          />                */}
-          {/* <Stack.Screen
-            name="ActivityCard"
-            component={ActivityCard}
-            options={{ headerShown: false, headerLeft: false }}
-          />          
-          <Stack.Screen
-            name="ActivityDetails"
-            component={ActivityDetails}
-            options={{ headerShown: false, headerLeft: false }}
-          /> */}
         </Stack.Navigator>
       )}
     </NavigationContainer>
   );
+
 }

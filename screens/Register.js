@@ -81,6 +81,7 @@ export default function Register({ route, navigation }) {
           lastName: formField.lastName,
           email: formField.email,
           userID: auth.currentUser.uid,
+          onBoardPending: true,
         };
         //2. Add data to firestore
         await setDoc(
@@ -128,19 +129,18 @@ export default function Register({ route, navigation }) {
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="bg-white pl-3 pr-3">
-        <Pressable
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
-          <View className="bg-white w-12 h-12 rounded-full items-center justify-center shadow-md">
-            <Ionicons name="arrow-back-sharp" size={24} color="black" />
-          </View>
-        </Pressable>
-
-        <Text className="font-urbanistBold text-3xl text-start pl-3">
-          Register
-        </Text>
+        <View className="flex-row items-center">
+          <Pressable
+            onPress={() => {
+              navigation.goBack();
+            }}
+          >
+            <View className="bg-white w-12 h-12 rounded-full items-center justify-center shadow-md">
+              <Ionicons name="arrow-back-sharp" size={24} color="black" />
+            </View>
+          </Pressable>
+          <Text className="font-urbanistBold text-2xl">Register</Text>
+        </View>
         <View className="mt-8">
           <View className="flex-row gap-3">
             <TextInput

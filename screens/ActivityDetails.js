@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { db, auth } from "../firebaseConfig";
 import { doc, updateDoc, arrayUnion, onSnapshot, getDocs, collection, arrayRemove } from "firebase/firestore";
 import { Entypo } from "@expo/vector-icons";
+import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 
 export default function ActivityDetails({ route, navigation }) {
 
@@ -16,6 +18,7 @@ export default function ActivityDetails({ route, navigation }) {
     const [isJoinedUser, setIsJoinedUser] = useState(false)
     const [joinedUserProfiles, setJoinedUserProfiles] = useState([])
     const [pendingUserProfiles, setPendingUserProfiles] = useState([])
+    const [isEditUI, setIsEditUI] = useState(false)
 
     //tmp
     // const [isUserActivity, setIsUserActivity] = useState(false);
@@ -34,20 +37,21 @@ export default function ActivityDetails({ route, navigation }) {
             await updateDoc(eventsRef, {
                 pendingUsers: arrayUnion(auth.currentUser.uid)
             });
-            alert("Profile Updated");
+            alert("Activity Updated");
         } catch (err) {
             console.log(err)
         }
     }
 
-    const updateDbJoinedUsers = async () => {
+    const updateDbJoinedUsers = async (userId) => {
+        removeDbJoinedOrPendingUsers(userId)
         // update data in firestore
         try {
             const eventsRef = doc(db, "events", activity.eventCollectionId, "sports", activity.docId)
             //   await updateDoc(userRef, user);
 
             await updateDoc(eventsRef, {
-                joinedUsers: arrayUnion(auth.currentUser.uid)
+                joinedUsers: arrayUnion(userId)
             });
             alert("You Joined The Activity");
         } catch (err) {
@@ -55,21 +59,21 @@ export default function ActivityDetails({ route, navigation }) {
         }
     }
 
-    const removeDbJoinedOrPendingUsers = async () => {
+    const removeDbJoinedOrPendingUsers = async (userIdToRemove) => {
         // update data in firestore
         try {
             const eventsRef = doc(db, "events", activity.eventCollectionId, "sports", activity.docId)
             //   await updateDoc(userRef, user);
             // Update the document
             updateDoc(eventsRef, {
-                joinedUsers: arrayRemove(auth.currentUser.uid),
-                pendingUsers: arrayRemove(auth.currentUser.uid)
+                joinedUsers: arrayRemove(userIdToRemove),
+                pendingUsers: arrayRemove(userIdToRemove)
             }).then(() => {
                 console.log("Value removed from array");
             }).catch((error) => {
                 console.error("Error removing value from array", error);
             });
-            alert("Profile Updated");
+            alert("Activity Updated");
         } catch (err) {
             console.log(err)
         }
@@ -157,6 +161,10 @@ export default function ActivityDetails({ route, navigation }) {
         setModalVisible(true)
     }
 
+    const onEditButtonClicked = () => {
+        setIsEditUI(true)
+    }
+
     useEffect(() => {
         realtimeDbListener();  // This sets up the realtime listener
         retrieveSingleEventData();  // This fetches joined users
@@ -176,16 +184,28 @@ export default function ActivityDetails({ route, navigation }) {
                     <Entypo name="chevron-left" size={35} color="black" />
                 </Pressable>
                 <Text className="font-urbanistBold text-2xl">Activity Details</Text>
-                <TouchableOpacity onPress={removeDbJoinedOrPendingUsers}>
-                    <Text>Leave</Text>
-                </TouchableOpacity>
-                {/* <Ionicons name="notifications" size={24} color="black" /> */}
+                {activity.isUserActivity ? (
+                    isEditUI ? (
+                        <TouchableOpacity onPress={() => setIsEditUI(false)}>
+                            <Text>Close</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity onPress={onEditButtonClicked}>
+                            <Text>Edit</Text>
+                        </TouchableOpacity>
+                    )
+                ) : (
+                    <TouchableOpacity onPress={() => removeDbJoinedOrPendingUsers(auth.currentUser.uid)}>
+                        <Text>Leave</Text>
+                    </TouchableOpacity>
+                )}
             </View>
             <ScrollView style={styles.scrollView}>
                 <View style={styles.container}>
                     <Image source={require('../assets/football.jpg')} style={{ width: '100%', height: 160 }} />
                     <View style={styles.eventDetails}>
                         <Text style={styles.title}>{activity.title}</Text>
+                        <Text style={styles.description}>{activity.description}</Text>
                         <Text style={styles.grayText}>{activity.date} {activity.time}</Text>
                         <Text style={styles.grayText}>CAD {activity.price}</Text>
                         <Text style={styles.grayText}>{joinedUsersCount ? joinedUsersCount : 0}/{activity.players} joined</Text>
@@ -202,15 +222,32 @@ export default function ActivityDetails({ route, navigation }) {
 
                         {
                             !activity.isUserActivity && !isPendingUsers && !isJoinedUser && (
-                                <TouchableOpacity onPress={updateDbJoinedUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
+                                <TouchableOpacity onPress={updatePendingUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
                                     <Text style={styles.joinButtonText}>Join</Text>
                                 </TouchableOpacity>
                             )
                         }
 
-                        {activity.isUserActivity && (
+                        {activity.isUserActivity && !isEditUI && (
                             <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-10 items-center justify-center">
                                 <Text style={styles.joinButtonText}>View Pending Requests</Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {activity.isUserActivity && isEditUI &&(
+                            <TouchableOpacity onPress={() => {
+                                navigation.navigate('CreateActivity', {
+                                    activity: "ActivityDetails",
+                                    title: activity.title,
+                                    description: activity.description,
+                                    joinedUsersCount: '' + joinedUsersCount,
+                                    price: activity.price,
+                                    eventCollectionId: activity.eventCollectionId,
+                                    docId: activity.docId
+                                })
+                            }}
+                                className="bg-secondary rounded-lg h-10 items-center justify-center">
+                                <Text style={styles.joinButtonText}>Update Activity</Text>
                             </TouchableOpacity>
                         )}
 
@@ -228,21 +265,42 @@ export default function ActivityDetails({ route, navigation }) {
                     </View>
                     <View style={styles.attendees}>
                         <Text style={styles.sectionTitle}>Who's going?</Text>
-                        <View style={styles.imagesContainer}>
-                            {joinedUserProfiles.map((image, index) => (
-                                <TouchableOpacity key={index} onPress={() => onImageClicked(image.userId)}>
-                                    <Image
-                                        key={index}
-                                        source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
-                                        style={{
-                                            width: 60,
-                                            height: 60,
-                                            borderRadius: 60 / 2,
-                                            borderWidth: 2,
-                                        }} />
-                                </TouchableOpacity>
-                            ))}
-                        </View>
+                        {isEditUI ? (
+                            <View style={styles.imagesContainer}>
+                                {joinedUserProfiles.map((image, index) => (
+                                    <TouchableOpacity key={index} onPress={() => removeDbJoinedOrPendingUsers(image.userId)}>
+                                        <View style={styles.iconContainer}>
+                                            <Ionicons name="remove-circle" size={24} color="black" />
+                                        </View>
+                                        <Image
+                                            key={index}
+                                            source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
+                                            style={{
+                                                width: 60,
+                                                height: 60,
+                                                borderRadius: 60 / 2,
+                                                borderWidth: 2,
+                                            }} />
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        ) : (
+                            <View style={styles.imagesContainer}>
+                                {joinedUserProfiles.map((image, index) => (
+                                    <TouchableOpacity key={index} onPress={() => onImageClicked(image.userId)}>
+                                        <Image
+                                            key={index}
+                                            source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
+                                            style={{
+                                                width: 60,
+                                                height: 60,
+                                                borderRadius: 60 / 2,
+                                                borderWidth: 2,
+                                            }} />
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        )}
                     </View>
                     <Modal
                         animationType="slide"
@@ -273,10 +331,10 @@ export default function ActivityDetails({ route, navigation }) {
                                                         <Text className="font-urbanist text-1xl mr-3">
                                                             {rowData.item.firstName} {rowData.item.lastName}
                                                         </Text>
-                                                        <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-8 w-20 mr-2 items-center justify-center">
+                                                        <TouchableOpacity onPress={() => updateDbJoinedUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 mr-2 items-center justify-center">
                                                             <Text style={styles.joinButtonText}>Accept</Text>
                                                         </TouchableOpacity>
-                                                        <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-8 w-20 items-center justify-center">
+                                                        <TouchableOpacity onPress={() => removeDbJoinedOrPendingUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 items-center justify-center">
                                                             <Text style={styles.joinButtonText}>Decline</Text>
                                                         </TouchableOpacity>
                                                     </View>
@@ -326,6 +384,10 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold'
     },
+    description: {
+        fontSize: 20,
+        fontWeight: 'bold'
+    },
     grayText: {
         color: 'gray',
         marginTop: 8
@@ -351,7 +413,7 @@ const styles = StyleSheet.create({
         marginBottom: 8
     },
     attendees: {
-        top: 300,
+        top: 340,
         left: 16,
         fontSize: 32,
         fontWeight: 'bold',
@@ -367,6 +429,13 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 60 / 2,
-        borderWidth: 3,
-    }
+        borderWidth: 2,
+        overflow: 'hidden', // Ensure the borderWidth does not exceed the dimensions of the image wrapper
+    },
+    iconContainer: {
+        position: 'absolute', // Position the icons absolutely
+        right: -8, // Align to the right edge of the image, adjust as necessary
+        top: -7, // Align to the top edge of the image, adjust as necessary
+        zIndex: 1, // Make sure the icon is layered above the image
+    },
 });
