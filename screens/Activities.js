@@ -29,6 +29,7 @@ export default function Activities({ navigation }) {
   const { width, height } = Dimensions.get("window");
   ///Variables
   //Location State
+  const [userActivityList, setUserActivityList] = useState([]);
   const [deviceLocation, setDeviceLocation] = useState(null);
   const [activityDataList, setActivityDataList] = useState([]);
   const [user, setUser] = useState({
