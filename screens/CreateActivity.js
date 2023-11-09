@@ -36,7 +36,12 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { db, auth } from "../firebaseConfig";
 import { setDoc, doc, collection } from "firebase/firestore";
 
-export default function CreateActivity({ navigation }) {
+export default function CreateActivity({ route, navigation }) {
+  const { activity } = route.params
+  const { title } = route.params
+  const { description } = route.params
+  const { joinedUsersCount } = route.params
+  const { price } = route.params
   const [pickerVisible, setPickerVisible] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const showDatePicker = () => {
@@ -78,11 +83,11 @@ export default function CreateActivity({ navigation }) {
   };
 
   const [userEventField, setUserEventField] = useState({
-    eventName: "",
-    description: "",
+    eventName: title,
+    description: description,
     sportType: "",
-    players: "",
-    payment: "",
+    players: joinedUsersCount,
+    payment: price,
     date: "",
     time: "",
     location: "",
@@ -205,9 +210,15 @@ Location: ${userEventField.location}
     <SafeAreaView className="bg-primary flex-1">
       <View className="bg-white pl-3 pr-3">
         <View className="flex-row justify-between items-baseline inline-flex">
-          <Text className="mt-5 font-urbanistBold text-3xl text-start pl-3">
-            Create Activity
-          </Text>
+          {activity == 'Activities' ? (
+            <Text className="mt-5 font-urbanistBold text-3xl text-start pl-3">
+              Create Activity
+            </Text>
+          ) : (
+            <Text className="mt-5 font-urbanistBold text-3xl text-start pl-3">
+              Update Activity
+            </Text>
+          )}
           <Pressable className="pr-3" onPress={() => navigation.goBack()}>
             <AntDesign name="close" size={30} color="black" />
           </Pressable>
@@ -391,14 +402,25 @@ Location: ${userEventField.location}
             </Text>
           </Pressable> */}
 
-          <Pressable
-            className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
-            onPress={onCreateEvent}
-          >
-            <Text className="text-lg font-urbanistBold text-primary">
-              Create Event
-            </Text>
-          </Pressable>
+          {activity == 'Activities' ? (
+            <Pressable
+              className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
+              onPress={onCreateEvent}
+            >
+              <Text className="text-lg font-urbanistBold text-primary">
+                Create Event
+              </Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
+              onPress={onCreateEvent}
+            >
+              <Text className="text-lg font-urbanistBold text-primary">
+                Update Event
+              </Text>
+            </Pressable>
+          )}
         </View>
         <StatusBar barStyle="dark-content"></StatusBar>
       </View>

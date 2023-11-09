@@ -136,11 +136,11 @@ export default function Activities({ navigation }) {
   const getUserEvents = async () => {
     const allSportsEvents = [];
     const currentUserId = auth.currentUser.uid;
-  
+
     const userEventsRef = doc(db, "events", currentUserId);
-    
+
     const sportsSnapshot = await getDocs(collection(userEventsRef, "sports"));
-  
+
     for (let sportDoc of sportsSnapshot.docs) {
       console.log(sportDoc.id, " => ", sportDoc.data());
       const sportData = sportDoc.data();
@@ -149,13 +149,13 @@ export default function Activities({ navigation }) {
         docId: sportDoc.id,
         eventCollectionId: currentUserId,
       };
-  
+
       allSportsEvents.push(combinedData);
     }
-  
+
     setUserActivityList(allSportsEvents);
   };
-  
+
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -189,13 +189,14 @@ export default function Activities({ navigation }) {
 
         <View>
           <MyCarousel data={userActivityList}
-          navigation={navigation} />
+            navigation={navigation} />
         </View>
 
         {activityDataList.map((activity, index) => (
           <ActivityCard
             key={index} // use a unique key, if there's an id in the data, prefer to use that
             title={activity.eventName}
+            description={activity.description}
             img={require("../assets/cherry.jpg")}
             location={activity.venue}
             // location="Cherry Sports Field"
@@ -212,6 +213,7 @@ export default function Activities({ navigation }) {
             joinedUsers={activity.joinedUsers ? activity.joinedUsers : []}
             docId={activity.docId}
             eventCollectionId={activity.eventCollectionId}
+            isUserActivity={activity.eventCollectionId === auth.currentUser.uid}
           />
         ))}
       </ScrollView>
@@ -231,7 +233,9 @@ export default function Activities({ navigation }) {
         }}
         onPress={() => {
           //NAVIGATE HERE
-          navigation.navigate("CreateActivity");
+          navigation.navigate('CreateActivity', {
+            activity: "Activities"
+          });
         }}
       >
         <Ionicons name="add" size={35} color="white" />
