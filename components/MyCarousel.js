@@ -15,6 +15,7 @@ const MyCarousel = ({ data,navigation }) => {
       <ActivityCard
         key={index} // use a unique key, if there's an id in the data, prefer to use that
         title={item.eventName}
+        description={item.description}
         img={require("../assets/cherry.jpg")}
         location={item.venue}
         // location="Cherry Sports Field"
@@ -28,6 +29,7 @@ const MyCarousel = ({ data,navigation }) => {
         venueAddress={item.venueAddress}
         joinedPlayers={item.joinedPlayers}
         joinedUsers={item.joinedUsers ? item.joinedUsers : []}
+        pendingUsers={item.pendingUsers ? item.pendingUsers : []}
         docId={item.docId}
         eventCollectionId={item.eventCollectionId}
         isUserActivity={true}
