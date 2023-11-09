@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  Modal,
 } from "react-native";
 import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,8 +22,8 @@ import {
 } from "@expo-google-fonts/urbanist";
 import { db, auth } from "../firebaseConfig";
 import { collection, getDoc, getDocs, doc } from "firebase/firestore";
-import Carousel from 'react-native-snap-carousel';//NEW
-import MyCarousel from "../components/MyCarousel" //NEW
+import Carousel from "react-native-snap-carousel"; //NEW
+import MyCarousel from "../components/MyCarousel"; //NEW
 
 export default function Activities({ navigation }) {
   const { width, height } = Dimensions.get("window");
@@ -30,7 +31,6 @@ export default function Activities({ navigation }) {
   //Location State
   const [deviceLocation, setDeviceLocation] = useState(null);
   const [activityDataList, setActivityDataList] = useState([]);
-  const [userActivityList, setUserActivityList] = useState([]);
   const [user, setUser] = useState({
     firstName: "",
     lastName: "",
@@ -40,6 +40,71 @@ export default function Activities({ navigation }) {
     postalCode: "",
     imageUrl: "",
   });
+  const [filterList, setFilterList] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState(null); // State to keep track of the selected filter
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false); // State to control the visibility of the filter modal
+
+  const toggleFilterModal = () => {
+    setIsFilterModalVisible(!isFilterModalVisible);
+  };
+
+  const applyFilter = (sportType) => {
+    setSelectedFilter(sportType);
+    toggleFilterModal();
+  };
+
+  const clearFilter = () => {
+    setSelectedFilter(null);
+    toggleFilterModal();
+  };
+
+  async function getFilters() {
+    let sportsTypes = new Set();
+    const eventsSnapshot = await getDocs(collection(db, "events"));
+
+    for (let userDoc of eventsSnapshot.docs) {
+      const userId = userDoc.id;
+      const sportsSnapshot = await getDocs(
+        collection(db, "events", userId, "sports")
+      );
+
+      for (let sportDoc of sportsSnapshot.docs) {
+        sportsTypes.add(sportDoc.data().sportType);
+      }
+    }
+
+    setFilterList([...sportsTypes]);
+  }
+
+  const getFilteredActivities = () => {
+    if (!selectedFilter) {
+      return activityDataList; // No filter selected, return all activities
+    }
+    return activityDataList.filter(
+      (activity) => activity.sportType === selectedFilter
+    );
+  };
+
+  const FilterModal = () => {
+    return (
+      <Modal visible={isFilterModalVisible} onBackdropPress={toggleFilterModal}>
+        <View
+          style={{ backgroundColor: "white", padding: 22, borderRadius: 4 }}
+        >
+          <ScrollView>
+            {filterList.map((sport, index) => (
+              <Button
+                key={index}
+                title={sport}
+                onPress={() => applyFilter(sport)}
+              />
+            ))}
+            <Button title="No Filter" onPress={clearFilter} />
+          </ScrollView>
+        </View>
+      </Modal>
+    );
+  };
 
   // Current Location
   // const getCurrentLocation = async () => {
@@ -71,7 +136,8 @@ export default function Activities({ navigation }) {
     // getCurrentLocation();
     retrieveFromDb();
     retrieveUserDataFromDb();
-    getUserEvents()
+    getUserEvents();
+    getFilters();
   }, []);
 
   // const retrieveFromDb = async () => {
@@ -136,11 +202,11 @@ export default function Activities({ navigation }) {
   const getUserEvents = async () => {
     const allSportsEvents = [];
     const currentUserId = auth.currentUser.uid;
-  
+
     const userEventsRef = doc(db, "events", currentUserId);
-    
+
     const sportsSnapshot = await getDocs(collection(userEventsRef, "sports"));
-  
+
     for (let sportDoc of sportsSnapshot.docs) {
       console.log(sportDoc.id, " => ", sportDoc.data());
       const sportData = sportDoc.data();
@@ -149,13 +215,12 @@ export default function Activities({ navigation }) {
         docId: sportDoc.id,
         eventCollectionId: currentUserId,
       };
-  
+
       allSportsEvents.push(combinedData);
     }
-  
+
     setUserActivityList(allSportsEvents);
   };
-  
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -170,10 +235,16 @@ export default function Activities({ navigation }) {
   return (
     <SafeAreaView className="bg-primary flex-1 h-full">
       <View className="flex-row justify-between items-center px-6 pb-5">
-        <Ionicons name="filter" size={24} color="black" />
+        <Ionicons
+          name="filter"
+          size={24}
+          color="black"
+          onPress={toggleFilterModal}
+        />
         <Text className="font-urbanistBold text-2xl">Sportlyst</Text>
         <Ionicons name="notifications" size={24} color="black" />
       </View>
+      <FilterModal />
       <ScrollView className="h-fit">
         <View className="px-3">
           <Text className="font-urbanist text-xl text-start pl-3">
@@ -188,17 +259,21 @@ export default function Activities({ navigation }) {
         </View>
 
         <View>
-          <MyCarousel data={userActivityList}
-          navigation={navigation} />
+          <MyCarousel data={userActivityList} navigation={navigation} />
+        </View>
+        <View className="flex-row items-baseline px-3">
+          <Text className="font-urbanistBold text-2xl text-start pl-3">
+            Discover Activities
+          </Text>
+          <Ionicons name="chevron-forward" size={21} color="black" />
         </View>
 
-        {activityDataList.map((activity, index) => (
+        {getFilteredActivities().map((activity, index) => (
           <ActivityCard
-            key={index} // use a unique key, if there's an id in the data, prefer to use that
+            key={index}
             title={activity.eventName}
             img={require("../assets/cherry.jpg")}
             location={activity.venue}
-            // location="Cherry Sports Field"
             date={activity.date}
             time={activity.time}
             navigation={navigation}
