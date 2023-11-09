@@ -91,19 +91,22 @@ export default function Login({ navigation, route }) {
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="bg-white pl-3 pr-3">
-        <Pressable
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
-          <View className="bg-white w-12 h-12 rounded-full items-center justify-center shadow-md">
-            <Ionicons name="arrow-back-sharp" size={24} color="black" />
-          </View>
-        </Pressable>
+        <View className="flex-row items-center">
+          <Pressable
+            onPress={() => {
+              navigation.goBack();
+            }}
+          >
+            <View className="bg-white w-12 h-12 rounded-full items-center justify-center shadow-md">
+              <Ionicons name="arrow-back-sharp" size={24} color="black" />
+            </View>
+          </Pressable>
+          <Text className="font-urbanistBold text-2xl">Login</Text>
+        </View>
 
-        <Text className="font-urbanistBold text-3xl text-start pl-3">
+        {/* <Text className="font-urbanistBold text-3xl text-start pl-3">
           Login
-        </Text>
+        </Text> */}
         <View className="mt-8">
           <TextInput
             className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist"
