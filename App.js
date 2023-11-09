@@ -30,6 +30,7 @@ import Onboarding from 'react-native-onboarding-swiper';
 import { Pressable } from 'react-native'; //NEW
 import OnBoardingScreen from "./screens/OnBoardingScreen";
 import AsyncStorage, { useAsyncStorage } from "@react-native-async-storage/async-storage";
+import ChatGroup from "./screens/ChatGroup";
 
 const Tab = createBottomTabNavigator();
 
@@ -253,6 +254,14 @@ export default function App() {
         <Stack.Screen
           name="Chat"
           component={Chat}
+          options={{
+            headerShown: true,
+            title: null,
+          }}
+        />
+        <Stack.Screen
+          name="ChatGroup"
+          component={ChatGroup}
           options={{
             headerShown: true,
             title: null,
