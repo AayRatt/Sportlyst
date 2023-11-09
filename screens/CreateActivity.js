@@ -34,7 +34,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 // Import firebase auth/db
 import { db, auth } from "../firebaseConfig";
-import { setDoc, doc, collection } from "firebase/firestore";
+import { setDoc, doc, collection, updateDoc } from "firebase/firestore";
 
 export default function CreateActivity({ route, navigation }) {
   const { activity } = route.params
@@ -42,6 +42,10 @@ export default function CreateActivity({ route, navigation }) {
   const { description } = route.params
   const { joinedUsersCount } = route.params
   const { price } = route.params
+  const { eventCollectionId } = route.params
+  const { docId } = route.params
+
+
   const [pickerVisible, setPickerVisible] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const showDatePicker = () => {
@@ -168,6 +172,18 @@ Location: ${userEventField.location}
       setFilteredVenues([]);
     }
   };
+
+  const updateDb = async () => {
+    // update data in firestore
+    try {
+      const eventsRef = doc(db, "events", eventCollectionId, "sports", docId)
+      await updateDoc(eventsRef, user);
+      alert("Activity Updated");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const fetchVenues = async () => {
     const response = await fetch(
       "https://sportlystapi.onrender.com/sportlyst/getVenues"

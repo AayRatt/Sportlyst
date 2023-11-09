@@ -37,7 +37,7 @@ export default function ActivityDetails({ route, navigation }) {
             await updateDoc(eventsRef, {
                 pendingUsers: arrayUnion(auth.currentUser.uid)
             });
-            alert("Profile Updated");
+            alert("Activity Updated");
         } catch (err) {
             console.log(err)
         }
@@ -72,7 +72,7 @@ export default function ActivityDetails({ route, navigation }) {
             }).catch((error) => {
                 console.error("Error removing value from array", error);
             });
-            alert("Profile Updated");
+            alert("Activity Updated");
         } catch (err) {
             console.log(err)
         }
@@ -221,7 +221,7 @@ export default function ActivityDetails({ route, navigation }) {
 
                         {
                             !activity.isUserActivity && !isPendingUsers && !isJoinedUser && (
-                                <TouchableOpacity onPress={updateDbJoinedUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
+                                <TouchableOpacity onPress={updatePendingUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
                                     <Text style={styles.joinButtonText}>Join</Text>
                                 </TouchableOpacity>
                             )
@@ -241,6 +241,8 @@ export default function ActivityDetails({ route, navigation }) {
                                     description: activity.description,
                                     joinedUsersCount: '' + joinedUsersCount,
                                     price: activity.price,
+                                    eventCollectionId: activity.eventCollectionId,
+                                    docId: activity.docId
                                 })
                             }}
                                 className="bg-secondary rounded-lg h-10 items-center justify-center">
