@@ -81,6 +81,7 @@ export default function Register({ route, navigation }) {
           lastName: formField.lastName,
           email: formField.email,
           userID: auth.currentUser.uid,
+          onBoardPending: true,
         };
         //2. Add data to firestore
         await setDoc(
