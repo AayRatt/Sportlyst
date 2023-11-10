@@ -438,9 +438,9 @@ export default function Friends({ navigation }) {
 
   return (
     <SafeAreaView className="bg-primary flex-1">
-      <View className="bg-white pl-3 pr-3">
+      <View className="bg-white px-3">
         <View className="flex-row justify-between align-baseline mt-5">
-          <Text className="font-urbanistBold text-3xl text-start pl-3">
+          <Text className="font-urbanistBold text-3xl text-start pl-1">
             Friend Requests
           </Text>
           <Pressable

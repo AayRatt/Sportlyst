@@ -1,4 +1,14 @@
-import { Text, View, FlatList, Image, TouchableOpacity, Dimensions, StyleSheet, TextInput } from "react-native";
+import {
+  Text,
+  View,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+  StyleSheet,
+  TextInput,
+  Pressable,
+} from "react-native";
 import {
   useFonts,
   Urbanist_600SemiBold,
@@ -15,17 +25,23 @@ import profileIcon from "../assets/profile-icon.png";
 import { Ionicons } from "@expo/vector-icons";
 
 import { db, auth } from "../firebaseConfig";
-import { addDoc, collection, doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 
 export default function ChatGroup({ navigation }) {
-
   //State Variables
-  const [friendsGroup, setFriendsGroup] = useState([])
-  const [selectedFriends, setSelectedFriends] = useState([])
-  const [groupName, setGroupName] = useState('')
+  const [friendsGroup, setFriendsGroup] = useState([]);
+  const [selectedFriends, setSelectedFriends] = useState([]);
+  const [groupName, setGroupName] = useState("");
 
   //Dimensions Floating Button
-  const { width, height } = Dimensions.get("window")
+  const { width, height } = Dimensions.get("window");
 
   //Get Friends ID from FireStore
   const getFriends = () => {
@@ -35,32 +51,31 @@ export default function ChatGroup({ navigation }) {
         "userProfiles",
         auth.currentUser.uid,
         "friends"
-      )
-      //Friends Listener 
-      const unsubscribeFriends = onSnapshot(friendsDb, async snapshot => {
+      );
+      //Friends Listener
+      const unsubscribeFriends = onSnapshot(friendsDb, async (snapshot) => {
         const friendsArray = [];
 
-        const friendsPromises = snapshot.docs.map(async friendDoc => {
+        const friendsPromises = snapshot.docs.map(async (friendDoc) => {
           const friend = {
             id: friendDoc.id,
-            ...friendDoc.data()
-          }
+            ...friendDoc.data(),
+          };
 
-          const friendProfile = await getFriendProfile(friend.userID)
+          const friendProfile = await getFriendProfile(friend.userID);
           if (friendProfile) {
-            friend.friendProfile = friendProfile
+            friend.friendProfile = friendProfile;
           }
-          friendsArray.push(friend)
-        })
+          friendsArray.push(friend);
+        });
         //Promises (get all the data correctly)
-        await Promise.all(friendsPromises)
-        setFriendsGroup(friendsArray)
+        await Promise.all(friendsPromises);
+        setFriendsGroup(friendsArray);
         console.log("Friends Array for Group Chat Creation:", friendsArray);
-      })
+      });
       return () => {
-        unsubscribeFriends()
-      }
-
+        unsubscribeFriends();
+      };
     } catch (error) {
       console.log(error);
     }
@@ -82,40 +97,42 @@ export default function ChatGroup({ navigation }) {
 
   useEffect(() => {
     navigation.setOptions({
-      title: 'New Group'
-    })
+      title: "New Group",
+    });
   }, []);
 
-  //Selection's Friend 
+  //Selection's Friend
   const handleSelectFriend = (id) => {
     if (selectedFriends.includes(id)) {
-      const newSelectedFriends = selectedFriends.filter(friendId => friendId !== id)
-      setSelectedFriends(newSelectedFriends)
-      console.log("Friend Unselected", newSelectedFriends)
+      const newSelectedFriends = selectedFriends.filter(
+        (friendId) => friendId !== id
+      );
+      setSelectedFriends(newSelectedFriends);
+      console.log("Friend Unselected", newSelectedFriends);
     } else {
-      const newSelectedFriends = [...selectedFriends, id]
-      setSelectedFriends(newSelectedFriends)
-      console.log("Friend Selected", newSelectedFriends)
+      const newSelectedFriends = [...selectedFriends, id];
+      setSelectedFriends(newSelectedFriends);
+      console.log("Friend Selected", newSelectedFriends);
     }
-  }
+  };
 
   //Add ChatGroup Data to FireStore
   const addChatGroup = async () => {
     //Requirements
-    if (groupName === '') {
-      alert("Please enter your group name")
-      return
+    if (groupName === "") {
+      alert("Please enter your group name");
+      return;
     }
     if (selectedFriends.length < 1) {
-      alert("At least two members are neccesary to create the Group")
-      return
+      alert("At least two members are neccesary to create the Group");
+      return;
     }
 
     try {
-      const membersUserIDs = selectedFriends.map(friendId => {
-        const friend = friendsGroup.find(f => f.id === friendId);
+      const membersUserIDs = selectedFriends.map((friendId) => {
+        const friend = friendsGroup.find((f) => f.id === friendId);
         return friend.userID;
-      })
+      });
 
       //Adding the current userID to the group members
       membersUserIDs.push(auth.currentUser.uid);
@@ -123,17 +140,16 @@ export default function ChatGroup({ navigation }) {
       const createGroup = await addDoc(collection(db, "chatGroups"), {
         createdAt: new Date(),
         groupName: groupName,
-        members: membersUserIDs
-      })
+        members: membersUserIDs,
+      });
 
       await updateDoc(doc(db, "chatGroups", createGroup.id), {
-        groupID: createGroup.id
-      })
-
+        groupID: createGroup.id,
+      });
     } catch (error) {
-      console.log('Problem to create the group', error);
+      console.log("Problem to create the group", error);
     }
-  }
+  };
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -151,6 +167,18 @@ export default function ChatGroup({ navigation }) {
         {/* <Text className="font-urbanist text-2xl text-start pl-3 mb-3">
           GroupNew
         </Text> */}
+        <View className="flex-row align-baseline mb-4 mt-5">
+          <Pressable
+            onPress={() => {
+              navigation.goBack();
+            }}
+          >
+            <Ionicons name="arrow-back-sharp" size={34} color="black" />
+          </Pressable>
+          <Text className="font-urbanistBold text-3xl text-start pl-1">
+            New Group
+          </Text>
+        </View>
         <TextInput
           className="bg-gray h-12 rounded-lg p-4 mb-4 font-urbanist"
           placeholder="Enter your Group's Name"
@@ -159,20 +187,24 @@ export default function ChatGroup({ navigation }) {
           value={groupName}
           onChangeText={setGroupName}
         ></TextInput>
-        <Text className="font-urbanist text-2xl text-start pl-3"
-        >Selected your members</Text>
+        <Text className="font-urbanist text-2xl text-start pl-3">
+          Add Participants
+        </Text>
 
         <FlatList
           data={friendsGroup}
           renderItem={(rowData) => {
-            const isSelected = selectedFriends.includes(rowData.item.id)
+            const isSelected = selectedFriends.includes(rowData.item.id);
             return (
               <TouchableOpacity
-                onPress={() => handleSelectFriend(rowData.item.id)}>
-                <View style={[
-                  styles.friendItemContainer,
-                  isSelected && { backgroundColor: '#D3D3D3' }
-                ]}>
+                onPress={() => handleSelectFriend(rowData.item.id)}
+              >
+                <View
+                  style={[
+                    styles.friendItemContainer,
+                    isSelected && { backgroundColor: "#D3D3D3" },
+                  ]}
+                >
                   <Image
                     source={
                       rowData.item.friendProfile?.image
@@ -186,9 +218,9 @@ export default function ChatGroup({ navigation }) {
                   </Text>
                 </View>
               </TouchableOpacity>
-            )
+            );
           }}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
         />
       </View>
       <TouchableOpacity
@@ -206,8 +238,8 @@ export default function ChatGroup({ navigation }) {
           borderRadius: 100,
         }}
         onPress={() => {
-          addChatGroup()
-          navigation.navigate("ChatFriendsHome")
+          addChatGroup();
+          navigation.navigate("ChatFriendsHome");
         }}
       >
         <Ionicons name="arrow-forward" size={35} color="white" />
@@ -219,29 +251,29 @@ export default function ChatGroup({ navigation }) {
 //FlatList Style
 const styles = StyleSheet.create({
   newGroupText: {
-    fontFamily: 'Urbanist_600SemiBold',
+    fontFamily: "Urbanist_600SemiBold",
     fontSize: 24,
-    textAlign: 'left',
+    textAlign: "left",
     paddingLeft: 12,
     marginBottom: 12,
   },
   textInput: {
-    backgroundColor: 'gray',
+    backgroundColor: "gray",
     height: 48,
     borderRadius: 4,
     paddingHorizontal: 16,
     marginBottom: 16,
-    fontFamily: 'Urbanist_500Medium',
+    fontFamily: "Urbanist_500Medium",
   },
   memberSelectionText: {
-    fontFamily: 'Urbanist_600SemiBold',
+    fontFamily: "Urbanist_600SemiBold",
     fontSize: 20,
-    textAlign: 'left',
+    textAlign: "left",
     paddingLeft: 12,
   },
   friendItemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 15,
     paddingLeft: 12,
   },
@@ -251,9 +283,8 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   friendName: {
-    fontFamily: 'Urbanist_500Medium',
+    fontFamily: "Urbanist_500Medium",
     fontSize: 15,
     marginRight: 12,
   },
-
 });
