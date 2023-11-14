@@ -45,7 +45,7 @@ const MyCarousel = ({ data,navigation }) => {
       renderItem={_renderItem}
       sliderWidth={viewportWidth}
       itemWidth={viewportWidth}
-      layout={'default'}
+      layout={'stack'}
     />
   );
 };
