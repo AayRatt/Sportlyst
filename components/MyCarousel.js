@@ -2,23 +2,21 @@ import React from 'react';
 import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
 import { View, Text, Dimensions, StyleSheet } from 'react-native';
 import ActivityCard from "../components/ActivityCard";
+import MyActivityCard from './MyActivityCard';
 
 const { width: viewportWidth } = Dimensions.get('window');
 
-const MyCarousel = ({ data,navigation }) => {
+const MyCarousel = ({ data, navigation }) => {
   const _renderItem = ({ item, index }) => {
     return (
-      // <View style={styles.slide}>
-      //   <Text style={styles.title}>{item.title}</Text>
-      // </View>
 
-      <ActivityCard
-        key={index} // use a unique key, if there's an id in the data, prefer to use that
+
+      <MyActivityCard
+        key={index}
         title={item.eventName}
         description={item.description}
         img={require("../assets/cherry.jpg")}
         location={item.venue}
-        // location="Cherry Sports Field"
         date={item.date}
         time={item.time}
         navigation={navigation}
@@ -45,8 +43,12 @@ const MyCarousel = ({ data,navigation }) => {
       renderItem={_renderItem}
       sliderWidth={viewportWidth}
       itemWidth={viewportWidth}
-      layout={'default'}
+      // inactiveSlideScale={0.9}
+      // inactiveSlideOpacity={0.9}
+      layout={'stack'}
+      
     />
+
   );
 };
 

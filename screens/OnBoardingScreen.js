@@ -66,7 +66,7 @@ export default function OnBoardingScreen({ navigation }) {
     <Onboarding
       onSkip={handleSkip}
       onDone={finishOnBoarding}
-      backgroundColor = {"#fefefe"}
+      backgroundColor = {"#000000"}
 
       pages={[
         {
