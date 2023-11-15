@@ -62,10 +62,12 @@ export default function OnBoardingScreen({ navigation }) {
 
   }
   return (
+    
     <Onboarding
       onSkip={handleSkip}
       onDone={finishOnBoarding}
-      
+      backgroundColor = {"#fefefe"}
+
       pages={[
         {
           backgroundColor:'#fff',
@@ -73,7 +75,7 @@ export default function OnBoardingScreen({ navigation }) {
           title='Welcome to Sportlyst'
           subtitle='Discover sports, meet peers, and stay active!'
           description = 'Join a community where fitness and fun meet. Whether you are a beginner or a pro, find the perfect sporty crew with Sportlyst'
-          imageSource={require('../assets/profile-icon.png')}
+          imageSource={require('../assets/OB1.png')}
           >
           </OnboardingPageTemplate>)
         },
@@ -83,7 +85,7 @@ export default function OnBoardingScreen({ navigation }) {
             title='Find Your Sport'
             subtitle='Explore a wide range of activities'
             description = 'From team sports to solo adventures, discover activities that match your interests and skill level.'
-            imageSource={require('../assets/profile-icon.png')}
+            imageSource={require('../assets/OB2.png')}
             >
             </OnboardingPageTemplate>)
           
@@ -94,7 +96,7 @@ export default function OnBoardingScreen({ navigation }) {
             title='Connect with Peers'
             subtitle='Meet people who share your passion'
             description = 'Create or join groups, plan events, and make new friends. It’s all about connecting with people who love the sport as much as you do.'
-            imageSource={require('../assets/profile-icon.png')}
+            imageSource={require('../assets/OB3.png')}
             >
             </OnboardingPageTemplate>))
         },
@@ -104,7 +106,7 @@ export default function OnBoardingScreen({ navigation }) {
             title='Stay Active'
             subtitle='Keep up with your fitness goals'
             description = 'Set personal goals, track your progress, and stay motivated. Sportlyst is your partner in maintaining an active and healthy lifestyle.'
-            imageSource={require('../assets/profile-icon.png')}
+            imageSource={require('../assets/OB4.png')}
             >
             </OnboardingPageTemplate>))
         },
@@ -114,7 +116,7 @@ export default function OnBoardingScreen({ navigation }) {
             title='Ready to Jump In?'
             subtitle='Lets get you set up!'
             description = 'Create your profile, tell us your favorite sports, and find your first activity today'
-            imageSource={require('../assets/profile-icon.png')}
+            imageSource={require('../assets/OB5.png')}
             >
             </OnboardingPageTemplate>))
         }

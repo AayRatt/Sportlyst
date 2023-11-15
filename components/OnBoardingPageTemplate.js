@@ -20,11 +20,12 @@ const OnboardingPageTemplate = ({ title, subtitle, description, children, imageS
 
   return (
     <View style={[styles.container]}>
-
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
-      <Text style={styles.description}>{description}</Text>
+      <View style={styles.backTop}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
+      </View>
       {imageSource && <Image source={imageSource} style={styles.image} />}
+      <Text style={styles.description}>{description}</Text>
       {children}
     </View>
   );
@@ -35,32 +36,47 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    marginTop:40
+    marginTop: 40
+  },
+  backTop:{
+    //flex: 1, 
+    // backgroundColor: "black",
+    // width: '100%', 
+    // alignSelf: 'stretch', 
+    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 
+
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     color: '#1a202c',
-    margin:30,
+    margin: 30,
     marginBottom: 10,
-    
+
   },
   subtitle: {
     fontSize: 18,
     color: '#4a5568',
-    textAlign:'center',
+    textAlign: 'center',
     justifyContent: 'center'
   },
 
   description: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#4a5568',
     justifyContent: 'center',
     alignItems: 'center',
-    textAlign:'center',
-    marginTop:40,
-    marginHorizontal:25
+    textAlign: 'center',
+    // marginTop:10,
+    marginHorizontal: 25
   },
+
+  image: {
+    width: '50%',  // or a fixed width
+    height: '50%',
+    aspectRatio: 1, // The aspect ratio (width/height) of the image
+    resizeMode: 'contain', // or 'cover'
+  }
 });
 
 export default OnboardingPageTemplate;

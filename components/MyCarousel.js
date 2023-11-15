@@ -1,5 +1,5 @@
 import React from 'react';
-import Carousel from 'react-native-snap-carousel';
+import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
 import { View, Text, Dimensions, StyleSheet } from 'react-native';
 import ActivityCard from "../components/ActivityCard";
 
@@ -45,7 +45,7 @@ const MyCarousel = ({ data,navigation }) => {
       renderItem={_renderItem}
       sliderWidth={viewportWidth}
       itemWidth={viewportWidth}
-      layout={'stack'}
+      layout={'default'}
     />
   );
 };
