@@ -1,10 +1,11 @@
 {
   "expo": {
     "name": "Sportlyst",
-    "slug": "Sportlyst",
+    "slug": "sportlyst",
+    "description": "This an app where you can organise and meet people with similar sport interests to simply play together.",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/splash.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -15,16 +16,30 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sportlystapp.sportlyst"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.sportlystapp.sportlyst"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d0ffc6a6-8234-41ab-bc89-2af87c5ebac9"
+      }
+    },
+    "owner": "sportlystapp",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d0ffc6a6-8234-41ab-bc89-2af87c5ebac9"
     }
   }
 }
