@@ -252,7 +252,7 @@ export default function App() {
           name="Chat"
           component={Chat}
           options={{
-            headerShown: true,
+            headerShown: false,
             title: null,
           }}
         />

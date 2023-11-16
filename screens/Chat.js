@@ -1,17 +1,18 @@
-import { Text, StyleSheet, View } from 'react-native';
+import { Text, StyleSheet, View, Pressable, Alert } from 'react-native';
 import { useFonts, Urbanist_600SemiBold, Urbanist_500Medium } from "@expo-google-fonts/urbanist";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useCallback, useEffect, useLayoutEffect } from 'react';
 
 import { GiftedChat, Bubble } from 'react-native-gifted-chat'
-
+import { Entypo } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 
 import { db, auth } from "../firebaseConfig";
-import { setDoc, getDoc, doc, collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { setDoc, getDoc, doc, collection, onSnapshot, query, orderBy, deleteDoc, getDocs } from "firebase/firestore";
 
 export default function Chat({ navigation, route }) {
 
-  const { friendID, firstName, lastName, groupID, groupName, groupMembers } = route.params
+  const { friendID, firstName, lastName, groupID, groupName, groupMembers, groupAdmiID } = route.params
   const [messages, setMessages] = useState([])
 
   const isGroupChat = groupID ? true : false
@@ -24,7 +25,7 @@ export default function Chat({ navigation, route }) {
     return [uidOne, uidTwo].sort().join('_')
   }
   const chatID = isGroupChat ? groupID : generateChatID(auth.currentUser.uid, friendID)
-  console.log(chatID)
+  // console.log(chatID)
 
   useLayoutEffect(() => {
     const chatCollection = collection(db, isGroupChat ? 'chats' : 'chats', isGroupChat ? groupID : chatID, 'messages')
@@ -40,11 +41,6 @@ export default function Chat({ navigation, route }) {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: isGroupChat ? groupName : (firstName ? `${firstName} ${lastName}` : 'Cannot load user data')
-    })
-  }, []);
 
   //Get Actual user Data
   const getCurrentUserData = async () => {
@@ -61,12 +57,13 @@ export default function Chat({ navigation, route }) {
       return null;
     }
   }
+
   useEffect(() => {
     const fetchData = async () => {
       const data = await getCurrentUserData();
       setCurrentUserData(data);
     };
-  
+
     fetchData()
   }, []);
 
@@ -85,15 +82,9 @@ export default function Chat({ navigation, route }) {
     } catch (error) {
       console.error(error)
     }
-  };
+  }
 
-  useEffect(() => {
-    if (isGroupChat) {
-      getMemberProfile()
-    }
-  }, [groupMembers])
-
-  
+  //Get the Name of the Member From FireStore
   const getNameForUser = (uid) => {
     if (isGroupChat) {
       const user = membersProfile.find((member) => member.uid === uid)
@@ -106,6 +97,23 @@ export default function Chat({ navigation, route }) {
     }
   }
 
+  useEffect(() => {
+    if (isGroupChat) {
+      getMemberProfile()
+    }
+  }, [groupMembers])
+
+  //Create the Title with the groupName and all the members
+  const GroupTitle = ({ groupName, memberNames }) => {
+    return (
+      <View style={{ alignItems: 'left' }}>
+        <Text className="font-urbanistBold text-3xl text-start">{groupName}</Text>
+        <Text numberOfLines={1} ellipsizeMode="tail">{memberNames.join(', ')}</Text>
+      </View>
+    )
+  }
+
+  //GiftedChat  Function to create the messages in the chat collection Firestore
   const onSend = useCallback((messages = []) => {
     setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
     const { _id, createdAt, text, user } = messages[0]
@@ -130,8 +138,69 @@ export default function Chat({ navigation, route }) {
   }
 
 
+  //Delete Confirmation
+  const confirmAndDeleteGroup = () => {
+    Alert.alert(
+      "Delete Group",
+      "Are you sure to eliminate this Group?",
+      [
+        //Cancel Button
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        //Confirmation
+        { text: "Eliminate", onPress: () => deleteGroup() }
+      ]
+    )
+  }
+
+  //Delete Function
+  const deleteGroup = async () => {
+    try {
+      //Delete document from Chat Group Colection
+      const groupChatDelete = doc(db, "chatGroups", groupID)
+      await deleteDoc(groupChatDelete)
+
+      //Delete every messsage fron documentChats Collection
+      const messages = collection(db, "chats", groupID, "messages")
+      const messagesSnapshot = await getDocs(messages)
+
+      messagesSnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      })
+
+      Alert.alert('Group Deleted')
+      navigation.goBack()
+    } catch (error) {
+      console.log('Delete Firestore problem', error)
+    }
+  }
+
   return (
     <SafeAreaView className="bg-primary flex-1">
+      <View className="bg-white pl-3 pr-3 flex-row justify-between items-center mt-5 mb-2">
+        <Pressable onPress={() => navigation.goBack()} className="flex-row items-center">
+          <Entypo name="chevron-left" size={35} color="black" />
+        </Pressable>
+        <View className="flex-1 mr-10"> 
+          {isGroupChat ? (
+            <GroupTitle
+              groupName={groupName}
+              memberNames={groupMembers.map(memberID => getNameForUser(memberID)).filter(name => name !== "No data loaded")}
+            />
+          ) : (
+            <Text className="font-urbanistBold text-3xl text-start ">
+              {firstName ? `${firstName} ${lastName}` : 'Cannot load user data'}
+            </Text>
+          )}
+        </View>
+        {auth.currentUser.uid === groupAdmiID && (
+          <Pressable onPress={confirmAndDeleteGroup}>
+            <MaterialIcons name="delete" size={35} color="black" />
+          </Pressable>
+        )}
+      </View>
       <GiftedChat
         messages={messages}
         showAvatarForEveryMessage={isGroupChat}
