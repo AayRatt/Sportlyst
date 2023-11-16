@@ -8,8 +8,10 @@ import {
   TouchableOpacity,
   Dimensions,
   Modal,
+  Animated,
+  StyleSheet,
 } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
@@ -57,6 +59,28 @@ export default function Activities({ navigation }) {
     }
     setSelectedFilters(newFilters);
   };
+
+
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const panelPosition = useRef(new Animated.Value(Dimensions.get('window').width)).current;
+
+  const openPanel = () => {
+    setIsPanelVisible(true);
+    Animated.timing(panelPosition, {
+      toValue: 0, // Adjust as needed to slide in the panel
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closePanel = () => {
+    Animated.timing(panelPosition, {
+      toValue: Dimensions.get('window').width,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setIsPanelVisible(false)); // Hide the panel after the animation
+  };
+
 
   const toggleFilterModal = () => {
     setIsFilterModalVisible((prevVisible) => !prevVisible);
@@ -167,6 +191,24 @@ export default function Activities({ navigation }) {
       </Modal>
     );
   };
+
+  const NotificationPanel = () => {
+    return (
+      <Animated.View
+        visible={isPanelVisible}
+        style={[
+          styles.panel,
+          { transform: [{ translateX: panelPosition }] }
+        ]}
+      >
+        {/* Your notification content here */}
+        <Text>Notifications</Text>
+        <TouchableOpacity onPress={closePanel}>
+          <Text>Close</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    )
+  }
 
   // Current Location
   // const getCurrentLocation = async () => {
@@ -301,7 +343,7 @@ export default function Activities({ navigation }) {
           onPress={toggleFilterModal}
         />
         <Text className="font-urbanistBold text-2xl">Sportlyst</Text>
-        <Ionicons name="notifications" size={24} color="black" />
+        <Ionicons name="notifications" size={24} color="black" onPress={openPanel} />
       </View>
       <FilterModal />
       <ScrollView className="h-fit">
@@ -316,6 +358,7 @@ export default function Activities({ navigation }) {
             <Ionicons name="chevron-forward" size={21} color="black" />
           </View>
         </View>
+        <NotificationPanel />
 
         <View>
           <MyCarousel data={userActivityList} navigation={navigation} />
@@ -377,3 +420,21 @@ export default function Activities({ navigation }) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  panel: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    // bottom: 0,
+    width: '60%', // Adjust width as needed
+    // height: '100%',
+    backgroundColor: 'grey',
+    padding: 20,
+    zIndex: 1000,
+    borderTopLeftRadius: 15,
+    borderBottomLeftRadius: 15,
+    // Additional styling for the panel
+  },
+  // ... (other styles)
+});

@@ -22,6 +22,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import profileIcon from "../assets/profile-icon.png";
 import countries from "../data/countries.json";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from '@expo/vector-icons';
 
 import {
   useFonts,
@@ -225,6 +226,70 @@ export default function Profile({ }) {
     return null;
   }
 
+  const PickerModal = () => {
+    // const toggleTemporaryFilter = (sportType) => {
+    //   setTemporarySelectedFilters((prevFilters) => {
+    //     const newFilters = new Set(prevFilters);
+    //     if (newFilters.has(sportType)) {
+    //       newFilters.delete(sportType);
+    //     } else {
+    //       newFilters.add(sportType);
+    //     }
+    //     return newFilters;
+    //   });
+    // };
+
+    return (
+        <Modal
+            visible={pickerVisible}
+            animationType="slide"
+            presentationStyle="pageSheet"
+            transparent={true}
+        >
+            <View className="flex-1 justify-end">
+                <View className="w-full h-1/2 bg-primary rounded-lg">
+                    <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
+                        <Text className="font-urbanistBold text-3xl text-start">
+                            Select Country
+                        </Text>
+                        <Ionicons
+                            name="close"
+                            size={35}
+                            color="black"
+                            onPress={() => setPickerVisible(false)}
+                        />
+                    </View>
+                    <View
+                style={{
+                  flex: 1,
+                  justifyContent: "flex-end",
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                }}
+              >
+                <View style={{ backgroundColor: "white", height: "100%" }}>
+                  <Picker
+                    selectedValue={user.country}
+                    onValueChange={(account) => {
+                      updateUser("country", account);
+                      setPickerVisible(false);
+                    }}
+                  >
+                    {countriesDataList.map((country) => (
+                      <Picker.Item
+                        key={country}
+                        label={country}
+                        value={country}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
+                </View>
+            </View>
+        </Modal>
+    );
+};
+
   return (
     <SafeAreaView className="bg-primary flex-1 h-full">
       <View className="flex-row justify-between items-center px-6 pb-5">
@@ -342,45 +407,7 @@ export default function Profile({ }) {
                 <Text className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-3 font-urbanist">{user.phoneNumber ? user.phoneNumber : "Phone Number"}</Text>
               )
             }
-
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={pickerVisible}
-              onRequestClose={() => {
-                setPickerVisible(false);
-              }}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "flex-end",
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                }}
-              >
-                <View style={{ backgroundColor: "white", height: 350 }}>
-                  <Picker
-                    selectedValue={user.country}
-                    onValueChange={(account) => {
-                      updateUser("country", account);
-                      setPickerVisible(false);
-                    }}
-                  >
-                    {countriesDataList.map((country) => (
-                      <Picker.Item
-                        key={country}
-                        label={country}
-                        value={country}
-                      />
-                    ))}
-                  </Picker>
-                  <Button
-                    title="Close Picker"
-                    onPress={() => setPickerVisible(false)}
-                  />
-                </View>
-              </View>
-            </Modal>
+            <PickerModal/>
             <View className="flex-row gap-3">
               {/* country */}
               {

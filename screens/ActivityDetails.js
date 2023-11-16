@@ -176,6 +176,82 @@ export default function ActivityDetails({ route, navigation }) {
         }
     }, [joinedUsers, pendingUsers]);  // Called whenever joinedUsers or pendingUsers changes
 
+    const PendingRequestsModal = () => {
+        // const toggleTemporaryFilter = (sportType) => {
+        //   setTemporarySelectedFilters((prevFilters) => {
+        //     const newFilters = new Set(prevFilters);
+        //     if (newFilters.has(sportType)) {
+        //       newFilters.delete(sportType);
+        //     } else {
+        //       newFilters.add(sportType);
+        //     }
+        //     return newFilters;
+        //   });
+        // };
+
+        return (
+            <Modal
+                visible={modalVisible}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                transparent={true}
+            >
+                <View className="flex-1 justify-end">
+                    <View className="w-full h-4/5 bg-primary rounded-lg">
+                        <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
+                            <Text className="font-urbanistBold text-3xl text-start">
+                                Pending Requests
+                            </Text>
+                            <Ionicons
+                                name="close"
+                                size={35}
+                                color="black"
+                                onPress={() => setModalVisible(false)}
+                            />
+                        </View>
+                        <ScrollView className="max-h-screen mt-5">
+                            <View
+                                style={{
+                                    flex: 1,
+                                    justifyContent: "flex-end",
+                                    backgroundColor: "rgba(0,0,0,0.5)",
+                                }}
+                            >
+                                <View style={{ backgroundColor: "white", height: 350 }}>
+                                    <FlatList
+                                        data={pendingUserProfiles}
+                                        renderItem={
+                                            (rowData) => {
+                                                return (
+                                                    <TouchableOpacity onPress={() => onImageClicked(rowData.item.userId)}>
+                                                        <View className="flex-row items-center mt-5 pl-3">
+                                                            <Image
+                                                                source={rowData.item.imageUrl ? { uri: rowData.item.imageUrl } : require("../assets/profile-icon.png")}
+                                                                className="w-12 h-12 rounded-full" />
+                                                            <Text className="font-urbanist text-1xl mr-3">
+                                                                {rowData.item.firstName} {rowData.item.lastName}
+                                                            </Text>
+                                                            <TouchableOpacity onPress={() => updateDbJoinedUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 mr-2 items-center justify-center">
+                                                                <Text style={styles.joinButtonText}>Accept</Text>
+                                                            </TouchableOpacity>
+                                                            <TouchableOpacity onPress={() => removeDbJoinedOrPendingUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 items-center justify-center">
+                                                                <Text style={styles.joinButtonText}>Decline</Text>
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                )
+                                            }
+                                        }
+                                    />
+                                </View>
+                            </View>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
+        );
+    };
+
 
     return (
         <SafeAreaView style={styles.safeAreaView}>
@@ -234,7 +310,7 @@ export default function ActivityDetails({ route, navigation }) {
                             </TouchableOpacity>
                         )}
 
-                        {activity.isUserActivity && isEditUI &&(
+                        {activity.isUserActivity && isEditUI && (
                             <TouchableOpacity onPress={() => {
                                 navigation.navigate('CreateActivity', {
                                     activity: "ActivityDetails",
@@ -302,54 +378,7 @@ export default function ActivityDetails({ route, navigation }) {
                             </View>
                         )}
                     </View>
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={() => {
-                            setModalVisible(false);
-                        }}
-                    >
-                        <View
-                            style={{
-                                flex: 1,
-                                justifyContent: "flex-end",
-                                backgroundColor: "rgba(0,0,0,0.5)",
-                            }}
-                        >
-                            <View style={{ backgroundColor: "white", height: 350 }}>
-                                <FlatList
-                                    data={pendingUserProfiles}
-                                    renderItem={
-                                        (rowData) => {
-                                            return (
-                                                <TouchableOpacity onPress={() => onImageClicked(rowData.item.userId)}>
-                                                    <View className="flex-row items-center mt-5 pl-3">
-                                                        <Image
-                                                            source={rowData.item.imageUrl ? { uri: rowData.item.imageUrl } : require("../assets/profile-icon.png")}
-                                                            className="w-12 h-12 rounded-full" />
-                                                        <Text className="font-urbanist text-1xl mr-3">
-                                                            {rowData.item.firstName} {rowData.item.lastName}
-                                                        </Text>
-                                                        <TouchableOpacity onPress={() => updateDbJoinedUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 mr-2 items-center justify-center">
-                                                            <Text style={styles.joinButtonText}>Accept</Text>
-                                                        </TouchableOpacity>
-                                                        <TouchableOpacity onPress={() => removeDbJoinedOrPendingUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 items-center justify-center">
-                                                            <Text style={styles.joinButtonText}>Decline</Text>
-                                                        </TouchableOpacity>
-                                                    </View>
-                                                </TouchableOpacity>
-                                            )
-                                        }
-                                    }
-                                />
-                                <Button
-                                    title="Close"
-                                    onPress={() => setModalVisible(false)}
-                                />
-                            </View>
-                        </View>
-                    </Modal>
+                    <PendingRequestsModal />
                     <StatusBar barStyle="dark-content" />
                 </View>
             </ScrollView>
