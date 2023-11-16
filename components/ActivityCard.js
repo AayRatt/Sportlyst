@@ -7,7 +7,7 @@ import {
 } from "@expo-google-fonts/urbanist";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function ActivityCard( props) {
+export default function ActivityCard(props) {
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
 
