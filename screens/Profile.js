@@ -29,7 +29,7 @@ import {
   Urbanist_500Medium,
 } from "@expo-google-fonts/urbanist";
 
-export default function Profile({}) {
+export default function Profile({ }) {
   const [uploading, setUploading] = useState(false);
   //Countries Picker Visibiilty
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -235,12 +235,9 @@ export default function Profile({}) {
             </TouchableOpacity>
             <Text className="font-urbanistBold text-2xl">User Profile</Text>
             <TouchableOpacity
-              onPress={() => {
-                saveUserProfile();
-                setIsEditing(false);
-              }}
+              onPress={() => setIsEditing(false)}
             >
-              <Text className="font-urbanist text-lg">Save</Text>
+              <Text className="font-urbanist text-lg">Cancel</Text>
             </TouchableOpacity>
           </>
         ) : (
@@ -267,53 +264,84 @@ export default function Profile({}) {
                 source={user.imageUrl ? { uri: user.imageUrl } : profileIcon}
                 className="self-center w-40 h-40 rounded-full border-solid border-2"
               />
-              <TouchableOpacity
-                onPress={pickImage}
-                className="flex items-center justify-center mt-2"
-              >
-                <Text>Change Image</Text>
-              </TouchableOpacity>
+              {isEditing && (
+                <TouchableOpacity
+                  onPress={pickImage}
+                  className="flex items-center justify-center mt-2"
+                >
+                  <Text>Change Image</Text>
+                </TouchableOpacity>
+              )}
             </View>
 
-            <TextInput
-              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
-              placeholderTextColor={"#666"}
-              value={user.email}
-              editable={false}
-            ></TextInput>
+            {/* email */}
+            {
+              isEditing ? (
+                <TextInput
+                  className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5"
+                  placeholderTextColor={"#666"}
+                  value={user.email}
+                  editable={false}
+                ></TextInput>
+              ) : (
+                <Text className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-5 font-urbanist mt-5">{user.email}</Text>
+              )
+            }
 
             <View className="flex-row gap-3">
-              <TextInput
-                className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
-                placeholder="Enter First Name"
-                placeholderTextColor={"#666"}
-                autoCapitalize="none"
-                value={user.firstName}
-                onChangeText={(account) => {
-                  updateUser("firstName", account);
-                }}
-              ></TextInput>
-              <TextInput
-                className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
-                placeholder="Enter Last Name"
-                placeholderTextColor={"#666"}
-                value={user.lastName}
-                onChangeText={(account) => {
-                  updateUser("lastName", account);
-                }}
-              ></TextInput>
+              {/* firstName */}
+              {
+                isEditing ? (
+                  <TextInput
+                    className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
+                    placeholder="Enter First Name"
+                    placeholderTextColor={"#666"}
+                    autoCapitalize="none"
+                    value={user.firstName}
+                    onChangeText={(account) => {
+                      updateUser("firstName", account);
+                    }}
+                  ></TextInput>
+                ) : (
+                  <Text className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist">{user.firstName}</Text>
+                )
+              }
+
+              {/* lastName */}
+              {
+                isEditing ? (
+                  <TextInput
+                    className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
+                    placeholder="Enter Last Name"
+                    placeholderTextColor={"#666"}
+                    value={user.lastName}
+                    onChangeText={(account) => {
+                      updateUser("lastName", account);
+                    }}
+                  ></TextInput>
+                ) : (
+                  <Text className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist">{user.lastName}</Text>
+                )
+              }
             </View>
 
-            <TextInput
-              className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-3 font-urbanist"
-              placeholder="Phone number (optional)"
-              placeholderTextColor={"#666"}
-              value={user.phoneNumber}
-              keyboardType="numeric"
-              onChangeText={(account) => {
-                updateUser("phoneNumber", account);
-              }}
-            ></TextInput>
+            {/* phoneNumber */}
+            {
+              isEditing ? (
+                <TextInput
+                  className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-3 font-urbanist"
+                  placeholder="Phone number (optional)"
+                  placeholderTextColor={"#666"}
+                  value={user.phoneNumber}
+                  keyboardType="numeric"
+                  onChangeText={(account) => {
+                    updateUser("phoneNumber", account);
+                  }}
+                ></TextInput>
+              ) : (
+                <Text className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-3 font-urbanist">{user.phoneNumber ? user.phoneNumber : "Phone Number"}</Text>
+              )
+            }
 
             <Modal
               animationType="slide"
@@ -353,33 +381,65 @@ export default function Profile({}) {
                 </View>
               </View>
             </Modal>
-            <Pressable
-              className="bg-secondary rounded-lg h-10 mt-1 items-center justify-center"
-              onPress={() => setPickerVisible(true)}
-            >
-              <Text className="text-lg font-urbanistBold text-primary">
-                {user.country ? user.country : "Country"}
-              </Text>
-            </Pressable>
+            <View className="flex-row gap-3">
+              {/* country */}
+              {
+                isEditing ? (
+                  <Pressable
+                    className="bg-secondary rounded-lg h-12 mt-1 items-center justify-center flex-1"
+                    onPress={() => setPickerVisible(true)}
+                  >
+                    <Text className="text-lg font-urbanistBold text-primary">
+                      {user.country ? user.country : "Country"}
+                    </Text>
+                  </Pressable>
+                ) : (
+                  <Text className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist">{user.country ? user.country : "Country"}</Text>
+                )
+              }
 
-            <TextInput
-              className="bg-gray h-12 rounded-lg w=11/12 p-4 mt-3 mb-5 font-urbanist"
-              placeholder="Postal code"
-              placeholderTextColor={"#666"}
-              value={user.postalCode}
-              onChangeText={(account) => {
-                updateUser("postalCode", account);
-              }}
-            ></TextInput>
+              {/* postalCode */}
+              {
+                isEditing ? (
+                  <TextInput
+                    className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
+                    placeholder="Postal code"
+                    placeholderTextColor={"#666"}
+                    value={user.postalCode}
+                    onChangeText={(account) => {
+                      updateUser("postalCode", account);
+                    }}
+                  ></TextInput>
+                ) : (
+                  <Text className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist">{user.postalCode ? user.postalCode : "Postal Code"}</Text>
+                )
+              }
+            </View>
 
-            <Pressable
-              className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
-              onPress={onLogoutClicked}
-            >
-              <Text className="text-lg font-urbanistBold text-primary">
-                Logout
-              </Text>
-            </Pressable>
+
+            {
+              isEditing ? (
+                <Pressable
+                  className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
+                  onPress={() => {
+                    saveUserProfile();
+                    setIsEditing(false);
+                  }}
+                >
+                  <Text className="text-lg font-urbanistBold text-primary">
+                    Save
+                  </Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  className="bg-secondary rounded-lg h-14 mt-2 items-center justify-center"
+                  onPress={onLogoutClicked}
+                >
+                  <Text className="text-lg font-urbanistBold text-primary">
+                    Logout
+                  </Text>
+                </Pressable>)
+            }
           </View>
           <StatusBar barStyle="dark-content"></StatusBar>
         </View>

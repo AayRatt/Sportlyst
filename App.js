@@ -6,10 +6,7 @@ import Register from "./screens/Register";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { auth, db } from "./firebaseConfig";
-import {
-  doc,
-  getDoc
-} from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { Alert, Text } from "react-native";
 import { useState, useEffect } from "react";
 import Activities from "./screens/Activities";
@@ -26,10 +23,12 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import ChatFriends from "./screens/ChatFriends";
 import FriendProfile from "./screens/FriendProfile";
-import Onboarding from 'react-native-onboarding-swiper';
-import { Pressable } from 'react-native'; //NEW
+import Onboarding from "react-native-onboarding-swiper";
+import { Pressable } from "react-native"; //NEW
 import OnBoardingScreen from "./screens/OnBoardingScreen";
-import AsyncStorage, { useAsyncStorage } from "@react-native-async-storage/async-storage";
+import AsyncStorage, {
+  useAsyncStorage,
+} from "@react-native-async-storage/async-storage";
 import ChatGroup from "./screens/ChatGroup";
 
 const Tab = createBottomTabNavigator();
@@ -42,7 +41,7 @@ export default function App() {
   const [onBoarding, setOnBoarding] = useState(false);
   const [launch, setLaunch] = useState(false);
 
-  console.log(onBoarding)
+  console.log(onBoarding);
 
   function onAuthStateChanged(user) {
     setUser(user);
@@ -54,9 +53,7 @@ export default function App() {
     return subscriber;
   }, []);
 
-
   useEffect(() => {
-
     let isMounted = true;
 
     const getOnBoardingStatus = async () => {
@@ -66,11 +63,9 @@ export default function App() {
         try {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
-            
-            print(`STATUS${docSnap.data().onBoardPending}`)
+            print(`STATUS${docSnap.data().onBoardPending}`);
             if (docSnap.data().onBoardPending) {
-
-              setOnBoarding(true)
+              setOnBoarding(true);
 
               // try {
 
@@ -91,22 +86,21 @@ export default function App() {
               //   console.log(error)
 
               // }
-
-
             } else {
-              setOnBoarding(false)
+              setOnBoarding(false);
             }
-
           } else {
             // Consider how to handle the case where user data doesn't exist
           }
 
-          console.log(`LAUNCH:${launch}, ONBOARDING:${onBoarding} USER:${user}`)
+          console.log(
+            `LAUNCH:${launch}, ONBOARDING:${onBoarding} USER:${user}`
+          );
         } catch (error) {
           // Handle any errors
         }
       }
-      console.log(`LAUNCH:${launch}, ONBOARDING:${onBoarding} USER:${user}`)
+      console.log(`LAUNCH:${launch}, ONBOARDING:${onBoarding} USER:${user}`);
     };
 
     if (user) {
@@ -116,22 +110,25 @@ export default function App() {
     return () => {
       isMounted = false;
     };
-
   }, [user]);
-
-
 
   if (initializing) return null;
 
   function Onboarding() {
-
     return (
       <Stack.Navigator>
-        <Stack.Screen options={{ headerShown: false }} name="OnBoardingScreen" component={OnBoardingScreen} />
-        <Stack.Screen options={{ headerShown: false }} name="BottomTab" component={BottomTabNavigator} />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="OnBoardingScreen"
+          component={OnBoardingScreen}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="BottomTab"
+          component={BottomTabNavigator}
+        />
       </Stack.Navigator>
     );
-
   }
 
   function BottomTabNavigator() {
@@ -255,7 +252,7 @@ export default function App() {
           name="Chat"
           component={Chat}
           options={{
-            headerShown: true,
+            headerShown: false,
             title: null,
           }}
         />
@@ -263,14 +260,13 @@ export default function App() {
           name="ChatGroup"
           component={ChatGroup}
           options={{
-            headerShown: true,
+            headerShown: false,
             title: null,
           }}
         />
       </Stack.Navigator>
     );
   }
-
 
   return (
     <NavigationContainer>
@@ -306,5 +302,4 @@ export default function App() {
       )}
     </NavigationContainer>
   );
-
 }
