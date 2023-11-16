@@ -13,7 +13,7 @@ import {
 import { Alert, Text } from "react-native";
 import { useState, useEffect } from "react";
 import Activities from "./screens/Activities";
-import Profile from "./screens/Profile";
+import Profile from "./screens/Profile"; 
 import Search from "./screens/Search";
 import Friends from "./screens/Friends";
 import CreateActivity from "./screens/CreateActivity";
