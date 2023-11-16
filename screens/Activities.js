@@ -42,20 +42,31 @@ export default function Activities({ navigation }) {
     imageUrl: "",
   });
   const [filterList, setFilterList] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState(null); // State to keep track of the selected filter
-  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false); // State to control the visibility of the filter modal
+  const [selectedFilters, setSelectedFilters] = useState(new Set());
+  const [temporarySelectedFilters, setTemporarySelectedFilters] = useState(
+    new Set()
+  );
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+
+  const toggleFilter = (sportType) => {
+    const newFilters = new Set(selectedFilters);
+    if (newFilters.has(sportType)) {
+      newFilters.delete(sportType);
+    } else {
+      newFilters.add(sportType);
+    }
+    setSelectedFilters(newFilters);
+  };
 
   const toggleFilterModal = () => {
-    setIsFilterModalVisible(!isFilterModalVisible);
+    setIsFilterModalVisible((prevVisible) => !prevVisible);
+    if (!isFilterModalVisible) {
+      setTemporarySelectedFilters(new Set(selectedFilters));
+    }
   };
 
-  const applyFilter = (sportType) => {
-    setSelectedFilter(sportType);
-    toggleFilterModal();
-  };
-
-  const clearFilter = () => {
-    setSelectedFilter(null);
+  const applyFilters = () => {
+    setSelectedFilters(new Set(temporarySelectedFilters));
     toggleFilterModal();
   };
 
@@ -78,30 +89,80 @@ export default function Activities({ navigation }) {
   }
 
   const getFilteredActivities = () => {
-    if (!selectedFilter) {
-      return activityDataList; // No filter selected, return all activities
-    }
     return activityDataList.filter(
-      (activity) => activity.sportType === selectedFilter
+      (activity) =>
+        selectedFilters.size === 0 || selectedFilters.has(activity.sportType)
     );
   };
 
   const FilterModal = () => {
+    const toggleTemporaryFilter = (sportType) => {
+      setTemporarySelectedFilters((prevFilters) => {
+        const newFilters = new Set(prevFilters);
+        if (newFilters.has(sportType)) {
+          newFilters.delete(sportType);
+        } else {
+          newFilters.add(sportType);
+        }
+        return newFilters;
+      });
+    };
+
     return (
-      <Modal visible={isFilterModalVisible} onBackdropPress={toggleFilterModal}>
-        <View
-          style={{ backgroundColor: "white", padding: 22, borderRadius: 4 }}
-        >
-          <ScrollView>
-            {filterList.map((sport, index) => (
-              <Button
-                key={index}
-                title={sport}
-                onPress={() => applyFilter(sport)}
+      <Modal
+        visible={isFilterModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        transparent={true}
+      >
+        <View className="flex-1 justify-end">
+          <View className="w-full h-4/5 bg-primary rounded-lg">
+            <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
+              <Text className="font-urbanistBold text-3xl text-start">
+                Filters
+              </Text>
+              <Ionicons
+                name="close"
+                size={35}
+                color="black"
+                onPress={toggleFilterModal}
               />
-            ))}
-            <Button title="No Filter" onPress={clearFilter} />
-          </ScrollView>
+            </View>
+            <ScrollView className="max-h-screen mt-5">
+              {filterList.map((sport, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => toggleTemporaryFilter(sport)}
+                >
+                  <View className="border mx-5"></View>
+                  <View className="flex-row justify-between align-center px-5 py-3">
+                    <Text className="font-urbanist text-xl">{sport}</Text>
+                    {temporarySelectedFilters.has(sport) && (
+                      <Ionicons name="checkmark" size={25} color="black" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+              <View className="w-full items-center justify-center">
+                <Pressable
+                  className="bg-gray rounded-lg w-11/12 h-14 items-center justify-center"
+                  onPress={() => setTemporarySelectedFilters(new Set())}
+                >
+                  <Text className="text-lg font-urbanistBold">
+                    Clear Filters
+                  </Text>
+                </Pressable>
+                <Pressable
+                  className="bg-secondary rounded-lg w-11/12 h-14 mt-6 items-center justify-center"
+                  onPress={applyFilters}
+                >
+                  <Text className="text-lg font-urbanistBold text-primary">
+                    Apply Filters
+                  </Text>
+                </Pressable>
+              </View>
+            </ScrollView>
+          </View>
         </View>
       </Modal>
     );
@@ -306,8 +367,8 @@ export default function Activities({ navigation }) {
         }}
         onPress={() => {
           //NAVIGATE HERE
-          navigation.navigate('CreateActivity', {
-            activity: "Activities"
+          navigation.navigate("CreateActivity", {
+            activity: "Activities",
           });
         }}
       >
