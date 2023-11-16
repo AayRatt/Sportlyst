@@ -95,11 +95,11 @@ export default function ChatGroup({ navigation }) {
     getFriends();
   }, []);
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: "New Group",
-    });
-  }, []);
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     title: "New Group",
+  //   });
+  // }, []);
 
   //Selection's Friend
   const handleSelectFriend = (id) => {
@@ -118,7 +118,7 @@ export default function ChatGroup({ navigation }) {
 
   //Add ChatGroup Data to FireStore
   const addChatGroup = async () => {
-    //Requirements
+    //Conditions
     if (groupName === "") {
       alert("Please enter your group name");
       return;
@@ -140,6 +140,7 @@ export default function ChatGroup({ navigation }) {
       const createGroup = await addDoc(collection(db, "chatGroups"), {
         createdAt: new Date(),
         groupName: groupName,
+        groupAdmiID: auth.currentUser.uid,
         members: membersUserIDs,
       });
 

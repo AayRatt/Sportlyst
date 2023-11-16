@@ -27,8 +27,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 export default function ChatFriends({ navigation }) {
   //State Variables
-  const [friends, setFriends] = useState([]);
-  const [groups, setGroups] = useState([]);
+  const [friends, setFriends] = useState([])
+  const [groups, setGroups] = useState([])
 
   //Get Friends
   const getFriends = () => {
@@ -135,15 +135,12 @@ export default function ChatFriends({ navigation }) {
   const arrayData = [
     ...friends,
     ...groups.map((group) => ({ isGroup: true, ...group })),
-  ];
+  ]
+
+
   console.log("arrayData aqui:", arrayData);
   return (
     <SafeAreaView className="bg-primary flex-1">
-      {/* <View className="flex-row">
-        <Text className="font-urbanistBold text-3xl text-start px-4 mt-5">
-          Chats
-        </Text>
-      </View> */}
       <View className="flex-row justify-between align-baseline mt-5">
         <Text className="font-urbanistBold text-3xl text-start px-4">
           Chats
@@ -159,6 +156,7 @@ export default function ChatFriends({ navigation }) {
       </View>
       <FlatList
         data={arrayData}
+        keyExtractor={rowData => rowData.id}
         renderItem={(rowData) => {
           if (rowData.item.isGroup) {
             return (
@@ -169,6 +167,7 @@ export default function ChatFriends({ navigation }) {
                       groupID: rowData.item.id,
                       groupName: rowData.item.groupName,
                       groupMembers: rowData.item.members,
+                      groupAdmiID: rowData.item.groupAdmiID
                     })
                   }
                 >
