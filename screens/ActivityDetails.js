@@ -252,6 +252,7 @@ export default function ActivityDetails({ route, navigation }) {
         );
     };
 
+    const attendeesTopMargin = activity.isUserActivity ? 365 : 340
 
     return (
         <SafeAreaView style={styles.safeAreaView}>
@@ -276,112 +277,112 @@ export default function ActivityDetails({ route, navigation }) {
                     </TouchableOpacity>
                 )}
             </View>
-            <ScrollView style={styles.scrollView}>
-                <View style={styles.container}>
-                    <Image source={require('../assets/football.jpg')} style={{ width: '100%', height: 160 }} />
-                    <View style={styles.eventDetails}>
-                        <Text style={styles.title}>{activity.title}</Text>
-                        <Text style={styles.description}>{activity.description}</Text>
-                        <Text style={styles.grayText}>{activity.date} {activity.time}</Text>
-                        <Text style={styles.grayText}>CAD {activity.price}</Text>
-                        <Text style={styles.grayText}>{joinedUsersCount ? joinedUsersCount : 0}/{activity.players} joined</Text>
-                        {activity.isUserActivity && (
-                            <Text style={styles.grayText}>{pendingUsersCount ? pendingUsersCount : 0} pending</Text>
-                        )}
+            {/* <ScrollView style={styles.scrollView}> */}
+            <View style={styles.container}>
+                <Image source={require('../assets/football.jpg')} style={{ width: '100%', height: 160 }} />
+                <View style={styles.eventDetails}>
+                    <Text style={styles.title}>{activity.title}</Text>
+                    <Text style={styles.description}>{activity.description}</Text>
+                    <Text style={styles.grayText}>{activity.date} {activity.time}</Text>
+                    <Text style={styles.grayText}>CAD {activity.price}</Text>
+                    <Text style={styles.grayText}>{joinedUsersCount ? joinedUsersCount : 0}/{activity.players} joined</Text>
+                    {activity.isUserActivity && (
+                        <Text style={styles.grayText}>{pendingUsersCount ? pendingUsersCount : 0} pending</Text>
+                    )}
 
-                        <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Venue</Text>
-                            {/* Add venue details here */}
-                            <Text style={styles.title}>{activity.venue}</Text>
-                            <Text style={styles.grayText}>{activity.venueAddress}</Text>
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Venue</Text>
+                        {/* Add venue details here */}
+                        <Text style={styles.title}>{activity.venue}</Text>
+                        <Text style={styles.grayText}>{activity.venueAddress}</Text>
+                    </View>
+
+                    {
+                        !activity.isUserActivity && !isPendingUsers && !isJoinedUser && (
+                            <TouchableOpacity onPress={updatePendingUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
+                                <Text style={styles.joinButtonText}>Join</Text>
+                            </TouchableOpacity>
+                        )
+                    }
+
+                    {activity.isUserActivity && !isEditUI && (
+                        <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-10 items-center justify-center">
+                            <Text style={styles.joinButtonText}>View Pending Requests</Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {activity.isUserActivity && isEditUI && (
+                        <TouchableOpacity onPress={() => {
+                            navigation.navigate('CreateActivity', {
+                                activity: "ActivityDetails",
+                                title: activity.title,
+                                description: activity.description,
+                                joinedUsersCount: '' + joinedUsersCount,
+                                price: activity.price,
+                                eventCollectionId: activity.eventCollectionId,
+                                docId: activity.docId
+                            })
+                        }}
+                            className="bg-secondary rounded-lg h-10 items-center justify-center">
+                            <Text style={styles.joinButtonText}>Update Activity</Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {isPendingUsers && (
+                        <View className="bg-secondary rounded-lg h-10 items-center justify-center">
+                            <Text style={styles.joinButtonText}>Pending</Text>
                         </View>
+                    )}
 
-                        {
-                            !activity.isUserActivity && !isPendingUsers && !isJoinedUser && (
-                                <TouchableOpacity onPress={updatePendingUsers} className="bg-secondary rounded-lg h-10 items-center justify-center">
-                                    <Text style={styles.joinButtonText}>Join</Text>
-                                </TouchableOpacity>
-                            )
-                        }
-
-                        {activity.isUserActivity && !isEditUI && (
-                            <TouchableOpacity onPress={onPendingButtonClicked} className="bg-secondary rounded-lg h-10 items-center justify-center">
-                                <Text style={styles.joinButtonText}>View Pending Requests</Text>
-                            </TouchableOpacity>
-                        )}
-
-                        {activity.isUserActivity && isEditUI && (
-                            <TouchableOpacity onPress={() => {
-                                navigation.navigate('CreateActivity', {
-                                    activity: "ActivityDetails",
-                                    title: activity.title,
-                                    description: activity.description,
-                                    joinedUsersCount: '' + joinedUsersCount,
-                                    price: activity.price,
-                                    eventCollectionId: activity.eventCollectionId,
-                                    docId: activity.docId
-                                })
-                            }}
-                                className="bg-secondary rounded-lg h-10 items-center justify-center">
-                                <Text style={styles.joinButtonText}>Update Activity</Text>
-                            </TouchableOpacity>
-                        )}
-
-                        {isPendingUsers && (
-                            <View className="bg-secondary rounded-lg h-10 items-center justify-center">
-                                <Text style={styles.joinButtonText}>Pending</Text>
-                            </View>
-                        )}
-
-                        {isJoinedUser && (
-                            <View className="bg-secondary rounded-lg h-10 items-center justify-center">
-                                <Text style={styles.joinButtonText}>Joined</Text>
-                            </View>
-                        )}
-                    </View>
-                    <View style={styles.attendees}>
-                        <Text style={styles.sectionTitle}>Who's going?</Text>
-                        {isEditUI ? (
-                            <View style={styles.imagesContainer}>
-                                {joinedUserProfiles.map((image, index) => (
-                                    <TouchableOpacity key={index} onPress={() => removeDbJoinedOrPendingUsers(image.userId)}>
-                                        <View style={styles.iconContainer}>
-                                            <Ionicons name="remove-circle" size={24} color="black" />
-                                        </View>
-                                        <Image
-                                            key={index}
-                                            source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
-                                            style={{
-                                                width: 60,
-                                                height: 60,
-                                                borderRadius: 60 / 2,
-                                                borderWidth: 2,
-                                            }} />
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        ) : (
-                            <View style={styles.imagesContainer}>
-                                {joinedUserProfiles.map((image, index) => (
-                                    <TouchableOpacity key={index} onPress={() => onImageClicked(image.userId)}>
-                                        <Image
-                                            key={index}
-                                            source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
-                                            style={{
-                                                width: 60,
-                                                height: 60,
-                                                borderRadius: 60 / 2,
-                                                borderWidth: 2,
-                                            }} />
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        )}
-                    </View>
-                    <PendingRequestsModal />
-                    <StatusBar barStyle="dark-content" />
+                    {isJoinedUser && (
+                        <View className="bg-secondary rounded-lg h-10 items-center justify-center">
+                            <Text style={styles.joinButtonText}>Joined</Text>
+                        </View>
+                    )}
                 </View>
-            </ScrollView>
+                <View style={[styles.attendees, {top: attendeesTopMargin}]}>
+                    <Text style={styles.sectionTitle}>Who's going?</Text>
+                    {isEditUI ? (
+                        <View style={styles.imagesContainer}>
+                            {joinedUserProfiles.map((image, index) => (
+                                <TouchableOpacity key={index} onPress={() => removeDbJoinedOrPendingUsers(image.userId)}>
+                                    <View style={styles.iconContainer}>
+                                        <Ionicons name="remove-circle" size={24} color="black" />
+                                    </View>
+                                    <Image
+                                        key={index}
+                                        source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
+                                        style={{
+                                            width: 60,
+                                            height: 60,
+                                            borderRadius: 60 / 2,
+                                            borderWidth: 2,
+                                        }} />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    ) : (
+                        <View style={styles.imagesContainer}>
+                            {joinedUserProfiles.map((image, index) => (
+                                <TouchableOpacity key={index} onPress={() => onImageClicked(image.userId)}>
+                                    <Image
+                                        key={index}
+                                        source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
+                                        style={{
+                                            width: 60,
+                                            height: 60,
+                                            borderRadius: 60 / 2,
+                                            borderWidth: 2,
+                                        }} />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    )}
+                </View>
+                <PendingRequestsModal />
+                <StatusBar barStyle="dark-content" />
+            </View>
+            {/* </ScrollView> */}
         </SafeAreaView>
     );
 }
@@ -442,7 +443,6 @@ const styles = StyleSheet.create({
         marginBottom: 8
     },
     attendees: {
-        top: 340,
         left: 16,
         fontSize: 32,
         fontWeight: 'bold',
