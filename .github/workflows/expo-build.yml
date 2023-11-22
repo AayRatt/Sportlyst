@@ -12,6 +12,6 @@ jobs:
           with:
             node-version: '18.x' # Specify your Node.js version
         - run: npm install # or yarn install
-        - run: npm install -g expo-cli
-        - run: expo login -u ${{ 'sportlystapp' }} -p ${{ 'sportlystapp@1123' }}
-        - run: expo build:android -t app-bundle
+        - run: npm install -g eas-cli
+        - run: eas login --non-interactive --apiKey ${{ secrets.EXPO_TOKEN }}
+        - run: eas build --platform android
