@@ -22,11 +22,13 @@ jobs:
 
       - name: Navigate to Android directory
         run: cd android
-      
+
+      - name: Set Executable Permissions for Gradlew
+        run: chmod +x ./gradlew
+
       - name: Build Android Release
         run: ./gradlew assembleRelease
       
-
       - name: Upload Android Release to App Center
         uses: wzieba/AppCenter-Github-Action@v1
         with:
