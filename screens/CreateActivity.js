@@ -126,7 +126,8 @@ Location: ${userEventField.location}
           date: userEventField.date,
           time: userEventField.time,
           location: userEventField.location,
-          joinedUsers: []
+          joinedUsers: [],
+          pendingUsers: []
         };
 
         //2. Add data to firestore
