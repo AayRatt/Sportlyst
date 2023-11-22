@@ -4,7 +4,7 @@ on: push
 
 jobs:
   update:
-    name: EAS Update
+    name: EAS Build
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v2
@@ -14,4 +14,4 @@ jobs:
         - run: npm install # or yarn install
         - run: npm install -g expo-cli
         - run: expo login -u ${{ 'sportlystapp' }} -p ${{ 'sportlystapp@1123' }}
-        - run: eas build -p android
+        - run: expo build:android -t app-bundle
