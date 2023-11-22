@@ -60,9 +60,10 @@ export default function Activities({ navigation }) {
     setSelectedFilters(newFilters);
   };
 
-
   const [isPanelVisible, setIsPanelVisible] = useState(false);
-  const panelPosition = useRef(new Animated.Value(Dimensions.get('window').width)).current;
+  const panelPosition = useRef(
+    new Animated.Value(Dimensions.get("window").width)
+  ).current;
 
   const openPanel = () => {
     setIsPanelVisible(true);
@@ -75,12 +76,11 @@ export default function Activities({ navigation }) {
 
   const closePanel = () => {
     Animated.timing(panelPosition, {
-      toValue: Dimensions.get('window').width,
+      toValue: Dimensions.get("window").width,
       duration: 300,
       useNativeDriver: true,
     }).start(() => setIsPanelVisible(false)); // Hide the panel after the animation
   };
-
 
   const toggleFilterModal = () => {
     setIsFilterModalVisible((prevVisible) => !prevVisible);
@@ -196,10 +196,7 @@ export default function Activities({ navigation }) {
     return (
       <Animated.View
         visible={isPanelVisible}
-        style={[
-          styles.panel,
-          { transform: [{ translateX: panelPosition }] }
-        ]}
+        style={[styles.panel, { transform: [{ translateX: panelPosition }] }]}
       >
         {/* Your notification content here */}
         <Text>Notifications</Text>
@@ -207,8 +204,8 @@ export default function Activities({ navigation }) {
           <Text>Close</Text>
         </TouchableOpacity>
       </Animated.View>
-    )
-  }
+    );
+  };
 
   // Current Location
   // const getCurrentLocation = async () => {
@@ -343,7 +340,12 @@ export default function Activities({ navigation }) {
           onPress={toggleFilterModal}
         />
         <Text className="font-urbanistBold text-2xl">Sportlyst</Text>
-        <Ionicons name="notifications" size={24} color="black" onPress={openPanel} />
+        <Ionicons
+          name="notifications"
+          size={24}
+          color="black"
+          onPress={openPanel}
+        />
       </View>
       <FilterModal />
       <ScrollView className="h-fit">
@@ -369,7 +371,6 @@ export default function Activities({ navigation }) {
           </Text>
           <Ionicons name="chevron-forward" size={21} color="black" />
         </View>
-
         {getFilteredActivities().map((activity, index) => (
           <ActivityCard
             key={index}
@@ -423,13 +424,13 @@ export default function Activities({ navigation }) {
 
 const styles = StyleSheet.create({
   panel: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 0,
     // bottom: 0,
-    width: '60%', // Adjust width as needed
+    width: "60%", // Adjust width as needed
     // height: '100%',
-    backgroundColor: 'grey',
+    backgroundColor: "grey",
     padding: 20,
     zIndex: 1000,
     borderTopLeftRadius: 15,

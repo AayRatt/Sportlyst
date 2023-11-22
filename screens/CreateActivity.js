@@ -37,14 +37,13 @@ import { db, auth } from "../firebaseConfig";
 import { setDoc, doc, collection, updateDoc } from "firebase/firestore";
 
 export default function CreateActivity({ route, navigation }) {
-  const { activity } = route.params
-  const { title } = route.params
-  const { description } = route.params
-  const { joinedUsersCount } = route.params
-  const { price } = route.params
-  const { eventCollectionId } = route.params
-  const { docId } = route.params
-
+  const { activity } = route.params;
+  const { title } = route.params;
+  const { description } = route.params;
+  const { joinedUsersCount } = route.params;
+  const { price } = route.params;
+  const { eventCollectionId } = route.params;
+  const { docId } = route.params;
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -126,7 +125,7 @@ Location: ${userEventField.location}
           date: userEventField.date,
           time: userEventField.time,
           location: userEventField.location,
-          joinedUsers: []
+          joinedUsers: [],
         };
 
         //2. Add data to firestore
@@ -149,7 +148,7 @@ Location: ${userEventField.location}
           payment: "",
           date: "",
           time: "",
-          location: ""
+          location: "",
         });
       }
     } catch (error) {
@@ -176,7 +175,7 @@ Location: ${userEventField.location}
   const updateDb = async () => {
     // update data in firestore
     try {
-      const eventsRef = doc(db, "events", eventCollectionId, "sports", docId)
+      const eventsRef = doc(db, "events", eventCollectionId, "sports", docId);
       await updateDoc(eventsRef, user);
       alert("Activity Updated");
     } catch (err) {
@@ -226,7 +225,7 @@ Location: ${userEventField.location}
     <SafeAreaView className="bg-primary flex-1">
       <View className="bg-white pl-3 pr-3">
         <View className="flex-row justify-between items-baseline inline-flex">
-          {activity == 'Activities' ? (
+          {activity == "Activities" ? (
             <Text className="mt-5 font-urbanistBold text-3xl text-start pl-3">
               Create Activity
             </Text>
@@ -275,7 +274,7 @@ Location: ${userEventField.location}
             }}
           ></TextInput>
           <View className="flex-row bg-gray h-15 rounded-lg w=11/12 p-4 mb-3 justify-between">
-            <Text className="font-urbanist text-[#666]">Start</Text>
+            <Text className="font-urbanist text-[#666]">Starts</Text>
             <DateTimePickerModal
               isVisible={isDatePickerVisible}
               mode="datetime"
@@ -294,7 +293,7 @@ Location: ${userEventField.location}
 
           <View className="flex-row gap-3">
             <TextInput
-              className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
+              className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-3 flex-1 font-urbanist"
               placeholder="Quantity of Players"
               placeholderTextColor={"#666"}
               autoCapitalize="none"
@@ -305,7 +304,7 @@ Location: ${userEventField.location}
               }}
             ></TextInput>
             <TextInput
-              className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-5 flex-1 font-urbanist"
+              className="bg-gray h-12 rounded-lg w-1/2 p-4 mb-3 flex-1 font-urbanist"
               placeholder="Price per person"
               placeholderTextColor={"#666"}
               autoCapitalize="none"
@@ -316,7 +315,26 @@ Location: ${userEventField.location}
               }}
             ></TextInput>
           </View>
-
+          <TextInput
+            className="bg-gray rounded-lg w=11/12 p-4 mb-3 font-urbanist"
+            placeholder="Address"
+            placeholderTextColor={"#666"}
+            autoCapitalize="none"
+            value={userEventField.location}
+            onChangeText={(account) => {
+              formChanged("location", account);
+            }}
+          ></TextInput>
+          <TextInput
+            className="bg-gray rounded-lg w=11/12 p-4 mb-3 font-urbanist"
+            placeholder="Activity Type"
+            placeholderTextColor={"#666"}
+            autoCapitalize="none"
+            value={userEventField.sportType}
+            onChangeText={(account) => {
+              formChanged("sportType", account);
+            }}
+          ></TextInput>
           {/* <Autocomplete
             autoCapitalize="none"
             autoCorrect={false}
@@ -418,7 +436,7 @@ Location: ${userEventField.location}
             </Text>
           </Pressable> */}
 
-          {activity == 'Activities' ? (
+          {activity == "Activities" ? (
             <Pressable
               className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
               onPress={onCreateEvent}
