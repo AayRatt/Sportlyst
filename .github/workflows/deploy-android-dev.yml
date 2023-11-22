@@ -20,8 +20,12 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      - name: Navigate to Android directory
+        run: cd android
+      
       - name: Build Android Release
-        run: npx react-native run-android --variant=release
+        run: ./gradlew assembleRelease
+      
 
       - name: Upload Android Release to App Center
         uses: wzieba/AppCenter-Github-Action@v1
