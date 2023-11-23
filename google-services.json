@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "671352737622",
+    "project_id": "sportlyst-f84a1",
+    "storage_bucket": "sportlyst-f84a1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671352737622:android:6b610ca15dafc3ac5150f7",
+        "android_client_info": {
+          "package_name": "com.sportlystapp.sportlyst"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbQMlk0T97BUwLtqovnFseexpaHPxR5R4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

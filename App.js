@@ -30,6 +30,7 @@ import AsyncStorage, {
   useAsyncStorage,
 } from "@react-native-async-storage/async-storage";
 import ChatGroup from "./screens/ChatGroup";
+import NotificationController from "./notifications/PushNotificationController"
 
 const Tab = createBottomTabNavigator();
 
@@ -51,6 +52,8 @@ export default function App() {
   useEffect(() => {
     const subscriber = auth.onAuthStateChanged(onAuthStateChanged);
     return subscriber;
+
+    NotificationController()
   }, []);
 
   useEffect(() => {
