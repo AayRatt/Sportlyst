@@ -8,7 +8,7 @@ import { Entypo } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import { db, auth } from "../firebaseConfig";
-import { setDoc, getDoc, doc, collection, onSnapshot, query, orderBy, deleteDoc, getDocs } from "firebase/firestore";
+import { setDoc, getDoc, doc, collection, onSnapshot, query, orderBy, deleteDoc, getDocs, updateDoc } from "firebase/firestore";
 
 export default function Chat({ navigation, route }) {
 
@@ -87,6 +87,7 @@ export default function Chat({ navigation, route }) {
   //Get the Name of the Member From FireStore
   const getNameForUser = (uid) => {
     if (isGroupChat) {
+      //Find the data of specfic user, using their uid
       const user = membersProfile.find((member) => member.uid === uid)
       return user ? `${user.firstName} ${user.lastName}` : "No data loaded"
     }
@@ -138,13 +139,13 @@ export default function Chat({ navigation, route }) {
   }
 
 
-  //Delete Confirmation
+  //Delete Alert Group Confirmation
   const confirmAndDeleteGroup = () => {
     Alert.alert(
       "Delete Group",
       "Are you sure to eliminate this Group?",
       [
-        //Cancel Button
+        //Cancel 
         {
           text: "Cancel",
           style: "cancel"
@@ -155,7 +156,7 @@ export default function Chat({ navigation, route }) {
     )
   }
 
-  //Delete Function
+  //Delete Group Function
   const deleteGroup = async () => {
     try {
       //Delete document from Chat Group Colection
@@ -177,13 +178,58 @@ export default function Chat({ navigation, route }) {
     }
   }
 
+  //Delete Alert Leave Group Confirmation
+  const confirmAndGetOutGroup = () => {
+    Alert.alert(
+      "Leave Group",
+      `Are you sure to leave this Group: ${groupName}?`,
+      [
+        //Cancel 
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        //Confirmation
+        { text: "Leave", onPress: () => getOutGroup() }
+      ]
+    )
+  }
+
+  //Leave Member of Group Function
+  const getOutGroup = async () => {
+    const groupRef = doc(db, "chatGroups", groupID)
+    try {
+      const groupData = await getDoc(groupRef)
+
+      if (groupData) {
+        const members = groupData.data().members
+        //Filter the actual member and store the others in a new array newMembers
+        const newMembers = members.filter(member => member !== auth.currentUser.uid)
+        //Update the Firestore Members Field
+        await updateDoc(groupRef, {
+          members: newMembers
+        })
+
+        Alert.alert('You left the Group: ', groupName)
+        navigation.goBack()
+      } else {
+        Alert.alert('The group does not exist')
+      }
+
+
+    } catch (error) {
+      console.log('Cant leave the group correctly', error)
+      Alert.alert('Error')
+    }
+  }
+
   return (
     <SafeAreaView className="bg-primary flex-1">
       <View className="bg-white pl-3 pr-3 flex-row justify-between items-center mt-5 mb-2">
         <Pressable onPress={() => navigation.goBack()} className="flex-row items-center">
           <Entypo name="chevron-left" size={35} color="black" />
         </Pressable>
-        <View className="flex-1 mr-10"> 
+        <View className="flex-1 mr-10">
           {isGroupChat ? (
             <GroupTitle
               groupName={groupName}
@@ -200,6 +246,13 @@ export default function Chat({ navigation, route }) {
             <MaterialIcons name="delete" size={35} color="black" />
           </Pressable>
         )}
+        {isGroupChat && auth.currentUser.uid !== groupAdmiID &&
+          (
+            <Pressable onPress={confirmAndGetOutGroup}>
+              <MaterialIcons name="exit-to-app" size={35} color="black"/>
+            </Pressable>
+          )}
+
       </View>
       <GiftedChat
         messages={messages}
