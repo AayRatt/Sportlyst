@@ -1,6 +1,7 @@
 name: Build Android AAB with Expo
-on: push
-
+on: 
+  push:
+    branches: [main]
 
 jobs:
   update:
@@ -15,13 +16,13 @@ jobs:
             fi
   
         - name: Checkout repository
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
   
         - name: Setup Node
-          uses: actions/setup-node@v3
+          uses: actions/setup-node@v4
           with:
             node-version: 18.x
-            cache: yarn
+            cache: npm
   
         - name: Setup EAS
           uses: expo/expo-github-action@v8
@@ -30,8 +31,36 @@ jobs:
             token: ${{ secrets.EXPO_TOKEN }}
   
         - name: Install dependencies
-          run: yarn install
+          run: npm install
   
-        - run: npm install -g eas-cli
-        - run: eas build --platform android
+        # - run: npm install -g eas-cli
 
+        - name: Build AAB file
+          run: eas build --platform android
+
+        - name: Get build URL
+          run: eas build:list --limit 1 --json --non-interactive --platform android | jq -r '.[0].artifacts.buildUrl'
+  
+        - name: Store AAB url in env variable
+          run: echo "AAB_URL=$(eas build:list --limit 1 --json --non-interactive --platform android | jq -r '.[0].artifacts.buildUrl')" >> $GITHUB_ENV
+  
+        - name: Download AAB file
+          uses: suisei-cn/actions-download-file@v1
+          id: downloadfile
+          with:
+            url: 'Downloading AAB from [this](${{ env.AAB_URL }})'
+            target: public/
+            auto-match: true
+  
+        - name: Get AAB file name
+          run: |
+            echo "AAB_FILE_NAME=$(ls public/)" >> $GITHUB_ENV
+  
+        - name: Install App Center CLI
+          run: npm install -g appcenter-cli
+  
+        - name: Login to App Center
+          run: appcenter login --token ${{ secrets.APP_CENTER_TOKEN }}
+  
+        - name: Upload to App Center
+          run: appcenter distribute release --app ${{ secrets.APP_CENTER_TOKEN_ANDROID }} --file ./public/${{ env.AAB_FILE_NAME }} --group "Collaborators" --build-version 1.0.${{ github.run_number }}
