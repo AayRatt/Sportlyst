@@ -60,7 +60,7 @@ jobs:
           run: npm install -g appcenter-cli
   
         - name: Login to App Center
-          run: appcenter login --token ${{ secrets.APP_CENTER_TOKEN }}
+          run: appcenter login --token ${{ secrets.APP_CENTER_TOKEN_ANDROID }}
   
         - name: Upload to App Center
           run: appcenter distribute release --app ${{ secrets.APP_CENTER_TOKEN_ANDROID }} --file ./public/${{ env.AAB_FILE_NAME }} --group "Collaborators" --build-version 1.0.${{ github.run_number }}
