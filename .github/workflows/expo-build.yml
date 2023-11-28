@@ -33,7 +33,7 @@ jobs:
         - name: Install dependencies
           run: npm install
   
-        # - run: npm install -g eas-cli
+        - run: npm install -g eas-cli
 
         - name: Build AAB file
           run: eas build --platform android
