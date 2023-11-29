@@ -1,0 +1,108 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.sportlyst"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="33" />
+10
+11    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+11-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/debug/AndroidManifest.xml:5:5-77
+11-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/debug/AndroidManifest.xml:5:22-75
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:3:5-67
+12-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:3:22-64
+13    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+13-->[com.facebook.flipper:flipper:0.182.0] /Users/nadunperera/.gradle/caches/transforms-3/e13f88164840fe641a466d05cd8edac7/transformed/jetified-flipper-0.182.0/AndroidManifest.xml:16:5-76
+13-->[com.facebook.flipper:flipper:0.182.0] /Users/nadunperera/.gradle/caches/transforms-3/e13f88164840fe641a466d05cd8edac7/transformed/jetified-flipper-0.182.0/AndroidManifest.xml:16:22-73
+14    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+15    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+16    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+17    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+17-->[com.microsoft.appcenter:appcenter:5.0.2] /Users/nadunperera/.gradle/caches/transforms-3/0f0208ef42ccb1700ad7a2eaecc39e10/transformed/jetified-appcenter-5.0.2/AndroidManifest.xml:14:5-79
+17-->[com.microsoft.appcenter:appcenter:5.0.2] /Users/nadunperera/.gradle/caches/transforms-3/0f0208ef42ccb1700ad7a2eaecc39e10/transformed/jetified-appcenter-5.0.2/AndroidManifest.xml:14:22-76
+18
+19    <application
+19-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:5:5-24:19
+20        android:name="com.sportlyst.MainApplication"
+20-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:6:7-38
+21        android:allowBackup="false"
+21-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:10:7-34
+22        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+22-->[androidx.core:core:1.7.0] /Users/nadunperera/.gradle/caches/transforms-3/75e4635b66fa4e4e84e71b52579837ce/transformed/core-1.7.0/AndroidManifest.xml:24:18-86
+23        android:debuggable="true"
+24        android:icon="@mipmap/ic_launcher"
+24-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:8:7-41
+25        android:label="@string/app_name"
+25-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:7:7-39
+26        android:roundIcon="@mipmap/ic_launcher_round"
+26-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:9:7-52
+27        android:theme="@style/AppTheme"
+27-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:11:7-38
+28        android:usesCleartextTraffic="true" >
+28-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/debug/AndroidManifest.xml:8:9-44
+29        <activity
+29-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/debug/AndroidManifest.xml:11:9-111
+30            android:name="com.facebook.react.devsupport.DevSettingsActivity"
+30-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/debug/AndroidManifest.xml:11:19-83
+31            android:exported="false" />
+31-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/debug/AndroidManifest.xml:11:84-108
+32        <activity
+32-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:12:7-23:18
+33            android:name="com.sportlyst.MainActivity"
+33-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:13:9-37
+34            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+34-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:15:9-118
+35            android:exported="true"
+35-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:18:9-32
+36            android:label="@string/app_name"
+36-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:14:9-41
+37            android:launchMode="singleTask"
+37-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:16:9-40
+38            android:windowSoftInputMode="adjustResize" >
+38-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:17:9-51
+39            <intent-filter>
+39-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:19:9-22:25
+40                <action android:name="android.intent.action.MAIN" />
+40-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:20:13-65
+40-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:20:21-62
+41
+42                <category android:name="android.intent.category.LAUNCHER" />
+42-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:21:13-73
+42-->/Users/nadunperera/Documents/GB/Semester_3/Sportlyst/android/app/src/main/AndroidManifest.xml:21:23-70
+43            </intent-filter>
+44        </activity>
+45
+46        <meta-data
+46-->[com.facebook.soloader:soloader:0.10.5] /Users/nadunperera/.gradle/caches/transforms-3/ec3312a013bd7d8a70466a1977a1dba4/transformed/jetified-soloader-0.10.5/AndroidManifest.xml:12:9-14:37
+47            android:name="com.facebook.soloader.enabled"
+47-->[com.facebook.soloader:soloader:0.10.5] /Users/nadunperera/.gradle/caches/transforms-3/ec3312a013bd7d8a70466a1977a1dba4/transformed/jetified-soloader-0.10.5/AndroidManifest.xml:13:13-57
+48            android:value="false" />
+48-->[com.facebook.soloader:soloader:0.10.5] /Users/nadunperera/.gradle/caches/transforms-3/ec3312a013bd7d8a70466a1977a1dba4/transformed/jetified-soloader-0.10.5/AndroidManifest.xml:14:13-34
+49
+50        <provider
+50-->[androidx.emoji2:emoji2:1.0.0] /Users/nadunperera/.gradle/caches/transforms-3/223146ef33e3aa619e8b04649706e145/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:26:9-34:20
+51            android:name="androidx.startup.InitializationProvider"
+51-->[androidx.emoji2:emoji2:1.0.0] /Users/nadunperera/.gradle/caches/transforms-3/223146ef33e3aa619e8b04649706e145/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:27:13-67
+52            android:authorities="com.sportlyst.androidx-startup"
+52-->[androidx.emoji2:emoji2:1.0.0] /Users/nadunperera/.gradle/caches/transforms-3/223146ef33e3aa619e8b04649706e145/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:28:13-68
+53            android:exported="false" >
+53-->[androidx.emoji2:emoji2:1.0.0] /Users/nadunperera/.gradle/caches/transforms-3/223146ef33e3aa619e8b04649706e145/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:29:13-37
+54            <meta-data
+54-->[androidx.emoji2:emoji2:1.0.0] /Users/nadunperera/.gradle/caches/transforms-3/223146ef33e3aa619e8b04649706e145/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:31:13-33:52
+55                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+55-->[androidx.emoji2:emoji2:1.0.0] /Users/nadunperera/.gradle/caches/transforms-3/223146ef33e3aa619e8b04649706e145/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:32:17-75
+56                android:value="androidx.startup" />
+56-->[androidx.emoji2:emoji2:1.0.0] /Users/nadunperera/.gradle/caches/transforms-3/223146ef33e3aa619e8b04649706e145/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:33:17-49
+57            <meta-data
+57-->[androidx.lifecycle:lifecycle-process:2.4.0] /Users/nadunperera/.gradle/caches/transforms-3/d5d05479173d466a6bd0989b3b3e5ef4/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:31:13-33:52
+58                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+58-->[androidx.lifecycle:lifecycle-process:2.4.0] /Users/nadunperera/.gradle/caches/transforms-3/d5d05479173d466a6bd0989b3b3e5ef4/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:32:17-78
+59                android:value="androidx.startup" />
+59-->[androidx.lifecycle:lifecycle-process:2.4.0] /Users/nadunperera/.gradle/caches/transforms-3/d5d05479173d466a6bd0989b3b3e5ef4/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:33:17-49
+60        </provider>
+61    </application>
+62
+63</manifest>
