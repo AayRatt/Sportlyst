@@ -36,7 +36,7 @@ jobs:
         - run: npm install -g eas-cli
 
         - name: Build AAB file
-          run: eas build --platform android
+          run: eas build --platform android --info
 
         - name: Get build URL
           run: eas build:list --limit 1 --json --non-interactive --platform android | jq -r '.[0].artifacts.buildUrl'
