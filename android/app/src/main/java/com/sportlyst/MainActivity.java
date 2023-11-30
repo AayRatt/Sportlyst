@@ -1,4 +1,4 @@
-package com.sportlystapp.sportlyst;
+package com.sportlyst;
 
 import android.os.Build;
 import android.os.Bundle;
