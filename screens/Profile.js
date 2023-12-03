@@ -227,18 +227,6 @@ export default function Profile({ }) {
   }
 
   const PickerModal = () => {
-    // const toggleTemporaryFilter = (sportType) => {
-    //   setTemporarySelectedFilters((prevFilters) => {
-    //     const newFilters = new Set(prevFilters);
-    //     if (newFilters.has(sportType)) {
-    //       newFilters.delete(sportType);
-    //     } else {
-    //       newFilters.add(sportType);
-    //     }
-    //     return newFilters;
-    //   });
-    // };
-
     return (
         <Modal
             visible={pickerVisible}

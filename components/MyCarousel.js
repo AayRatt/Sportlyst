@@ -15,7 +15,7 @@ const MyCarousel = ({ data, navigation }) => {
         key={index}
         title={item.eventName}
         description={item.description}
-        img={require("../assets/cherry.jpg")}
+        img={require("../assets/Soccer.jpg")}
         location={item.venue}
         date={item.date}
         time={item.time}

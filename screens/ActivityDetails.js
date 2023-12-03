@@ -279,7 +279,7 @@ export default function ActivityDetails({ route, navigation }) {
             </View>
             {/* <ScrollView style={styles.scrollView}> */}
             <View style={styles.container}>
-                <Image source={require('../assets/football.jpg')} style={{ width: '100%', height: 160 }} />
+                <Image source={require('../assets/Soccer-ad.jpg')} style={{ width: '100%', height: 160 }} />
                 <View style={styles.eventDetails}>
                     <Text style={styles.title}>{activity.title}</Text>
                     <Text style={styles.description}>{activity.description}</Text>

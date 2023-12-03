@@ -47,6 +47,7 @@ export default function CreateActivity({ route, navigation }) {
 
 
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [sportPickerVisible, setSportPickerVisible] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -125,12 +126,19 @@ Location: ${userEventField.location}
           payment: userEventField.payment,
           date: userEventField.date,
           time: userEventField.time,
-          location: userEventField.location,
+          venue: userEventField.venue,
+          venueAddress: userEventField.venueAddress,
           joinedUsers: [],
           pendingUsers: []
         };
 
-        //2. Add data to firestore
+        const userDocRef = doc(db, "events", auth.currentUser.uid); // 'userId' is the ID for the user
+
+        await setDoc(userDocRef, {
+          // Set at least one field, e.g., a timestamp or a placeholder value
+          createdAt: new Date(),
+        });
+
         const randomId = doc(
           collection(db, "events", auth.currentUser.uid, "sports")
         ).id;
@@ -159,6 +167,7 @@ Location: ${userEventField.location}
   };
 
   const [venueData, setVenueData] = useState([]);
+  const [sportsData, setSportsData] = useState([]);
   const [filteredVenues, setFilteredVenues] = useState([]);
   const onInputChange = (text) => {
     formChanged("location", text);
@@ -202,8 +211,26 @@ Location: ${userEventField.location}
     }
   };
 
+  const fetchSports = async () => {
+    const response = await fetch(
+      "https://sportlystapi.onrender.com/sportlyst/getSports"
+    );
+    const results = await response.json();
+
+    if (Array.isArray(results.sports)) {
+      const sports = results.sports.map((item) => item.sportsType);
+      setSportsData(sports);
+    } else {
+      console.error(
+        'API did not return an array in the "sports" key:',
+        results
+      );
+    }
+  };
+
   useEffect(() => {
     fetchVenues();
+    fetchSports();
   }, []);
 
   // Function for Updating form fields
@@ -222,6 +249,58 @@ Location: ${userEventField.location}
   if (!fontsLoaded) {
     return null;
   }
+
+  const SportsPickerModal = () => {
+    return (
+      <Modal
+        visible={sportPickerVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        transparent={true}
+      >
+        <View className="flex-1 justify-end">
+          <View className="w-full h-1/2 bg-primary rounded-lg">
+            <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
+              <Text className="font-urbanistBold text-3xl text-start">
+                Select Sport
+              </Text>
+              <Ionicons
+                name="close"
+                size={35}
+                color="black"
+                onPress={() => setSportPickerVisible(false)}
+              />
+            </View>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "flex-end",
+                backgroundColor: "rgba(0,0,0,0.5)",
+              }}
+            >
+              <View style={{ backgroundColor: "white", height: "100%" }}>
+                <Picker
+                  selectedValue={userEventField.sportType}
+                  onValueChange={(value) => {
+                    formChanged("sportType", value);
+                    setSportPickerVisible(false);
+                  }}
+                >
+                  {sportsData.map((sport) => (
+                    <Picker.Item
+                      key={sport}
+                      label={sport}
+                      value={sport}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <SafeAreaView className="bg-primary flex-1">
@@ -275,6 +354,45 @@ Location: ${userEventField.location}
               formChanged("description", account);
             }}
           ></TextInput>
+
+          <SportsPickerModal />
+          <View className="flex-row gap-3 mb-3">
+            <Pressable
+              className="bg-secondary rounded-lg h-12 mt-1 items-center justify-center flex-1"
+              onPress={() => setSportPickerVisible(true)}
+            >
+              <Text className="text-lg font-urbanistBold text-primary">
+                {userEventField.sportType ? userEventField.sportType : "Sport Type"}
+              </Text>
+            </Pressable>
+          </View>
+
+          <View className="flex-row bg-gray h-15 rounded-lg w=11/12 p-4 mb-3 justify-between">
+            <TextInput
+              className="font-urbanist"
+              placeholder="Venue"
+              placeholderTextColor={"#666"}
+              autoCapitalize="none"
+              value={userEventField.venue}
+              onChangeText={(account) => {
+                formChanged("venue", account);
+              }}
+            ></TextInput>
+          </View>
+
+          <View className="flex-row bg-gray h-15 rounded-lg w=11/12 p-4 mb-3 justify-between">
+            <TextInput
+              className="font-urbanist"
+              placeholder="Venue Address"
+              placeholderTextColor={"#666"}
+              autoCapitalize="none"
+              value={userEventField.venueAddress}
+              onChangeText={(account) => {
+                formChanged("venueAddress", account);
+              }}
+            ></TextInput>
+          </View>
+
           <View className="flex-row bg-gray h-15 rounded-lg w=11/12 p-4 mb-3 justify-between">
             <Text className="font-urbanist text-[#666]">Start</Text>
             <DateTimePickerModal

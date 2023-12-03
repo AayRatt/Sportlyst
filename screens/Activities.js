@@ -26,6 +26,7 @@ import { db, auth } from "../firebaseConfig";
 import { collection, getDoc, getDocs, doc } from "firebase/firestore";
 import Carousel from "react-native-snap-carousel"; //NEW
 import MyCarousel from "../components/MyCarousel"; //NEW
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 export default function Activities({ navigation }) {
   const { width, height } = Dimensions.get("window");
@@ -49,6 +50,8 @@ export default function Activities({ navigation }) {
     new Set()
   );
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [imageUrls, setImageUrls] = useState([]); // State to hold image URLs
+  const [sportsData, setSportsData] = useState([]);
 
   const toggleFilter = (sportType) => {
     const newFilters = new Set(selectedFilters);
@@ -136,7 +139,7 @@ export default function Activities({ navigation }) {
       <Modal
         visible={isFilterModalVisible}
         animationType="slide"
-        presentationStyle="pageSheet"
+        // presentationStyle="pageSheet"
         transparent={true}
       >
         <View className="flex-1 justify-end">
@@ -235,14 +238,44 @@ export default function Activities({ navigation }) {
   //   }
   // };
 
-  //Use effect State
-  useEffect(() => {
-    // getCurrentLocation();
-    retrieveFromDb();
-    retrieveUserDataFromDb();
-    getUserEvents();
-    getFilters();
-  }, []);
+  //function to retrieve image url from firebase storage
+  const fetchImage = () => {
+    const tmpSportsArr = [];
+
+    for (let sport of sportsData) {
+      console.log("sportType url is : ", sport)
+
+      const storage = getStorage();
+      const imagePath = `/${sport}.jpg`; // The path of your image in Firebase Storage
+      const imageRef = ref(storage, imagePath);
+
+      getDownloadURL(imageRef)
+        .then((url) => {
+          // console.log("Image url is : ", url)
+
+          const combinedData = {
+            imageUrl: url,
+            // sportType: sport.sportType
+            sportType: sport
+          };
+
+          tmpSportsArr.push(combinedData)
+        })
+        .catch((error) => {
+          // Handle any errors
+          console.log("Error retrieving image url :", error)
+        });
+    }
+    setImageUrls(tmpSportsArr)
+  };
+
+  const retrieveImageUrl = (sportType) => {
+    for (let image of imageUrls) {
+      if (image.sportType == sportType) {
+        return image.imageUrl
+      }
+    }
+  }
 
   // const retrieveFromDb = async () => {
   //   const allSportsEvents = [];
@@ -264,7 +297,7 @@ export default function Activities({ navigation }) {
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
+      // console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
       setUser(docSnap.data());
     } else {
       console.log("No such document!");
@@ -277,15 +310,16 @@ export default function Activities({ navigation }) {
 
     // Using for...of loop to handle asynchronous operations
     for (let userDoc of querySnapshot.docs) {
-      console.log(`userDoc => ${userDoc.id}`);
+      // console.log(`userDoc => ${userDoc.id}`);
       const userId = userDoc.id;
       const sportsSnapshot = await getDocs(
         collection(db, "events", userId, "sports")
       );
 
       for (let sportDoc of sportsSnapshot.docs) {
-        console.log(sportDoc.id, " => ", sportDoc.data());
+        // console.log(sportDoc.id, " => ", sportDoc.data());
         const sportData = sportDoc.data();
+
         // Combine the retrieved data with the docId and eventCollectionId
         const combinedData = {
           ...sportData,
@@ -297,7 +331,6 @@ export default function Activities({ navigation }) {
         allSportsEvents.push(combinedData);
       }
     }
-
     setActivityDataList(allSportsEvents);
   };
 
@@ -309,7 +342,7 @@ export default function Activities({ navigation }) {
     const userEventsRef = doc(db, "events", currentUserId);
     const sportsSnapshot = await getDocs(collection(userEventsRef, "sports"));
     for (let sportDoc of sportsSnapshot.docs) {
-      console.log(sportDoc.id, " => ", sportDoc.data());
+      // console.log(sportDoc.id, " => ", sportDoc.data());
       const sportData = sportDoc.data();
       const combinedData = {
         ...sportData,
@@ -322,6 +355,38 @@ export default function Activities({ navigation }) {
 
     setUserActivityList(allSportsEvents);
   };
+
+  const fetchSports = async () => {
+    const response = await fetch(
+      "https://sportlystapi.onrender.com/sportlyst/getSports"
+    );
+    const results = await response.json();
+
+    if (Array.isArray(results.sports)) {
+      const sports = results.sports.map((item) => item.sportsType);
+      console.log("Data from API: ", sports)
+      setSportsData(sports);
+    } else {
+      console.error(
+        'API did not return an array in the "sports" key:',
+        results
+      );
+    }
+  };
+
+  //Use effect State
+  useEffect(() => {
+    // getCurrentLocation();
+    fetchSports();
+    retrieveFromDb();
+    retrieveUserDataFromDb();
+    getUserEvents();
+    getFilters();
+  }, []);
+
+  useEffect(() => {
+    fetchImage();
+  }, [sportsData])
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -375,7 +440,7 @@ export default function Activities({ navigation }) {
             key={index}
             title={activity.eventName}
             description={activity.description}
-            img={require("../assets/cherry.jpg")}
+            img={retrieveImageUrl(activity.sportType)}
             location={activity.venue}
             date={activity.date}
             time={activity.time}
