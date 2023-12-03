@@ -1,7 +1,6 @@
 import React from 'react';
-import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
-import { View, Text, Dimensions, StyleSheet } from 'react-native';
-import ActivityCard from "../components/ActivityCard";
+import Carousel from 'react-native-snap-carousel';
+import { Dimensions } from 'react-native';
 import MyActivityCard from './MyActivityCard';
 
 const { width: viewportWidth } = Dimensions.get('window');
@@ -9,16 +8,14 @@ const { width: viewportWidth } = Dimensions.get('window');
 const MyCarousel = ({ data, navigation }) => {
   const _renderItem = ({ item, index }) => {
     return (
-
-
       <MyActivityCard
         key={index}
         title={item.eventName}
         description={item.description}
-        img={require("../assets/Soccer.jpg")}
+        activityImage={item.activityImage}
+        activityDetailsImage={item.activityDetailsImage}
         location={item.venue}
         date={item.date}
-        time={item.time}
         navigation={navigation}
         price={item.payment}
         players={item.players}
@@ -32,8 +29,6 @@ const MyCarousel = ({ data, navigation }) => {
         eventCollectionId={item.eventCollectionId}
         isUserActivity={true}
       />
-
-
     );
   };
 

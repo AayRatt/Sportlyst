@@ -32,7 +32,7 @@ export default function ActivityCard(props) {
           <Image
             className="w-full h-52 rounded-t-lg"
             // source={props.img}
-            source={{uri: props.img}}
+            source={{uri: props.activityImage}}
           ></Image>
         </View>
         <View className="px-3 py-3">

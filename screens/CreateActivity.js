@@ -3,8 +3,6 @@ import { StyleSheet } from "react-native";
 import {
   Text,
   View,
-  TouchableOpacity,
-  Image,
   Pressable,
   Button,
   TextInput,
@@ -17,16 +15,11 @@ import {
 } from "@expo-google-fonts/urbanist";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  SafeAreaView,
-  SafeAreaProvider,
-  SafeAreaInsetsContext,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-
 import { useState, useEffect } from "react";
+
 // import { Picker } from 'react-native-wheel-pick';
 import { Picker } from "@react-native-picker/picker";
 
@@ -36,15 +29,27 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { db, auth } from "../firebaseConfig";
 import { setDoc, doc, collection, updateDoc } from "firebase/firestore";
 
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+
 export default function CreateActivity({ route, navigation }) {
   const { activity } = route.params
   const { title } = route.params
   const { description } = route.params
-  const { joinedUsersCount } = route.params
+  const { players } = route.params
   const { price } = route.params
+  const { date } = route.params
+  const { venue } = route.params
+  const { venueAddress } = route.params
+  const { sportType } = route.params
+  const { joinedUsers } = route.params
+  const { pendingUsers } = route.params
+  const { activityImage } = route.params
+  const { activityDetailsImage } = route.params
   const { eventCollectionId } = route.params
   const { docId } = route.params
 
+  const [imageUrls, setImageUrls] = useState([]); // State to hold image URLs
+  const [adImageUrls, setAdImageUrls] = useState([]); // State to hold activity details image URLs
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [sportPickerVisible, setSportPickerVisible] = useState(false);
@@ -90,12 +95,16 @@ export default function CreateActivity({ route, navigation }) {
   const [userEventField, setUserEventField] = useState({
     eventName: title,
     description: description,
-    sportType: "",
-    players: joinedUsersCount,
+    sportType: sportType,
+    players: players,
     payment: price,
-    date: "",
-    time: "",
-    location: "",
+    date: date,
+    venue: venue,
+    venueAddress: venueAddress,
+    joinedUsers: joinedUsers,
+    pendingUsers: pendingUsers,
+    activityImage: activityImage,
+    activityDetailsImage: activityDetailsImage
   });
 
   const onCreateEvent = async () => {
@@ -125,11 +134,12 @@ Location: ${userEventField.location}
           players: userEventField.players,
           payment: userEventField.payment,
           date: userEventField.date,
-          time: userEventField.time,
           venue: userEventField.venue,
           venueAddress: userEventField.venueAddress,
           joinedUsers: [],
-          pendingUsers: []
+          pendingUsers: [],
+          activityImage: retrieveImageUrl(userEventField.sportType),
+          activityDetailsImage: retrieveAdImageUrl(userEventField.sportType)
         };
 
         const userDocRef = doc(db, "events", auth.currentUser.uid); // 'userId' is the ID for the user
@@ -187,7 +197,7 @@ Location: ${userEventField.location}
     // update data in firestore
     try {
       const eventsRef = doc(db, "events", eventCollectionId, "sports", docId)
-      await updateDoc(eventsRef, user);
+      await updateDoc(eventsRef, userEventField);
       alert("Activity Updated");
     } catch (err) {
       console.log(err);
@@ -228,10 +238,82 @@ Location: ${userEventField.location}
     }
   };
 
+  //function to retrieve image url from firebase storage
+  const fetchImage = () => {
+    const tmpSportsArr = [];
+    const tmpAdSportsArr = [];
+
+    for (let sport of sportsData) {
+      console.log("sportType url is : ", sport)
+
+      const storage = getStorage();
+      const imagePath = `/${sport}.jpg`; // The path of your image in Firebase Storage
+      const adImagePath = `/${sport}-ad.jpg`; // The path of your image in Firebase Storage
+      const imageRef = ref(storage, imagePath);
+      const adImageRef = ref(storage, adImagePath);
+
+      getDownloadURL(imageRef)
+        .then((url) => {
+          // console.log("Image url is : ", url)
+
+          const combinedData = {
+            imageUrl: url,
+            // sportType: sport.sportType
+            sportType: sport
+          };
+
+          tmpSportsArr.push(combinedData)
+        })
+        .catch((error) => {
+          // Handle any errors
+          console.log("Error retrieving image url :", error)
+        });
+
+      getDownloadURL(adImageRef)
+        .then((url) => {
+          // console.log("Image url is : ", url)
+
+          const combinedData = {
+            imageUrl: url,
+            // sportType: sport.sportType
+            sportType: sport
+          };
+
+          tmpAdSportsArr.push(combinedData)
+        })
+        .catch((error) => {
+          // Handle any errors
+          console.log("Error retrieving image url :", error)
+        });
+    }
+    setImageUrls(tmpSportsArr)
+    setAdImageUrls(tmpAdSportsArr)
+  };
+
+  const retrieveImageUrl = (sportType) => {
+    for (let image of imageUrls) {
+      if (image.sportType == sportType) {
+        return image.imageUrl
+      }
+    }
+  }
+
+  const retrieveAdImageUrl = (sportType) => {
+    for (let image of adImageUrls) {
+      if (image.sportType == sportType) {
+        return image.imageUrl
+      }
+    }
+  }
+
   useEffect(() => {
     fetchVenues();
     fetchSports();
   }, []);
+
+  useEffect(() => {
+    fetchImage();
+  }, [sportsData])
 
   // Function for Updating form fields
   const formChanged = (key, updatedValue) => {
@@ -549,7 +631,7 @@ Location: ${userEventField.location}
           ) : (
             <Pressable
               className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
-              onPress={onCreateEvent}
+              onPress={updateDb}
             >
               <Text className="text-lg font-urbanistBold text-primary">
                 Update Event

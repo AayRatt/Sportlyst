@@ -50,8 +50,6 @@ export default function Activities({ navigation }) {
     new Set()
   );
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-  const [imageUrls, setImageUrls] = useState([]); // State to hold image URLs
-  const [sportsData, setSportsData] = useState([]);
 
   const toggleFilter = (sportType) => {
     const newFilters = new Set(selectedFilters);
@@ -238,60 +236,6 @@ export default function Activities({ navigation }) {
   //   }
   // };
 
-  //function to retrieve image url from firebase storage
-  const fetchImage = () => {
-    const tmpSportsArr = [];
-
-    for (let sport of sportsData) {
-      console.log("sportType url is : ", sport)
-
-      const storage = getStorage();
-      const imagePath = `/${sport}.jpg`; // The path of your image in Firebase Storage
-      const imageRef = ref(storage, imagePath);
-
-      getDownloadURL(imageRef)
-        .then((url) => {
-          // console.log("Image url is : ", url)
-
-          const combinedData = {
-            imageUrl: url,
-            // sportType: sport.sportType
-            sportType: sport
-          };
-
-          tmpSportsArr.push(combinedData)
-        })
-        .catch((error) => {
-          // Handle any errors
-          console.log("Error retrieving image url :", error)
-        });
-    }
-    setImageUrls(tmpSportsArr)
-  };
-
-  const retrieveImageUrl = (sportType) => {
-    for (let image of imageUrls) {
-      if (image.sportType == sportType) {
-        return image.imageUrl
-      }
-    }
-  }
-
-  // const retrieveFromDb = async () => {
-  //   const allSportsEvents = [];
-  //   const querySnapshot = await getDocs(collection(db, "events"));
-  //   querySnapshot.forEach(async (doc) => {
-  //     const userId = doc.id
-  //     const querySnapshot = await getDocs(collection(db, "events", userId, "sports"));
-  //     querySnapshot.forEach((doc) => {
-  //       // doc.data() is never undefined for query doc snapshots
-  //       console.log(doc.id, " => ", doc.data());
-  //       allSportsEvents.push(doc.data());
-  //     });
-  //   });
-  //   setActivityData(allSportsEvents)
-  // }
-
   const retrieveUserDataFromDb = async () => {
     const docRef = doc(db, "userProfiles", auth.currentUser.uid);
     const docSnap = await getDoc(docRef);
@@ -310,14 +254,14 @@ export default function Activities({ navigation }) {
 
     // Using for...of loop to handle asynchronous operations
     for (let userDoc of querySnapshot.docs) {
-      // console.log(`userDoc => ${userDoc.id}`);
+      console.log(`userDoc => ${userDoc.id}`);
       const userId = userDoc.id;
       const sportsSnapshot = await getDocs(
         collection(db, "events", userId, "sports")
       );
 
       for (let sportDoc of sportsSnapshot.docs) {
-        // console.log(sportDoc.id, " => ", sportDoc.data());
+        console.log(sportDoc.id, " => ", sportDoc.data());
         const sportData = sportDoc.data();
 
         // Combine the retrieved data with the docId and eventCollectionId
@@ -342,7 +286,7 @@ export default function Activities({ navigation }) {
     const userEventsRef = doc(db, "events", currentUserId);
     const sportsSnapshot = await getDocs(collection(userEventsRef, "sports"));
     for (let sportDoc of sportsSnapshot.docs) {
-      // console.log(sportDoc.id, " => ", sportDoc.data());
+      console.log(sportDoc.id, " User events!!! => ", sportDoc.data());
       const sportData = sportDoc.data();
       const combinedData = {
         ...sportData,
@@ -356,37 +300,14 @@ export default function Activities({ navigation }) {
     setUserActivityList(allSportsEvents);
   };
 
-  const fetchSports = async () => {
-    const response = await fetch(
-      "https://sportlystapi.onrender.com/sportlyst/getSports"
-    );
-    const results = await response.json();
-
-    if (Array.isArray(results.sports)) {
-      const sports = results.sports.map((item) => item.sportsType);
-      console.log("Data from API: ", sports)
-      setSportsData(sports);
-    } else {
-      console.error(
-        'API did not return an array in the "sports" key:',
-        results
-      );
-    }
-  };
-
   //Use effect State
   useEffect(() => {
     // getCurrentLocation();
-    fetchSports();
     retrieveFromDb();
     retrieveUserDataFromDb();
     getUserEvents();
     getFilters();
   }, []);
-
-  useEffect(() => {
-    fetchImage();
-  }, [sportsData])
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -440,10 +361,10 @@ export default function Activities({ navigation }) {
             key={index}
             title={activity.eventName}
             description={activity.description}
-            img={retrieveImageUrl(activity.sportType)}
+            activityImage={activity.activityImage}
+            activityDetailsImage={activity.activityDetailsImage}
             location={activity.venue}
             date={activity.date}
-            time={activity.time}
             navigation={navigation}
             price={activity.payment}
             players={activity.players}

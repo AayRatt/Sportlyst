@@ -31,7 +31,7 @@ export default function ActivityCard(props) {
       <View className="flex-row">
         <Image
           className="w-full h-40 rounded-t-lg" 
-          source={props.img}
+          source={{uri: props.activityImage}}
         />
       </View>
       <View className="px-3 py-3">

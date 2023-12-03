@@ -6,6 +6,7 @@ import { doc, updateDoc, arrayUnion, onSnapshot, getDocs, collection, arrayRemov
 import { Entypo } from "@expo/vector-icons";
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 export default function ActivityDetails({ route, navigation }) {
 
@@ -279,7 +280,7 @@ export default function ActivityDetails({ route, navigation }) {
             </View>
             {/* <ScrollView style={styles.scrollView}> */}
             <View style={styles.container}>
-                <Image source={require('../assets/Soccer-ad.jpg')} style={{ width: '100%', height: 160 }} />
+                <Image source={{ uri: activity.activityDetailsImage }} style={{ width: '100%', height: 160 }} />
                 <View style={styles.eventDetails}>
                     <Text style={styles.title}>{activity.title}</Text>
                     <Text style={styles.description}>{activity.description}</Text>
@@ -317,8 +318,16 @@ export default function ActivityDetails({ route, navigation }) {
                                 activity: "ActivityDetails",
                                 title: activity.title,
                                 description: activity.description,
-                                joinedUsersCount: '' + joinedUsersCount,
+                                players: activity.players,
                                 price: activity.price,
+                                date: activity.date,
+                                venue: activity.venue,
+                                venueAddress: activity.venueAddress,
+                                sportType: activity.sportType,
+                                joinedUsers: joinedUsers,
+                                pendingUsers: pendingUsers,
+                                activityImage: activity.activityImage,
+                                activityDetailsImage: activity.activityDetailsImage,
                                 eventCollectionId: activity.eventCollectionId,
                                 docId: activity.docId
                             })
@@ -340,7 +349,7 @@ export default function ActivityDetails({ route, navigation }) {
                         </View>
                     )}
                 </View>
-                <View style={[styles.attendees, {top: attendeesTopMargin}]}>
+                <View style={[styles.attendees, { top: attendeesTopMargin }]}>
                     <Text style={styles.sectionTitle}>Who's going?</Text>
                     {isEditUI ? (
                         <View style={styles.imagesContainer}>
