@@ -9,7 +9,7 @@ import {
   Dimensions,
   Modal,
   Animated,
-  StyleSheet,
+  StyleSheet
 } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -137,7 +137,7 @@ export default function Activities({ navigation }) {
         visible={isFilterModalVisible}
         animationType="slide"
         presentationStyle="pageSheet"
-        transparent={true}
+      // transparent={true}
       >
         <View className="flex-1 justify-end">
           <View className="w-full h-4/5 bg-primary rounded-lg">
@@ -192,23 +192,113 @@ export default function Activities({ navigation }) {
     );
   };
 
+
+  //----------------------------------------------->
+  //Function Pending Players into Notification Panel
+  const pendPlayersNot = async () => {
+    try {
+      let allPendingUsers = [];
+
+      const pendPla = collection(db, "events", auth.currentUser.uid, "sports")
+      const pendPlaSnapshot = await getDocs(pendPla)
+
+      for (const players of pendPlaSnapshot.docs) {
+        const playersData = players.data()
+        if (playersData.pendingUsers && playersData.pendingUsers.length > 0) {
+          //Get all the data of the Player 
+          const playerProfiles = await Promise.all(playersData.pendingUsers.map(playerID => getPendingPlayerProfile(playerID)))
+          const playersWithEventName = playerProfiles
+            .filter(Boolean)
+            .map(playerProfile => ({
+              ...playerProfile,
+              eventName: playersData.eventName
+            }));
+
+          allPendingUsers.push(...playersWithEventName);
+        }
+      }
+      console.log("ARRAY DE PENDING USERS", allPendingUsers);
+      return allPendingUsers
+    } catch (error) {
+      console.log('Error, getting Pending Players', error)
+      return []
+    }
+  }
+
+
+  //Get Pending Player Data
+  const getPendingPlayerProfile = async (playerID) => {
+    try {
+      const playerDocRef = doc(db, "userProfiles", playerID)
+      const playerDocSnap = await getDoc(playerDocRef)
+      if (playerDocSnap.exists()) {
+        return playerDocSnap.data()
+      } else {
+        // If the User does not exist
+        console.error('No profile found for player with ID:', playerID)
+        return null
+      }
+    } catch (error) {
+      console.error('Error getting player profile:', error)
+      return null
+    }
+  }
+
+  //Variable Store Data of the Pending Users
+  const [pendingUsersProfiles, setPendingUsersProfiles] = useState([]);
+
+  //Show Notifications when the user click the Icon bell notification
+  const showNotifications = async () => {
+    const profiles = await pendPlayersNot()
+    setPendingUsersProfiles(profiles)
+    openPanel()
+  }
+
+  //Norification Panel with Pending Users Data 
   const NotificationPanel = () => {
     return (
       <Animated.View
         visible={isPanelVisible}
         style={[
           styles.panel,
-          { transform: [{ translateX: panelPosition }] }
+          {
+            transform: [{ translateX: panelPosition }],
+            backgroundColor: 'rgba(0,0,0,0.5)'
+          }
         ]}
       >
         {/* Your notification content here */}
-        <Text>Notifications</Text>
-        <TouchableOpacity onPress={closePanel}>
-          <Text>Close</Text>
+        <Text style={{ color: '#FFFFFF', fontSize: 16 }} className="font-urbanist">Notifications{"\n"}</Text>
+        {pendingUsersProfiles.length > 0 ? (
+          pendingUsersProfiles.map((profile, index) => (
+            <View key={index}>
+              <Text style={{ color: '#FFFFFF' }} className="font-urbanist">
+                - {profile.firstName} {profile.lastName} wants to Join to your event: "{profile.eventName}"
+              </Text>
+            </View>
+          ))
+        ) : (
+          <Text style={{ color: '#FFFFFF' }} className="font-urbanist" >No Pendings</Text>
+        )}
+        <TouchableOpacity
+          onPress={closePanel}
+          style={{
+            padding: 10,
+            borderRadius: 20,
+            borderWidth: 1,
+            borderColor: 'white',
+            backgroundColor: 'transparent',
+            alignSelf: 'left',
+            marginTop: 15
+          }}
+        >
+          <Text style={{ color: '#FFFFFF' }} className="font-urbanist">Close</Text>
         </TouchableOpacity>
       </Animated.View>
     )
   }
+
+  //----------------------------------------------->
 
   // Current Location
   // const getCurrentLocation = async () => {
@@ -343,7 +433,7 @@ export default function Activities({ navigation }) {
           onPress={toggleFilterModal}
         />
         <Text className="font-urbanistBold text-2xl">Sportlyst</Text>
-        <Ionicons name="notifications" size={24} color="black" onPress={openPanel} />
+        <Ionicons name="notifications" size={24} color="black" onPress={showNotifications} />
       </View>
       <FilterModal />
       <ScrollView className="h-fit">
