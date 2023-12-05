@@ -3,7 +3,6 @@ import {
   View,
   Text,
   Pressable,
-  Button,
   ScrollView,
   TouchableOpacity,
   Dimensions,
@@ -11,12 +10,11 @@ import {
   Animated,
   StyleSheet,
 } from "react-native";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import ActivityCard from "../components/ActivityCard";
-import CreateActivity from "./CreateActivity";
 import {
   useFonts,
   Urbanist_600SemiBold,
@@ -26,7 +24,7 @@ import { db, auth } from "../firebaseConfig";
 import { collection, getDoc, getDocs, doc } from "firebase/firestore";
 import Carousel from "react-native-snap-carousel"; //NEW
 import MyCarousel from "../components/MyCarousel"; //NEW
-import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import { RefreshControl } from 'react-native';
 
 export default function Activities({ navigation }) {
   const { width, height } = Dimensions.get("window");
@@ -61,6 +59,7 @@ export default function Activities({ navigation }) {
     setSelectedFilters(newFilters);
   };
 
+  const [refreshing, setRefreshing] = useState(false);
 
   const [isPanelVisible, setIsPanelVisible] = useState(false);
   const panelPosition = useRef(new Animated.Value(Dimensions.get('window').width)).current;
@@ -300,6 +299,19 @@ export default function Activities({ navigation }) {
     setUserActivityList(allSportsEvents);
   };
 
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    try {
+      await retrieveFromDb();
+      await getUserEvents();
+    } catch (error) {
+      console.error('Error refreshing data:', error)
+    } finally {
+      setRefreshing(false)
+    }
+  }, []);
+
   //Use effect State
   useEffect(() => {
     // getCurrentLocation();
@@ -308,7 +320,7 @@ export default function Activities({ navigation }) {
     getUserEvents();
     getFilters();
   }, []);
-  
+
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
 
@@ -332,7 +344,14 @@ export default function Activities({ navigation }) {
         <Ionicons name="notifications" size={24} color="black" onPress={openPanel} />
       </View>
       <FilterModal />
-      <ScrollView className="h-fit">
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+        className="h-fit">
         <View className="px-3">
           <Text className="font-urbanist text-xl text-start pl-3">
             Hello, {user.firstName}
