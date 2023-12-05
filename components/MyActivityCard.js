@@ -29,7 +29,7 @@ export default function ActivityCard(props) {
     <View className="shadow-lg">
       <View className="bg-primary rounded-lg m-5">
         <View className="flex-row">
-          <Image className="w-full h-40 rounded-t-lg" source={props.img} />
+          <Image className="w-full h-40 rounded-t-lg" source={{uri: props.activityImage}} />
         </View>
         <View className="px-3 py-3">
           <View className="flex-row justify-between items-center">
