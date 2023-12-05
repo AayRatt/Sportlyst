@@ -8,7 +8,7 @@ import {
   Dimensions,
   Modal,
   Animated,
-  StyleSheet
+  StyleSheet,
 } from "react-native";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,7 +24,7 @@ import { db, auth } from "../firebaseConfig";
 import { collection, getDoc, getDocs, doc } from "firebase/firestore";
 import Carousel from "react-native-snap-carousel"; //NEW
 import MyCarousel from "../components/MyCarousel"; //NEW
-import { RefreshControl } from 'react-native';
+import { RefreshControl } from "react-native";
 
 export default function Activities({ navigation }) {
   const { width, height } = Dimensions.get("window");
@@ -62,7 +62,9 @@ export default function Activities({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
 
   const [isPanelVisible, setIsPanelVisible] = useState(false);
-  const panelPosition = useRef(new Animated.Value(Dimensions.get('window').width)).current;
+  const panelPosition = useRef(
+    new Animated.Value(Dimensions.get("window").width)
+  ).current;
 
   const openPanel = () => {
     setIsPanelVisible(true);
@@ -75,12 +77,11 @@ export default function Activities({ navigation }) {
 
   const closePanel = () => {
     Animated.timing(panelPosition, {
-      toValue: Dimensions.get('window').width,
+      toValue: Dimensions.get("window").width,
       duration: 300,
       useNativeDriver: true,
     }).start(() => setIsPanelVisible(false)); // Hide the panel after the animation
   };
-
 
   const toggleFilterModal = () => {
     setIsFilterModalVisible((prevVisible) => !prevVisible);
@@ -137,7 +138,8 @@ export default function Activities({ navigation }) {
         visible={isFilterModalVisible}
         animationType="slide"
         presentationStyle="pageSheet"
-      // transparent={true}
+        // transparent={true}
+      >
         <View className="flex-1 justify-end">
           <View className="w-full h-4/5 bg-primary rounded-lg">
             <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
@@ -191,69 +193,71 @@ export default function Activities({ navigation }) {
     );
   };
 
-
   //----------------------------------------------->
   //Function Pending Players into Notification Panel
   const pendPlayersNot = async () => {
     try {
       let allPendingUsers = [];
 
-      const pendPla = collection(db, "events", auth.currentUser.uid, "sports")
-      const pendPlaSnapshot = await getDocs(pendPla)
+      const pendPla = collection(db, "events", auth.currentUser.uid, "sports");
+      const pendPlaSnapshot = await getDocs(pendPla);
 
       for (const players of pendPlaSnapshot.docs) {
-        const playersData = players.data()
+        const playersData = players.data();
         if (playersData.pendingUsers && playersData.pendingUsers.length > 0) {
-          //Get all the data of the Player 
-          const playerProfiles = await Promise.all(playersData.pendingUsers.map(playerID => getPendingPlayerProfile(playerID)))
+          //Get all the data of the Player
+          const playerProfiles = await Promise.all(
+            playersData.pendingUsers.map((playerID) =>
+              getPendingPlayerProfile(playerID)
+            )
+          );
           const playersWithEventName = playerProfiles
             .filter(Boolean)
-            .map(playerProfile => ({
+            .map((playerProfile) => ({
               ...playerProfile,
-              eventName: playersData.eventName
+              eventName: playersData.eventName,
             }));
 
           allPendingUsers.push(...playersWithEventName);
         }
       }
       console.log("ARRAY DE PENDING USERS", allPendingUsers);
-      return allPendingUsers
+      return allPendingUsers;
     } catch (error) {
-      console.log('Error, getting Pending Players', error)
-      return []
+      console.log("Error, getting Pending Players", error);
+      return [];
     }
-  }
-
+  };
 
   //Get Pending Player Data
   const getPendingPlayerProfile = async (playerID) => {
     try {
-      const playerDocRef = doc(db, "userProfiles", playerID)
-      const playerDocSnap = await getDoc(playerDocRef)
+      const playerDocRef = doc(db, "userProfiles", playerID);
+      const playerDocSnap = await getDoc(playerDocRef);
       if (playerDocSnap.exists()) {
-        return playerDocSnap.data()
+        return playerDocSnap.data();
       } else {
         // If the User does not exist
-        console.error('No profile found for player with ID:', playerID)
-        return null
+        console.error("No profile found for player with ID:", playerID);
+        return null;
       }
     } catch (error) {
-      console.error('Error getting player profile:', error)
-      return null
+      console.error("Error getting player profile:", error);
+      return null;
     }
-  }
+  };
 
   //Variable Store Data of the Pending Users
   const [pendingUsersProfiles, setPendingUsersProfiles] = useState([]);
 
   //Show Notifications when the user click the Icon bell notification
   const showNotifications = async () => {
-    const profiles = await pendPlayersNot()
-    setPendingUsersProfiles(profiles)
-    openPanel()
-  }
+    const profiles = await pendPlayersNot();
+    setPendingUsersProfiles(profiles);
+    openPanel();
+  };
 
-  //Norification Panel with Pending Users Data 
+  //Norification Panel with Pending Users Data
   const NotificationPanel = () => {
     return (
       <Animated.View
@@ -262,22 +266,30 @@ export default function Activities({ navigation }) {
           styles.panel,
           {
             transform: [{ translateX: panelPosition }],
-            backgroundColor: 'rgba(0,0,0,0.5)'
-          }
+            backgroundColor: "rgba(0,0,0,0.5)",
+          },
         ]}
       >
         {/* Your notification content here */}
-        <Text style={{ color: '#FFFFFF', fontSize: 16 }} className="font-urbanist">Notifications{"\n"}</Text>
+        <Text
+          style={{ color: "#FFFFFF", fontSize: 16 }}
+          className="font-urbanist"
+        >
+          Notifications{"\n"}
+        </Text>
         {pendingUsersProfiles.length > 0 ? (
           pendingUsersProfiles.map((profile, index) => (
             <View key={index}>
-              <Text style={{ color: '#FFFFFF' }} className="font-urbanist">
-                - {profile.firstName} {profile.lastName} wants to Join to your event: "{profile.eventName}"
+              <Text style={{ color: "#FFFFFF" }} className="font-urbanist">
+                - {profile.firstName} {profile.lastName} wants to Join to your
+                event: "{profile.eventName}"
               </Text>
             </View>
           ))
         ) : (
-          <Text style={{ color: '#FFFFFF' }} className="font-urbanist" >No Pendings</Text>
+          <Text style={{ color: "#FFFFFF" }} className="font-urbanist">
+            No Pendings
+          </Text>
         )}
         <TouchableOpacity
           onPress={closePanel}
@@ -285,17 +297,19 @@ export default function Activities({ navigation }) {
             padding: 10,
             borderRadius: 20,
             borderWidth: 1,
-            borderColor: 'white',
-            backgroundColor: 'transparent',
-            alignSelf: 'left',
-            marginTop: 15
+            borderColor: "white",
+            backgroundColor: "transparent",
+            alignSelf: "left",
+            marginTop: 15,
           }}
         >
-          <Text style={{ color: '#FFFFFF' }} className="font-urbanist">Close</Text>
+          <Text style={{ color: "#FFFFFF" }} className="font-urbanist">
+            Close
+          </Text>
         </TouchableOpacity>
       </Animated.View>
-    )
-  }
+    );
+  };
 
   //----------------------------------------------->
 
@@ -388,16 +402,15 @@ export default function Activities({ navigation }) {
     setUserActivityList(allSportsEvents);
   };
 
-
   const onRefresh = useCallback(async () => {
-    setRefreshing(true)
+    setRefreshing(true);
     try {
       await retrieveFromDb();
       await getUserEvents();
     } catch (error) {
-      console.error('Error refreshing data:', error)
+      console.error("Error refreshing data:", error);
     } finally {
-      setRefreshing(false)
+      setRefreshing(false);
     }
   }, []);
 
@@ -430,17 +443,20 @@ export default function Activities({ navigation }) {
           onPress={toggleFilterModal}
         />
         <Text className="font-urbanistBold text-2xl">Sportlyst</Text>
-        <Ionicons name="notifications" size={24} color="black" onPress={showNotifications} />
+        <Ionicons
+          name="notifications"
+          size={24}
+          color="black"
+          onPress={showNotifications}
+        />
       </View>
       <FilterModal />
       <ScrollView
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        className="h-fit">
+        className="h-fit"
+      >
         <View className="px-3">
           <Text className="font-urbanist text-xl text-start pl-3">
             Hello, {user.firstName}
@@ -517,13 +533,13 @@ export default function Activities({ navigation }) {
 
 const styles = StyleSheet.create({
   panel: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 0,
     // bottom: 0,
-    width: '60%', // Adjust width as needed
+    width: "60%", // Adjust width as needed
     // height: '100%',
-    backgroundColor: 'grey',
+    backgroundColor: "grey",
     padding: 20,
     zIndex: 1000,
     borderTopLeftRadius: 15,
