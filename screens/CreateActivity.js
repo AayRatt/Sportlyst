@@ -3,8 +3,6 @@ import { StyleSheet } from "react-native";
 import {
   Text,
   View,
-  TouchableOpacity,
-  Image,
   Pressable,
   Button,
   TextInput,
@@ -17,16 +15,10 @@ import {
 } from "@expo-google-fonts/urbanist";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  SafeAreaView,
-  SafeAreaProvider,
-  SafeAreaInsetsContext,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign } from "@expo/vector-icons";
-
 import { useState, useEffect } from "react";
+
 // import { Picker } from 'react-native-wheel-pick';
 import { Picker } from "@react-native-picker/picker";
 
@@ -36,17 +28,30 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { db, auth } from "../firebaseConfig";
 import { setDoc, doc, collection, updateDoc } from "firebase/firestore";
 
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+
 export default function CreateActivity({ route, navigation }) {
   const { activity } = route.params
   const { title } = route.params
   const { description } = route.params
-  const { joinedUsersCount } = route.params
+  const { players } = route.params
   const { price } = route.params
+  const { date } = route.params
+  const { venue } = route.params
+  const { venueAddress } = route.params
+  const { sportType } = route.params
+  const { joinedUsers } = route.params
+  const { pendingUsers } = route.params
+  const { activityImage } = route.params
+  const { activityDetailsImage } = route.params
   const { eventCollectionId } = route.params
   const { docId } = route.params
 
+  const [imageUrls, setImageUrls] = useState([]); // State to hold image URLs
+  const [adImageUrls, setAdImageUrls] = useState([]); // State to hold activity details image URLs
 
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [sportPickerVisible, setSportPickerVisible] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -89,12 +94,16 @@ export default function CreateActivity({ route, navigation }) {
   const [userEventField, setUserEventField] = useState({
     eventName: title,
     description: description,
-    sportType: "",
-    players: joinedUsersCount,
+    sportType: sportType,
+    players: players,
     payment: price,
-    date: "",
-    time: "",
-    location: "",
+    date: date,
+    venue: venue,
+    venueAddress: venueAddress,
+    joinedUsers: joinedUsers,
+    pendingUsers: pendingUsers,
+    activityImage: activityImage,
+    activityDetailsImage: activityDetailsImage
   });
 
   const onCreateEvent = async () => {
@@ -124,13 +133,21 @@ Location: ${userEventField.location}
           players: userEventField.players,
           payment: userEventField.payment,
           date: userEventField.date,
-          time: userEventField.time,
-          location: userEventField.location,
+          venue: userEventField.venue,
+          venueAddress: userEventField.venueAddress,
           joinedUsers: [],
-          pendingUsers: []
+          pendingUsers: [],
+          activityImage: retrieveImageUrl(userEventField.sportType),
+          activityDetailsImage: retrieveAdImageUrl(userEventField.sportType)
         };
 
-        //2. Add data to firestore
+        const userDocRef = doc(db, "events", auth.currentUser.uid); // 'userId' is the ID for the user
+
+        await setDoc(userDocRef, {
+          // Set at least one field, e.g., a timestamp or a placeholder value
+          createdAt: new Date(),
+        });
+
         const randomId = doc(
           collection(db, "events", auth.currentUser.uid, "sports")
         ).id;
@@ -159,6 +176,7 @@ Location: ${userEventField.location}
   };
 
   const [venueData, setVenueData] = useState([]);
+  const [sportsData, setSportsData] = useState([]);
   const [filteredVenues, setFilteredVenues] = useState([]);
   const onInputChange = (text) => {
     formChanged("location", text);
@@ -178,7 +196,7 @@ Location: ${userEventField.location}
     // update data in firestore
     try {
       const eventsRef = doc(db, "events", eventCollectionId, "sports", docId)
-      await updateDoc(eventsRef, user);
+      await updateDoc(eventsRef, userEventField);
       alert("Activity Updated");
     } catch (err) {
       console.log(err);
@@ -202,9 +220,99 @@ Location: ${userEventField.location}
     }
   };
 
+  const fetchSports = async () => {
+    const response = await fetch(
+      "https://sportlystapi.onrender.com/sportlyst/getSports"
+    );
+    const results = await response.json();
+
+    if (Array.isArray(results.sports)) {
+      const sports = results.sports.map((item) => item.sportsType);
+      setSportsData(sports);
+    } else {
+      console.error(
+        'API did not return an array in the "sports" key:',
+        results
+      );
+    }
+  };
+
+  //function to retrieve image url from firebase storage
+  const fetchImage = () => {
+    const tmpSportsArr = [];
+    const tmpAdSportsArr = [];
+
+    for (let sport of sportsData) {
+      console.log("sportType url is : ", sport)
+
+      const storage = getStorage();
+      const imagePath = `/${sport}.jpg`; // The path of your image in Firebase Storage
+      const adImagePath = `/${sport}-ad.jpg`; // The path of your image in Firebase Storage
+      const imageRef = ref(storage, imagePath);
+      const adImageRef = ref(storage, adImagePath);
+
+      getDownloadURL(imageRef)
+        .then((url) => {
+          // console.log("Image url is : ", url)
+
+          const combinedData = {
+            imageUrl: url,
+            // sportType: sport.sportType
+            sportType: sport
+          };
+
+          tmpSportsArr.push(combinedData)
+        })
+        .catch((error) => {
+          // Handle any errors
+          console.log("Error retrieving image url :", error)
+        });
+
+      getDownloadURL(adImageRef)
+        .then((url) => {
+          // console.log("Image url is : ", url)
+
+          const combinedData = {
+            imageUrl: url,
+            // sportType: sport.sportType
+            sportType: sport
+          };
+
+          tmpAdSportsArr.push(combinedData)
+        })
+        .catch((error) => {
+          // Handle any errors
+          console.log("Error retrieving image url :", error)
+        });
+    }
+    setImageUrls(tmpSportsArr)
+    setAdImageUrls(tmpAdSportsArr)
+  };
+
+  const retrieveImageUrl = (sportType) => {
+    for (let image of imageUrls) {
+      if (image.sportType == sportType) {
+        return image.imageUrl
+      }
+    }
+  }
+
+  const retrieveAdImageUrl = (sportType) => {
+    for (let image of adImageUrls) {
+      if (image.sportType == sportType) {
+        return image.imageUrl
+      }
+    }
+  }
+
   useEffect(() => {
     fetchVenues();
+    fetchSports();
   }, []);
+
+  useEffect(() => {
+    fetchImage();
+  }, [sportsData])
 
   // Function for Updating form fields
   const formChanged = (key, updatedValue) => {
@@ -222,6 +330,58 @@ Location: ${userEventField.location}
   if (!fontsLoaded) {
     return null;
   }
+
+  const SportsPickerModal = () => {
+    return (
+      <Modal
+        visible={sportPickerVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        transparent={true}
+      >
+        <View className="flex-1 justify-end">
+          <View className="w-full h-1/2 bg-primary rounded-lg">
+            <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
+              <Text className="font-urbanistBold text-3xl text-start">
+                Select Sport
+              </Text>
+              <Ionicons
+                name="close"
+                size={35}
+                color="black"
+                onPress={() => setSportPickerVisible(false)}
+              />
+            </View>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "flex-end",
+                backgroundColor: "rgba(0,0,0,0.5)",
+              }}
+            >
+              <View style={{ backgroundColor: "white", height: "100%" }}>
+                <Picker
+                  selectedValue={userEventField.sportType}
+                  onValueChange={(value) => {
+                    formChanged("sportType", value);
+                    setSportPickerVisible(false);
+                  }}
+                >
+                  {sportsData.map((sport) => (
+                    <Picker.Item
+                      key={sport}
+                      label={sport}
+                      value={sport}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <SafeAreaView className="bg-primary flex-1">
@@ -275,6 +435,45 @@ Location: ${userEventField.location}
               formChanged("description", account);
             }}
           ></TextInput>
+
+          <SportsPickerModal />
+          <View className="flex-row gap-3 mb-3">
+            <Pressable
+              className="bg-secondary rounded-lg h-12 mt-1 items-center justify-center flex-1"
+              onPress={() => setSportPickerVisible(true)}
+            >
+              <Text className="text-lg font-urbanistBold text-primary">
+                {userEventField.sportType ? userEventField.sportType : "Sport Type"}
+              </Text>
+            </Pressable>
+          </View>
+
+          <View className="flex-row bg-gray h-15 rounded-lg w=11/12 p-4 mb-3 justify-between">
+            <TextInput
+              className="font-urbanist"
+              placeholder="Venue"
+              placeholderTextColor={"#666"}
+              autoCapitalize="none"
+              value={userEventField.venue}
+              onChangeText={(account) => {
+                formChanged("venue", account);
+              }}
+            ></TextInput>
+          </View>
+
+          <View className="flex-row bg-gray h-15 rounded-lg w=11/12 p-4 mb-3 justify-between">
+            <TextInput
+              className="font-urbanist"
+              placeholder="Venue Address"
+              placeholderTextColor={"#666"}
+              autoCapitalize="none"
+              value={userEventField.venueAddress}
+              onChangeText={(account) => {
+                formChanged("venueAddress", account);
+              }}
+            ></TextInput>
+          </View>
+
           <View className="flex-row bg-gray h-15 rounded-lg w=11/12 p-4 mb-3 justify-between">
             <Text className="font-urbanist text-[#666]">Start</Text>
             <DateTimePickerModal
@@ -431,7 +630,7 @@ Location: ${userEventField.location}
           ) : (
             <Pressable
               className="bg-secondary rounded-lg h-14 mt-5 items-center justify-center"
-              onPress={onCreateEvent}
+              onPress={updateDb}
             >
               <Text className="text-lg font-urbanistBold text-primary">
                 Update Event

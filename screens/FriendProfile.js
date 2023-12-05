@@ -154,8 +154,8 @@ export default function FriendProfile({ navigation, route }) {
                         </Text>
 
                         <Image
-                            source={userInfo.image ? { uri: userInfo.image } : profileIcon}
-                            className="self-center w-40 h-40 rounded-full"
+                            source={userInfo.imageUrl ? { uri: userInfo.imageUrl } : profileIcon}
+                            className="self-center w-40 h-40 rounded-full mb-5 mt-2"
                         />
 
                         {requestStatus === 'Accepted' ? (

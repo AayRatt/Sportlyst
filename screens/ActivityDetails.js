@@ -1,11 +1,11 @@
 import React from "react";
-import { SafeAreaView, ScrollView, View, Image, Text, TouchableOpacity, StatusBar, StyleSheet, Modal, Button, FlatList, Pressable } from 'react-native';
+import { SafeAreaView, View, Image, Text, TouchableOpacity, StatusBar, StyleSheet, Modal, FlatList, Pressable } from 'react-native';
 import { useState, useEffect } from 'react';
 import { db, auth } from "../firebaseConfig";
 import { doc, updateDoc, arrayUnion, onSnapshot, getDocs, collection, arrayRemove } from "firebase/firestore";
 import { Entypo } from "@expo/vector-icons";
 import { Ionicons } from '@expo/vector-icons';
-import { FontAwesome } from '@expo/vector-icons';
+
 
 export default function ActivityDetails({ route, navigation }) {
 
@@ -19,12 +19,10 @@ export default function ActivityDetails({ route, navigation }) {
     const [joinedUserProfiles, setJoinedUserProfiles] = useState([])
     const [pendingUserProfiles, setPendingUserProfiles] = useState([])
     const [isEditUI, setIsEditUI] = useState(false)
+    const [userName, setUserName] = useState('')
 
-    //tmp
-    // const [isUserActivity, setIsUserActivity] = useState(false);
-    // const [isUserActivity, setIsUserActivity] = useState(true);
-
-    const [modalVisible, setModalVisible] = useState(false);
+    const [prModalVisible, setPrModalVisible] = useState(false);
+    const [adModalVisible, setAdModalVisible] = useState(false);
 
     const updatePendingUsers = async () => {
         setIsPendingUsers(true)
@@ -37,13 +35,14 @@ export default function ActivityDetails({ route, navigation }) {
             await updateDoc(eventsRef, {
                 pendingUsers: arrayUnion(auth.currentUser.uid)
             });
-            alert("Activity Updated");
+            alert("Your request is pending. \nEvent Admin will update the status");
         } catch (err) {
             console.log(err)
         }
     }
 
     const updateDbJoinedUsers = async (userId) => {
+        setPrModalVisible(false)
         removeDbJoinedOrPendingUsers(userId)
         // update data in firestore
         try {
@@ -53,13 +52,13 @@ export default function ActivityDetails({ route, navigation }) {
             await updateDoc(eventsRef, {
                 joinedUsers: arrayUnion(userId)
             });
-            alert("You Joined The Activity");
         } catch (err) {
             console.log(err)
         }
     }
 
     const removeDbJoinedOrPendingUsers = async (userIdToRemove) => {
+        setPrModalVisible(false)
         // update data in firestore
         try {
             const eventsRef = doc(db, "events", activity.eventCollectionId, "sports", activity.docId)
@@ -85,6 +84,10 @@ export default function ActivityDetails({ route, navigation }) {
         const querySnapshot = await getDocs(collection(db, "userProfiles"));
         querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
+            if (activity.eventCollectionId == doc.id) {
+                setUserName(`${doc.data().firstName} ${doc.data().lastName}`)
+            }
+
             if (joinedUsers.includes(doc.id)) {
                 const userObj = {
                     imageUrl: doc.data().imageUrl,
@@ -151,14 +154,25 @@ export default function ActivityDetails({ route, navigation }) {
         // setPendingUsers(pendingUsersArr)
     }
 
-    const onImageClicked = (userId) => {
-        navigation.navigate("FriendProfile", {
-            userID: userId,
-        })
+    const onItemClickedToNavigate = (userId) => {
+        setPrModalVisible(false)
+        if (userId == auth.currentUser.uid) {
+            navigation.navigate("Profile", {
+                userID: userId,
+            })
+        } else {
+            navigation.navigate("FriendProfile", {
+                userID: userId,
+            })
+        }
     }
 
     const onPendingButtonClicked = () => {
-        setModalVisible(true)
+        setPrModalVisible(true)
+    }
+
+    const onActivityDescriptionClicked = () => {
+        setAdModalVisible(true)
     }
 
     const onEditButtonClicked = () => {
@@ -168,32 +182,21 @@ export default function ActivityDetails({ route, navigation }) {
     useEffect(() => {
         realtimeDbListener();  // This sets up the realtime listener
         retrieveSingleEventData();  // This fetches joined users
-    }, []);  // Called only once when component is mounted
+    }, []);
 
     useEffect(() => {
-        if (joinedUsers.length > 0 || pendingUsers.length > 0) {  // Ensure that we have some joined users
-            retrieveAllUsersDataFromDb();  // Fetch images for joined users
+        if (pendingUsers.includes(auth.currentUser.uid)) {
+            setIsPendingUsers(true)
         }
+        retrieveAllUsersDataFromDb();  // Fetch images for joined users
     }, [joinedUsers, pendingUsers]);  // Called whenever joinedUsers or pendingUsers changes
 
     const PendingRequestsModal = () => {
-        // const toggleTemporaryFilter = (sportType) => {
-        //   setTemporarySelectedFilters((prevFilters) => {
-        //     const newFilters = new Set(prevFilters);
-        //     if (newFilters.has(sportType)) {
-        //       newFilters.delete(sportType);
-        //     } else {
-        //       newFilters.add(sportType);
-        //     }
-        //     return newFilters;
-        //   });
-        // };
-
         return (
             <Modal
-                visible={modalVisible}
+                visible={prModalVisible}
                 animationType="slide"
-                presentationStyle="pageSheet"
+                // presentationStyle="pageSheet"
                 transparent={true}
             >
                 <View className="flex-1 justify-end">
@@ -206,46 +209,81 @@ export default function ActivityDetails({ route, navigation }) {
                                 name="close"
                                 size={35}
                                 color="black"
-                                onPress={() => setModalVisible(false)}
+                                onPress={() => setPrModalVisible(false)}
                             />
                         </View>
-                        <ScrollView className="max-h-screen mt-5">
-                            <View
-                                style={{
-                                    flex: 1,
-                                    justifyContent: "flex-end",
-                                    backgroundColor: "rgba(0,0,0,0.5)",
-                                }}
-                            >
-                                <View style={{ backgroundColor: "white", height: 350 }}>
-                                    <FlatList
-                                        data={pendingUserProfiles}
-                                        renderItem={
-                                            (rowData) => {
-                                                return (
-                                                    <TouchableOpacity onPress={() => onImageClicked(rowData.item.userId)}>
-                                                        <View className="flex-row items-center mt-5 pl-3">
-                                                            <Image
-                                                                source={rowData.item.imageUrl ? { uri: rowData.item.imageUrl } : require("../assets/profile-icon.png")}
-                                                                className="w-12 h-12 rounded-full" />
-                                                            <Text className="font-urbanist text-1xl mr-3">
-                                                                {rowData.item.firstName} {rowData.item.lastName}
-                                                            </Text>
-                                                            <TouchableOpacity onPress={() => updateDbJoinedUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 mr-2 items-center justify-center">
-                                                                <Text style={styles.joinButtonText}>Accept</Text>
-                                                            </TouchableOpacity>
-                                                            <TouchableOpacity onPress={() => removeDbJoinedOrPendingUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 items-center justify-center">
-                                                                <Text style={styles.joinButtonText}>Decline</Text>
-                                                            </TouchableOpacity>
-                                                        </View>
-                                                    </TouchableOpacity>
-                                                )
-                                            }
+                        <View
+                            style={{
+                                flex: 1,
+                                backgroundColor: "rgba(0,0,0,0.5)",
+                            }}
+                        >
+                            <View style={{ backgroundColor: "white", height: "100%" }}>
+                                <FlatList
+                                    data={pendingUserProfiles}
+                                    renderItem={
+                                        (rowData) => {
+                                            return (
+                                                <TouchableOpacity onPress={() => onItemClickedToNavigate(rowData.item.userId)}>
+                                                    <View className="flex-row items-center mt-5 pl-3">
+                                                        <Image
+                                                            source={rowData.item.imageUrl ? { uri: rowData.item.imageUrl } : require("../assets/profile-icon.png")}
+                                                            className="w-12 h-12 rounded-full" />
+                                                        <Text className="font-urbanist text-1xl mr-3">
+                                                            {rowData.item.firstName} {rowData.item.lastName}
+                                                        </Text>
+                                                        <TouchableOpacity onPress={() => updateDbJoinedUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 mr-2 items-center justify-center">
+                                                            <Text style={styles.joinButtonText}>Accept</Text>
+                                                        </TouchableOpacity>
+                                                        <TouchableOpacity onPress={() => removeDbJoinedOrPendingUsers(rowData.item.userId)} className="bg-secondary rounded-lg h-8 w-20 items-center justify-center">
+                                                            <Text style={styles.joinButtonText}>Decline</Text>
+                                                        </TouchableOpacity>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            )
                                         }
-                                    />
-                                </View>
+                                    }
+                                />
                             </View>
-                        </ScrollView>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        );
+    };
+
+    const ActivityDescriptionModal = () => {
+        return (
+            <Modal
+                visible={adModalVisible}
+                animationType="slide"
+                // presentationStyle="pageSheet"
+                transparent={true}
+            >
+                <View className="flex-1 justify-end">
+                    <View className="w-full h-4/5 bg-primary rounded-lg">
+                        <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
+                            <Text className="font-urbanistBold text-3xl text-start">
+                                Activity Description
+                            </Text>
+                            <Ionicons
+                                name="close"
+                                size={35}
+                                color="black"
+                                onPress={() => setAdModalVisible(false)}
+                            />
+                        </View>
+                        <View
+                            style={{
+                                flex: 1,
+                                backgroundColor: "rgba(0,0,0,0.5)",
+                                margin: 20
+                            }}
+                        >
+                            <View style={{ backgroundColor: "white", height: "100%" }}>
+                                <Text style={styles.description}>{activity.description}</Text>
+                            </View>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -279,21 +317,32 @@ export default function ActivityDetails({ route, navigation }) {
             </View>
             {/* <ScrollView style={styles.scrollView}> */}
             <View style={styles.container}>
-                <Image source={require('../assets/football.jpg')} style={{ width: '100%', height: 160 }} />
+                <Image source={{ uri: activity.activityDetailsImage }} style={{ width: '100%', height: 160 }} />
                 <View style={styles.eventDetails}>
                     <Text style={styles.title}>{activity.title}</Text>
-                    <Text style={styles.description}>{activity.description}</Text>
-                    <Text style={styles.grayText}>{activity.date} {activity.time}</Text>
-                    <Text style={styles.grayText}>CAD {activity.price}</Text>
-                    <Text style={styles.grayText}>{joinedUsersCount ? joinedUsersCount : 0}/{activity.players} joined</Text>
-                    {activity.isUserActivity && (
-                        <Text style={styles.grayText}>{pendingUsersCount ? pendingUsersCount : 0} pending</Text>
-                    )}
+                    <TouchableOpacity onPress={() => onItemClickedToNavigate(activity.eventCollectionId)} >
+                        <Text style={styles.createdByText}>Created By: <Text style={styles.boldText}>{userName}</Text></Text>
+                    </TouchableOpacity>
+                    <View style={styles.userCount}>
+                        <Text style={styles.grayText}>{activity.date} {activity.time}</Text>
+                        <Text style={styles.grayText}>CAD {activity.price}</Text>
+                    </View>
+                    <View style={styles.userCount}>
+                        <Text style={styles.grayText}>{joinedUsersCount ? joinedUsersCount : 0}/{activity.players} joined</Text>
+                        {activity.isUserActivity && (
+                            <Text style={styles.grayText}>{pendingUsersCount ? pendingUsersCount : 0} pending</Text>
+                        )}
+                    </View>
+                    <TouchableOpacity onPress={onActivityDescriptionClicked}
+                        style={styles.descriptionButton}>
+                        <Text style={styles.joinButtonText}>See Description</Text>
+                    </TouchableOpacity>
+
 
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Venue</Text>
                         {/* Add venue details here */}
-                        <Text style={styles.title}>{activity.venue}</Text>
+                        <Text style={styles.venueTitle}>{activity.venue}</Text>
                         <Text style={styles.grayText}>{activity.venueAddress}</Text>
                     </View>
 
@@ -317,8 +366,16 @@ export default function ActivityDetails({ route, navigation }) {
                                 activity: "ActivityDetails",
                                 title: activity.title,
                                 description: activity.description,
-                                joinedUsersCount: '' + joinedUsersCount,
+                                players: activity.players,
                                 price: activity.price,
+                                date: activity.date,
+                                venue: activity.venue,
+                                venueAddress: activity.venueAddress,
+                                sportType: activity.sportType,
+                                joinedUsers: joinedUsers,
+                                pendingUsers: pendingUsers,
+                                activityImage: activity.activityImage,
+                                activityDetailsImage: activity.activityDetailsImage,
                                 eventCollectionId: activity.eventCollectionId,
                                 docId: activity.docId
                             })
@@ -340,7 +397,7 @@ export default function ActivityDetails({ route, navigation }) {
                         </View>
                     )}
                 </View>
-                <View style={[styles.attendees, {top: attendeesTopMargin}]}>
+                <View style={[styles.attendees, { top: attendeesTopMargin }]}>
                     <Text style={styles.sectionTitle}>Who's going?</Text>
                     {isEditUI ? (
                         <View style={styles.imagesContainer}>
@@ -364,7 +421,7 @@ export default function ActivityDetails({ route, navigation }) {
                     ) : (
                         <View style={styles.imagesContainer}>
                             {joinedUserProfiles.map((image, index) => (
-                                <TouchableOpacity key={index} onPress={() => onImageClicked(image.userId)}>
+                                <TouchableOpacity key={index} onPress={() => onItemClickedToNavigate(image.userId)}>
                                     <Image
                                         key={index}
                                         source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
@@ -380,6 +437,7 @@ export default function ActivityDetails({ route, navigation }) {
                     )}
                 </View>
                 <PendingRequestsModal />
+                <ActivityDescriptionModal />
                 <StatusBar barStyle="dark-content" />
             </View>
             {/* </ScrollView> */}
@@ -410,17 +468,51 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         padding: 16,
     },
+    userCount: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        // You can adjust these as needed
+        // padding: 10,
+        width: '100%',
+    },
+    boldText: {
+        fontWeight: 'bold',
+        color: "#000000",
+        fontSize: 16
+    },
     title: {
         fontSize: 24,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        marginBottom: 5,
+        alignSelf: "center"
+    },    
+    venueTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 5,
+        textAlign: "center"
     },
     description: {
         fontSize: 20,
-        fontWeight: 'bold'
+    },
+    createdByText: {
+        color: 'gray',
+        marginTop: 12
     },
     grayText: {
         color: 'gray',
-        marginTop: 8
+        marginTop: 8,
+        fontSize: 14
+    },
+    descriptionButton: {
+        width: "40%",
+        height: 30,
+        borderRadius: 10,
+        borderWidth: 2,
+        backgroundColor: "#000000",
+        justifyContent: "center",
+        marginTop: 10
     },
     joinButton: {
         marginHorizontal: 16,
@@ -435,19 +527,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     section: {
-        padding: 16
+        padding: 10
     },
     sectionTitle: {
         fontSize: 32,
         fontWeight: 'bold',
-        marginBottom: 8
+        marginBottom: 8,
+        alignSelf: "center"
     },
     attendees: {
         left: 16,
         fontSize: 32,
         fontWeight: 'bold',
         marginBottom: 8,
-        // flexDirection: "row"
     },
     imagesContainer: {
         flex: 1,

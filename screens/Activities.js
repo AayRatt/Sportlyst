@@ -3,7 +3,6 @@ import {
   View,
   Text,
   Pressable,
-  Button,
   ScrollView,
   TouchableOpacity,
   Dimensions,
@@ -11,12 +10,11 @@ import {
   Animated,
   StyleSheet
 } from "react-native";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import ActivityCard from "../components/ActivityCard";
-import CreateActivity from "./CreateActivity";
 import {
   useFonts,
   Urbanist_600SemiBold,
@@ -26,6 +24,7 @@ import { db, auth } from "../firebaseConfig";
 import { collection, getDoc, getDocs, doc } from "firebase/firestore";
 import Carousel from "react-native-snap-carousel"; //NEW
 import MyCarousel from "../components/MyCarousel"; //NEW
+import { RefreshControl } from 'react-native';
 
 export default function Activities({ navigation }) {
   const { width, height } = Dimensions.get("window");
@@ -60,6 +59,7 @@ export default function Activities({ navigation }) {
     setSelectedFilters(newFilters);
   };
 
+  const [refreshing, setRefreshing] = useState(false);
 
   const [isPanelVisible, setIsPanelVisible] = useState(false);
   const panelPosition = useRef(new Animated.Value(Dimensions.get('window').width)).current;
@@ -138,7 +138,6 @@ export default function Activities({ navigation }) {
         animationType="slide"
         presentationStyle="pageSheet"
       // transparent={true}
-      >
         <View className="flex-1 justify-end">
           <View className="w-full h-4/5 bg-primary rounded-lg">
             <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
@@ -325,36 +324,12 @@ export default function Activities({ navigation }) {
   //   }
   // };
 
-  //Use effect State
-  useEffect(() => {
-    // getCurrentLocation();
-    retrieveFromDb();
-    retrieveUserDataFromDb();
-    getUserEvents();
-    getFilters();
-  }, []);
-
-  // const retrieveFromDb = async () => {
-  //   const allSportsEvents = [];
-  //   const querySnapshot = await getDocs(collection(db, "events"));
-  //   querySnapshot.forEach(async (doc) => {
-  //     const userId = doc.id
-  //     const querySnapshot = await getDocs(collection(db, "events", userId, "sports"));
-  //     querySnapshot.forEach((doc) => {
-  //       // doc.data() is never undefined for query doc snapshots
-  //       console.log(doc.id, " => ", doc.data());
-  //       allSportsEvents.push(doc.data());
-  //     });
-  //   });
-  //   setActivityData(allSportsEvents)
-  // }
-
   const retrieveUserDataFromDb = async () => {
     const docRef = doc(db, "userProfiles", auth.currentUser.uid);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
+      // console.log(`docSnap ${JSON.stringify(docSnap.data().imageUrl)}`);
       setUser(docSnap.data());
     } else {
       console.log("No such document!");
@@ -376,6 +351,7 @@ export default function Activities({ navigation }) {
       for (let sportDoc of sportsSnapshot.docs) {
         console.log(sportDoc.id, " => ", sportDoc.data());
         const sportData = sportDoc.data();
+
         // Combine the retrieved data with the docId and eventCollectionId
         const combinedData = {
           ...sportData,
@@ -387,7 +363,6 @@ export default function Activities({ navigation }) {
         allSportsEvents.push(combinedData);
       }
     }
-
     setActivityDataList(allSportsEvents);
   };
 
@@ -399,7 +374,7 @@ export default function Activities({ navigation }) {
     const userEventsRef = doc(db, "events", currentUserId);
     const sportsSnapshot = await getDocs(collection(userEventsRef, "sports"));
     for (let sportDoc of sportsSnapshot.docs) {
-      console.log(sportDoc.id, " => ", sportDoc.data());
+      console.log(sportDoc.id, " User events!!! => ", sportDoc.data());
       const sportData = sportDoc.data();
       const combinedData = {
         ...sportData,
@@ -412,6 +387,28 @@ export default function Activities({ navigation }) {
 
     setUserActivityList(allSportsEvents);
   };
+
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    try {
+      await retrieveFromDb();
+      await getUserEvents();
+    } catch (error) {
+      console.error('Error refreshing data:', error)
+    } finally {
+      setRefreshing(false)
+    }
+  }, []);
+
+  //Use effect State
+  useEffect(() => {
+    // getCurrentLocation();
+    retrieveFromDb();
+    retrieveUserDataFromDb();
+    getUserEvents();
+    getFilters();
+  }, []);
 
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
@@ -436,7 +433,14 @@ export default function Activities({ navigation }) {
         <Ionicons name="notifications" size={24} color="black" onPress={showNotifications} />
       </View>
       <FilterModal />
-      <ScrollView className="h-fit">
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+        className="h-fit">
         <View className="px-3">
           <Text className="font-urbanist text-xl text-start pl-3">
             Hello, {user.firstName}
@@ -465,10 +469,10 @@ export default function Activities({ navigation }) {
             key={index}
             title={activity.eventName}
             description={activity.description}
-            img={require("../assets/cherry.jpg")}
+            activityImage={activity.activityImage}
+            activityDetailsImage={activity.activityDetailsImage}
             location={activity.venue}
             date={activity.date}
-            time={activity.time}
             navigation={navigation}
             price={activity.payment}
             players={activity.players}
