@@ -308,7 +308,7 @@ export default function Activities({ navigation }) {
     getUserEvents();
     getFilters();
   }, []);
-
+  
   let [fontsLoaded] = useFonts({
     Urbanist_600SemiBold,
 
