@@ -72,7 +72,7 @@ export default function Register({ route, navigation }) {
           formField.password
         );
         console.log(`Id of created user is: ${userCredential.user.uid}`);
-        alert(userCredential.user.uid);
+        // alert(userCredential.user.uid);
 
         //Create a Firestore Collection
         //1. Add data Object
