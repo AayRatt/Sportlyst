@@ -188,12 +188,7 @@ export default function ActivityDetails({ route, navigation }) {
         if (pendingUsers.includes(auth.currentUser.uid)) {
             setIsPendingUsers(true)
         }
-
         retrieveAllUsersDataFromDb();  // Fetch images for joined users
-
-        // if (joinedUsers.length > 0 || pendingUsers.length > 0) {  // Ensure that we have some joined users
-        //     retrieveAllUsersDataFromDb();  // Fetch images for joined users
-        // }
     }, [joinedUsers, pendingUsers]);  // Called whenever joinedUsers or pendingUsers changes
 
     const PendingRequestsModal = () => {
