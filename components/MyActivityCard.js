@@ -36,9 +36,11 @@ export default function ActivityCard(props) {
             <Text className="font-urbanist text-3xl">{props.title}</Text>
             <View className="flex-row items-center">
               <Ionicons name="location-sharp" size={24} color="gray" />
-              <Text className="font-urbanist text-[#777]">
-                {props.location}
-              </Text>
+              <View className="w-28">
+                <Text numberOfLines={1} className="font-urbanist text-[#777]">
+                  {props.location}
+                </Text>
+              </View>
             </View>
           </View>
           <View className="flex-row justify-between">
