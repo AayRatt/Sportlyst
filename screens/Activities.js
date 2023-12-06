@@ -466,12 +466,14 @@ export default function Activities({ navigation }) {
           <Text className="font-urbanist text-xl text-start pl-3">
             Hello, {user.firstName}
           </Text>
-          <View className="flex-row items-baseline">
-            <Text className="font-urbanistBold text-2xl text-start pl-3">
-              Your Activities
-            </Text>
-            <Ionicons name="chevron-forward" size={21} color="black" />
-          </View>
+          {userActivityList && userActivityList.length > 0 && (
+            <View className="flex-row items-baseline">
+              <Text className="font-urbanistBold text-2xl text-start pl-3">
+                Your Activities
+              </Text>
+              <Ionicons name="chevron-forward" size={21} color="black" />
+            </View>
+          )}
         </View>
         <NotificationPanel />
 
