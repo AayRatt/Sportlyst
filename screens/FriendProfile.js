@@ -180,7 +180,7 @@ export default function FriendProfile({ navigation, route }) {
           )}
         </Pressable>
       </View>
-      <View className="bg-white pl-3 pr-3 flex justify-center items-center">
+      <View className="bg-white pl-3 pr-3 mt-18 flex justify-center items-center">
         {userInfo && (
           <>
             {/* <Text className="mt-8 font-urbanistBold text-2xl text-start pl-3 text-center">

@@ -237,7 +237,7 @@ export default function App() {
           component={FriendProfile}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Search" component={SearchStack} />
+        <Stack.Screen name="ChatFriends" component={ChatStack} />
       </Stack.Navigator>
     );
   }
