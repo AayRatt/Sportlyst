@@ -221,7 +221,6 @@ export default function Activities({ navigation }) {
           allPendingUsers.push(...playersWithEventName);
         }
       }
-      console.log("ARRAY DE PENDING USERS", allPendingUsers);
       return allPendingUsers;
     } catch (error) {
       console.log("Error, getting Pending Players", error);
@@ -358,6 +357,12 @@ export default function Activities({ navigation }) {
     for (let userDoc of querySnapshot.docs) {
       console.log(`userDoc => ${userDoc.id}`);
       const userId = userDoc.id;
+
+      //skip the iteration if events are by the current logged in user
+      if (userId == auth.currentUser.uid) {
+        continue;
+      }
+
       const sportsSnapshot = await getDocs(
         collection(db, "events", userId, "sports")
       );
