@@ -133,7 +133,7 @@ export default function Login({ navigation, route }) {
               Login
             </Text>
           </Pressable>
-          <Pressable className="bg-gray rounded-lg h-14 mt-5 items-center justify-center">
+          {/* <Pressable className="bg-gray rounded-lg h-14 mt-5 items-center justify-center">
             <View className="flex-row">
               <MaterialCommunityIcons name="apple" size={24} color="black" />
               <Text className="text-lg font-urbanistBold text-secondary">
@@ -148,7 +148,7 @@ export default function Login({ navigation, route }) {
                 Continue with Google
               </Text>
             </View>
-          </Pressable>
+          </Pressable> */}
         </View>
         <StatusBar barStyle="dark-content"></StatusBar>
       </View>

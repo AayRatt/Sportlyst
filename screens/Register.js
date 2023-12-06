@@ -203,7 +203,7 @@ export default function Register({ route, navigation }) {
               Continue
             </Text>
           </Pressable>
-          <Pressable className="bg-gray rounded-lg h-14 mt-5 items-center justify-center">
+          {/* <Pressable className="bg-gray rounded-lg h-14 mt-5 items-center justify-center">
             <View className="flex-row">
               <MaterialCommunityIcons name="apple" size={24} color="black" />
               <Text className="text-lg font-urbanistBold text-secondary">
@@ -218,13 +218,13 @@ export default function Register({ route, navigation }) {
                 Sign Up with Google
               </Text>
             </View>
-          </Pressable>
+          </Pressable> */}
         </View>
-        <Text className="text-2sm, font-urbanist text-[#999] mt-3">
+        {/* <Text className="text-2sm, font-urbanist text-[#999] mt-3">
           By proceeding, you consent to get email messages, including by
           automated means, from Sportlyst and its affiliates to the email
           provided.
-        </Text>
+        </Text> */}
         <StatusBar barStyle="dark-content"></StatusBar>
       </View>
     </SafeAreaView>
