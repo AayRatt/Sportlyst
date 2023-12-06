@@ -6,6 +6,7 @@ import {
   Urbanist_500Medium,
 } from "@expo-google-fonts/urbanist";
 import { Ionicons } from "@expo/vector-icons";
+import CachedImage from 'react-native-expo-cached-image';
 
 export default function ActivityCard(props) {
   let [fontsLoaded] = useFonts({
@@ -30,11 +31,16 @@ export default function ActivityCard(props) {
       <View className="shadow-lg">
         <View className="bg-primary m-5 rounded-lg">
           <View className="flex-row">
-            <Image
+            <CachedImage
+              className="w-full h-52 rounded-t-lg"
+              isBackground
+              source={{ uri: props.activityImage }}
+            />
+            {/* <Image
               className="w-full h-52 rounded-t-lg"
               // source={props.img}
               source={{ uri: props.activityImage }}
-            ></Image>
+            ></Image> */}
           </View>
           <View className="px-3 py-3">
             <View className="flex-row justify-between items-center">

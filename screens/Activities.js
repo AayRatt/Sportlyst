@@ -137,7 +137,7 @@ export default function Activities({ navigation }) {
       <Modal
         visible={isFilterModalVisible}
         animationType="slide"
-        presentationStyle="pageSheet"
+        // presentationStyle="pageSheet"
         transparent={true}
       >
         <View className="flex-1 justify-end">

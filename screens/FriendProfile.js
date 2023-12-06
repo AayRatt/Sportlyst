@@ -30,6 +30,7 @@ import profileIcon from "../assets/profile-icon.png";
 import { useFonts, Urbanist_600SemiBold } from "@expo-google-fonts/urbanist";
 import { AntDesign } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
+import CachedImage from 'react-native-expo-cached-image';
 
 export default function FriendProfile({ navigation, route }) {
   //const { userID } = navigation.params
@@ -187,12 +188,20 @@ export default function FriendProfile({ navigation, route }) {
               {`${userInfo.firstName} ${userInfo.lastName}`}
             </Text> */}
 
-            <Image
-              source={
-                userInfo.imageUrl ? { uri: userInfo.imageUrl } : profileIcon
-              }
-              className="self-center w-40 h-40 rounded-full mb-5 mt-2"
-            />
+            {userInfo.imageUrl ? (
+              <CachedImage
+                className="self-center w-40 h-40 rounded-full mb-5 mt-2"
+                // isBackground
+                source={{ uri: userInfo.imageUrl }}
+              />
+            ) : (
+              <Image
+                source={
+                  profileIcon
+                }
+                className="self-center w-40 h-40 rounded-full mb-5 mt-2"
+              />
+            )}
 
             {requestStatus === "Accepted" ? (
               <View>

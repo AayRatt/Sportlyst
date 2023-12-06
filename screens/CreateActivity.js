@@ -336,7 +336,7 @@ Location: ${userEventField.location}
       <Modal
         visible={sportPickerVisible}
         animationType="slide"
-        presentationStyle="pageSheet"
+        // presentationStyle="pageSheet"
         transparent={true}
       >
         <View className="flex-1 justify-end">

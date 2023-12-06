@@ -23,6 +23,7 @@ import profileIcon from "../assets/profile-icon.png";
 import countries from "../data/countries.json";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ionicons } from '@expo/vector-icons';
+import CachedImage from 'react-native-expo-cached-image';
 
 import {
   useFonts,
@@ -38,6 +39,7 @@ export default function Profile({ }) {
   const [isEditing, setIsEditing] = useState(false);
 
   const [countriesDataList, setCountriesDataList] = useState([]);
+  const [imageUrl, setImageUrl] = useState(false);
 
   const retrieveCountryNames = () => {
     console.log(`Countries data ${JSON.stringify(countries)}`);
@@ -82,6 +84,7 @@ export default function Profile({ }) {
     postalCode: "",
     imageUrl: "",
   });
+
 
   // Function to update form fields
   const updateUser = (key, updatedValue) => {
@@ -143,13 +146,15 @@ export default function Profile({ }) {
 
     const source = { uri: result.assets[0].uri };
     console.log(`source is: ${JSON.stringify(source)}`);
-    updateUser("imageUrl", source.uri);
+    // updateUser("imageUrl", source.uri);
+    setImageUrl(source.uri);
   };
 
   const uploadImage = async () => {
     setUploading(true);
 
-    const response = await fetch(user.imageUrl);
+    // const response = await fetch(user.imageUrl);
+    const response = await fetch(imageUrl);
     const blob = await response.blob();
 
     const filename = auth.currentUser.uid;
@@ -228,55 +233,55 @@ export default function Profile({ }) {
 
   const PickerModal = () => {
     return (
-        <Modal
-            visible={pickerVisible}
-            animationType="slide"
-            presentationStyle="pageSheet"
-            transparent={true}
-        >
-            <View className="flex-1 justify-end">
-                <View className="w-full h-1/2 bg-primary rounded-lg">
-                    <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
-                        <Text className="font-urbanistBold text-3xl text-start">
-                            Select Country
-                        </Text>
-                        <Ionicons
-                            name="close"
-                            size={35}
-                            color="black"
-                            onPress={() => setPickerVisible(false)}
-                        />
-                    </View>
-                    <View
-                style={{
-                  flex: 1,
-                  justifyContent: "flex-end",
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                }}
-              >
-                <View style={{ backgroundColor: "white", height: "100%" }}>
-                  <Picker
-                    selectedValue={user.country}
-                    onValueChange={(account) => {
-                      updateUser("country", account);
-                      setPickerVisible(false);
-                    }}
-                  >
-                    {countriesDataList.map((country) => (
-                      <Picker.Item
-                        key={country}
-                        label={country}
-                        value={country}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              </View>
-                </View>
+      <Modal
+        visible={pickerVisible}
+        animationType="slide"
+        // presentationStyle="pageSheet"
+        transparent={true}
+      >
+        <View className="flex-1 justify-end">
+          <View className="w-full h-1/2 bg-primary rounded-lg">
+            <View className="flex-row justify-between mt-3 align-center px-3 pt-2">
+              <Text className="font-urbanistBold text-3xl text-start">
+                Select Country
+              </Text>
+              <Ionicons
+                name="close"
+                size={35}
+                color="black"
+                onPress={() => setPickerVisible(false)}
+              />
             </View>
-        </Modal>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "flex-end",
+                backgroundColor: "rgba(0,0,0,0.5)",
+              }}
+            >
+              <View style={{ backgroundColor: "white", height: "100%" }}>
+                <Picker
+                  selectedValue={user.country}
+                  onValueChange={(account) => {
+                    updateUser("country", account);
+                    setPickerVisible(false);
+                  }}
+                >
+                  {countriesDataList.map((country) => (
+                    <Picker.Item
+                      key={country}
+                      label={country}
+                      value={country}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     );
-};
+  };
 
   return (
     <SafeAreaView className="bg-primary flex-1 h-full">
@@ -313,10 +318,18 @@ export default function Profile({ }) {
         <View className="bg-white pl-3 pr-3">
           <View className="mt-2">
             <View className="h-50 w-50 bg-gray-500 relative rounded-full">
-              <Image
-                source={user.imageUrl ? { uri: user.imageUrl } : profileIcon}
-                className="self-center w-40 h-40 rounded-full border-solid border-2"
-              />
+              {user.imageUrl ? (
+                <CachedImage
+                  className="self-center w-40 h-40 rounded-full border-solid border-2"
+                  // isBackground
+                  source={{ uri: user.imageUrl }}
+                />
+              ) : (
+                <Image
+                  source={imageUrl ? { uri: imageUrl } : profileIcon}
+                  className="self-center w-40 h-40 rounded-full border-solid border-2"
+                />
+              )}
               {isEditing && (
                 <TouchableOpacity
                   onPress={pickImage}
@@ -395,7 +408,7 @@ export default function Profile({ }) {
                 <Text className="bg-gray h-12 rounded-lg w=11/12 p-4 mb-3 font-urbanist">{user.phoneNumber ? user.phoneNumber : "Phone Number"}</Text>
               )
             }
-            <PickerModal/>
+            <PickerModal />
             <View className="flex-row gap-3">
               {/* country */}
               {
