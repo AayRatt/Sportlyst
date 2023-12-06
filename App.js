@@ -207,6 +207,7 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Search" component={SearchStack} />
+        <Stack.Screen name="ChatFriends" component={ChatStack} />
       </Stack.Navigator>
     );
   }
@@ -234,7 +235,7 @@ export default function App() {
         <Stack.Screen
           name="FriendProfile"
           component={FriendProfile}
-          options={{ headerShown: true }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen name="Search" component={SearchStack} />
       </Stack.Navigator>
@@ -248,6 +249,7 @@ export default function App() {
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="ChatFriendsHome" component={ChatFriends} />
+
         <Stack.Screen
           name="Chat"
           component={Chat}
