@@ -10,7 +10,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { Alert, Text } from "react-native";
 import { useState, useEffect } from "react";
 import Activities from "./screens/Activities";
-import Profile from "./screens/Profile"; 
+import Profile from "./screens/Profile";
 import Search from "./screens/Search";
 import Friends from "./screens/Friends";
 import CreateActivity from "./screens/CreateActivity";
@@ -188,7 +188,7 @@ export default function App() {
         <Stack.Screen
           name="SearchFriendProfile"
           component={FriendProfile}
-          options={{ headerShown: true }}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     );
@@ -204,9 +204,10 @@ export default function App() {
         <Stack.Screen
           name="FriendProfile"
           component={FriendProfile}
-          options={{ headerShown: true }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen name="Search" component={SearchStack} />
+        <Stack.Screen name="ChatFriends" component={ChatStack} />
       </Stack.Navigator>
     );
   }
@@ -234,9 +235,9 @@ export default function App() {
         <Stack.Screen
           name="FriendProfile"
           component={FriendProfile}
-          options={{ headerShown: true }}
+          options={{ headerShown: false }}
         />
-        <Stack.Screen name="Search" component={SearchStack} />
+        <Stack.Screen name="ChatFriends" component={ChatStack} />
       </Stack.Navigator>
     );
   }
@@ -248,6 +249,7 @@ export default function App() {
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="ChatFriendsHome" component={ChatFriends} />
+
         <Stack.Screen
           name="Chat"
           component={Chat}

@@ -137,8 +137,8 @@ export default function Activities({ navigation }) {
       <Modal
         visible={isFilterModalVisible}
         animationType="slide"
-        presentationStyle="pageSheet"
-        // transparent={true}
+        // presentationStyle="pageSheet"
+        transparent={true}
       >
         <View className="flex-1 justify-end">
           <View className="w-full h-4/5 bg-primary rounded-lg">
@@ -221,7 +221,6 @@ export default function Activities({ navigation }) {
           allPendingUsers.push(...playersWithEventName);
         }
       }
-      console.log("ARRAY DE PENDING USERS", allPendingUsers);
       return allPendingUsers;
     } catch (error) {
       console.log("Error, getting Pending Players", error);
@@ -288,7 +287,7 @@ export default function Activities({ navigation }) {
           ))
         ) : (
           <Text style={{ color: "#FFFFFF" }} className="font-urbanist">
-            No Pendings
+            No Notifications
           </Text>
         )}
         <TouchableOpacity
@@ -358,6 +357,12 @@ export default function Activities({ navigation }) {
     for (let userDoc of querySnapshot.docs) {
       console.log(`userDoc => ${userDoc.id}`);
       const userId = userDoc.id;
+
+      //skip the iteration if events are by the current logged in user
+      if (userId == auth.currentUser.uid) {
+        continue;
+      }
+
       const sportsSnapshot = await getDocs(
         collection(db, "events", userId, "sports")
       );
@@ -461,12 +466,14 @@ export default function Activities({ navigation }) {
           <Text className="font-urbanist text-xl text-start pl-3">
             Hello, {user.firstName}
           </Text>
-          <View className="flex-row items-baseline">
-            <Text className="font-urbanistBold text-2xl text-start pl-3">
-              Your Activities
-            </Text>
-            <Ionicons name="chevron-forward" size={21} color="black" />
-          </View>
+          {userActivityList && userActivityList.length > 0 && (
+            <View className="flex-row items-baseline">
+              <Text className="font-urbanistBold text-2xl text-start pl-3">
+                Your Activities
+              </Text>
+              <Ionicons name="chevron-forward" size={21} color="black" />
+            </View>
+          )}
         </View>
         <NotificationPanel />
 

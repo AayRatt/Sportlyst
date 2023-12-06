@@ -5,7 +5,7 @@ import { db, auth } from "../firebaseConfig";
 import { doc, updateDoc, arrayUnion, onSnapshot, getDocs, collection, arrayRemove } from "firebase/firestore";
 import { Entypo } from "@expo/vector-icons";
 import { Ionicons } from '@expo/vector-icons';
-
+import CachedImage from 'react-native-expo-cached-image';
 
 export default function ActivityDetails({ route, navigation }) {
 
@@ -123,8 +123,14 @@ export default function ActivityDetails({ route, navigation }) {
         // Setting up the real-time listener
         const unsubscribe = onSnapshot(eventsRef, (docSnapshot) => {
             if (docSnapshot.exists()) {
+                const pendingUsers = docSnapshot.data().pendingUsers
+
                 docSnapshot.data().joinedUsers ? setJoinedUsersCount(docSnapshot.data().joinedUsers.length) : setJoinedUsersCount(0)
-                docSnapshot.data().pendingUsers ? setPendingUsersCount(docSnapshot.data().pendingUsers.length) : setPendingUsersCount(0)
+                pendingUsers ? setPendingUsersCount(docSnapshot.data().pendingUsers.length) : setPendingUsersCount(0)
+
+                if (pendingUsers.length == 0){
+                    setPendingUserProfiles([])
+                }
             } else {
                 console.log("No such document!");
             }
@@ -226,9 +232,18 @@ export default function ActivityDetails({ route, navigation }) {
                                             return (
                                                 <TouchableOpacity onPress={() => onItemClickedToNavigate(rowData.item.userId)}>
                                                     <View className="flex-row items-center mt-5 pl-3">
-                                                        <Image
-                                                            source={rowData.item.imageUrl ? { uri: rowData.item.imageUrl } : require("../assets/profile-icon.png")}
-                                                            className="w-12 h-12 rounded-full" />
+                                                        {rowData.item.imageUrl ? (
+                                                            <CachedImage
+                                                                className="w-12 h-12 rounded-full"
+                                                                // isBackground
+                                                                source={{ uri: rowData.item.imageUrl }}
+                                                            />
+                                                        ) : (
+                                                            <Image
+                                                                source={require("../assets/profile-icon.png")}
+                                                                className="w-12 h-12 rounded-full" />
+                                                        )}
+
                                                         <Text className="font-urbanist text-1xl mr-3">
                                                             {rowData.item.firstName} {rowData.item.lastName}
                                                         </Text>
@@ -317,7 +332,12 @@ export default function ActivityDetails({ route, navigation }) {
             </View>
             {/* <ScrollView style={styles.scrollView}> */}
             <View style={styles.container}>
-                <Image source={{ uri: activity.activityDetailsImage }} style={{ width: '100%', height: 160 }} />
+                <CachedImage
+                    style={{ width: '100%', height: 160 }}
+                    // isBackground
+                    source={{ uri: activity.activityDetailsImage }}
+                />
+                {/* <Image source={{ uri: activity.activityDetailsImage }} style={{ width: '100%', height: 160 }} /> */}
                 <View style={styles.eventDetails}>
                     <Text style={styles.title}>{activity.title}</Text>
                     <TouchableOpacity onPress={() => onItemClickedToNavigate(activity.eventCollectionId)} >
@@ -406,15 +426,28 @@ export default function ActivityDetails({ route, navigation }) {
                                     <View style={styles.iconContainer}>
                                         <Ionicons name="remove-circle" size={24} color="black" />
                                     </View>
-                                    <Image
-                                        key={index}
-                                        source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
-                                        style={{
-                                            width: 60,
-                                            height: 60,
-                                            borderRadius: 60 / 2,
-                                            borderWidth: 2,
-                                        }} />
+                                    {image.imageUrl ? (
+                                        <CachedImage
+                                            style={{
+                                                width: 60,
+                                                height: 60,
+                                                borderRadius: 60 / 2,
+                                                borderWidth: 2,
+                                            }}
+                                            // isBackground
+                                            source={{ uri: image.imageUrl }}
+                                        />
+                                    ) : (
+                                        <Image
+                                            key={index}
+                                            source={require("../assets/profile-icon.png")}
+                                            style={{
+                                                width: 60,
+                                                height: 60,
+                                                borderRadius: 60 / 2,
+                                                borderWidth: 2,
+                                            }} />
+                                    )}
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -422,15 +455,28 @@ export default function ActivityDetails({ route, navigation }) {
                         <View style={styles.imagesContainer}>
                             {joinedUserProfiles.map((image, index) => (
                                 <TouchableOpacity key={index} onPress={() => onItemClickedToNavigate(image.userId)}>
-                                    <Image
-                                        key={index}
-                                        source={image.imageUrl ? { uri: image.imageUrl } : require("../assets/profile-icon.png")}
-                                        style={{
-                                            width: 60,
-                                            height: 60,
-                                            borderRadius: 60 / 2,
-                                            borderWidth: 2,
-                                        }} />
+                                    {image.imageUrl ? (
+                                        <CachedImage
+                                            style={{
+                                                width: 60,
+                                                height: 60,
+                                                borderRadius: 60 / 2,
+                                                borderWidth: 2,
+                                            }}
+                                            // isBackground
+                                            source={{ uri: image.imageUrl }}
+                                        />
+                                    ) : (
+                                        <Image
+                                            key={index}
+                                            source={require("../assets/profile-icon.png")}
+                                            style={{
+                                                width: 60,
+                                                height: 60,
+                                                borderRadius: 60 / 2,
+                                                borderWidth: 2,
+                                            }} />
+                                    )}
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -486,7 +532,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 5,
         alignSelf: "center"
-    },    
+    },
     venueTitle: {
         fontSize: 24,
         fontWeight: 'bold',
