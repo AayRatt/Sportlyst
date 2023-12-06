@@ -138,7 +138,7 @@ export default function Activities({ navigation }) {
         visible={isFilterModalVisible}
         animationType="slide"
         presentationStyle="pageSheet"
-        // transparent={true}
+        transparent={true}
       >
         <View className="flex-1 justify-end">
           <View className="w-full h-4/5 bg-primary rounded-lg">
@@ -287,7 +287,7 @@ export default function Activities({ navigation }) {
           ))
         ) : (
           <Text style={{ color: "#FFFFFF" }} className="font-urbanist">
-            No Pendings
+            No Notifications
           </Text>
         )}
         <TouchableOpacity
