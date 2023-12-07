@@ -2,10 +2,10 @@ import React from "react";
 import {
   Text,
   View,
-  TouchableOpacity,
   Pressable,
   StatusBar,
   TextInput,
+  Alert
 } from "react-native";
 import {
   useFonts,
@@ -26,12 +26,16 @@ import { useState, useEffect } from "react";
 
 // Import the auth variable
 import { auth } from "../firebaseConfig";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "firebase/auth";
+
+import PasswordReset from "../components/PasswordReset"
 
 export default function Login({ navigation, route }) {
   //Variables
   const [usernameFromUI, setUsernameFromUI] = useState("");
   const [passwordFromUI, setPasswordFromUI] = useState("");
+
+  const [prModalVisible, setPrModalVisible] = useState(false);
 
   // Login
   const loginClick = async () => {
@@ -86,6 +90,22 @@ export default function Login({ navigation, route }) {
 
   if (!fontsLoaded) {
     return null;
+  }
+
+  const passwordReset = async (email) => {
+    try {
+      // await auth().sendPasswordResetEmail(email);
+      await sendPasswordResetEmail(auth, email)
+      console.log("Who is the currently logged in user");
+      Alert.alert("Check your email", "A link to reset your password has been sent to your email address.");
+      setPrModalVisible(false);
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  const onResetPwdBtnClicked = () => {
+    setPrModalVisible(true)
   }
 
   return (
@@ -149,7 +169,22 @@ export default function Login({ navigation, route }) {
               </Text>
             </View>
           </Pressable> */}
+          <Pressable
+            onPress={onResetPwdBtnClicked}
+          >
+            <Text className="text-lg font-urbanistBold mt-2">
+              Forgot Password?
+            </Text>
+          </Pressable>
         </View>
+        <PasswordReset
+          visible={prModalVisible}
+          onClose={() => setPrModalVisible(false)}
+          onSend={(email) => {
+            passwordReset(email);
+            setPrModalVisible(false);
+          }}
+        />
         <StatusBar barStyle="dark-content"></StatusBar>
       </View>
     </SafeAreaView>
