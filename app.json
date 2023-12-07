@@ -5,7 +5,7 @@
     "name": "Sportlyst",
     "slug": "sportlyst",
     "description": "This an app where you can organise and meet people with similar sport interests to simply play together.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/splash.png",
     "userInterfaceStyle": "light",
