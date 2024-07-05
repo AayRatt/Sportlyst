@@ -68,10 +68,6 @@ The Sportlyst API is built with Node.js and Express, using MongoDB. It provides 
 
 Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
-## License
-
-This project is licensed under the [LICENSE NAME] - see the [LICENSE.md](LICENSE.md) file for details.
-
 ## Acknowledgments
 
 - Arnoldo Bermudez
