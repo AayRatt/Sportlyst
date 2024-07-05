@@ -30,8 +30,6 @@ Here are some screenshots of the Sportlyst app:
 ![5](./SCR-20240705-kuwc.png)
 
 
-(Note: Replace the placeholder paths with the actual paths to your screenshot images once you've added them to your repository)
-
 ## Technologies Used
 
 - React Native for cross-platform mobile development
