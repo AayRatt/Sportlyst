@@ -15,7 +15,7 @@ Sportlyst is a mobile app that connects sports enthusiasts with others who share
 
 Here are some screenshots of the Sportlyst app:
 
-![Activities Tab](./screenshots/activities_tab.png)
+![Activities Tab](./SCR-20240705-kulp.png)
 *Activities Tab: Discover and manage your sports activities*
 
 ![Profile Screen](./screenshots/profile_screen.png)
