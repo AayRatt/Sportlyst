@@ -15,17 +15,20 @@ Sportlyst is a mobile app that connects sports enthusiasts with others who share
 
 Here are some screenshots of the Sportlyst app:
 
-![Activities Tab](./SCR-20240705-kulp.png)
-*Activities Tab: Discover and manage your sports activities*
+![1](./SCR-20240705-kulp.png)
 
-![Profile Screen](./screenshots/profile_screen.png)
-*Profile Screen: View and edit your user profile*
 
-![Event Creation](./screenshots/event_creation.png)
-*Event Creation: Create and customize your own sports events*
+![2](./SCR-20240705-kung.png)
 
-![Chat Interface](./screenshots/chat_interface.png)
-*Chat Interface: Communicate with other users and groups*
+
+![3](./SCR-20240705-kuqy.png)
+
+
+![4](./SCR-20240705-kutb.png)
+
+
+![5](./SCR-20240705-kuwc.png)
+
 
 (Note: Replace the placeholder paths with the actual paths to your screenshot images once you've added them to your repository)
 
