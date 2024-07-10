@@ -65,10 +65,6 @@ The app will be available for download on the App Store and Google Play Store. (
 
 The Sportlyst API is built with Node.js and Express, using MongoDB. It provides endpoints for retrieving sports and venue information. The API is hosted at `https://sportlystapi.onrender.com/`.
 
-## Contributing
-
-Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
 ## Acknowledgments
 
 - Arnoldo Bermudez
@@ -78,4 +74,4 @@ Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of co
 
 ## Contact
 
-For any queries, please reach out to [contact email/information].
+For any queries, please reach out to aayush.rattan@ymail.com.
